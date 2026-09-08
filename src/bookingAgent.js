@@ -203,6 +203,18 @@ export async function checkBookingPrice({ query, checkin, checkout, adults = '2'
   await context.addInitScript(() => {
     Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
   });
+
+  // Solo necesitamos el texto de la pagina (precios, nombres...), no como se ve.
+  // Bloquear imagenes/fuentes/medios reduce mucho el consumo de memoria de
+  // Chromium, critico en un contenedor con RAM limitada como el de Render.
+  await context.route('**/*', (route) => {
+    const type = route.request().resourceType();
+    if (type === 'image' || type === 'media' || type === 'font') {
+      return route.abort();
+    }
+    return route.continue();
+  });
+
   const page = await context.newPage();
 
   try {
