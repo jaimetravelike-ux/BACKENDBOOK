@@ -66,6 +66,7 @@ async function selectBestDestination(page, destInput, query) {
   const fallback = async () => {
     await destInput.press('ArrowDown');
     await destInput.press('Enter');
+    return null;
   };
 
   if (responses.length === 0) return fallback();
@@ -92,28 +93,48 @@ async function selectBestDestination(page, destInput, query) {
   const candidates = nyResults.length > 0 ? nyResults : results;
   const candidateIndexOf = (r) => results.indexOf(r);
 
-  const queryWords = relevantWords(query);
-  let best = candidates[0];
-  let bestScore = -1;
-  let bestCoverage = -1;
-  candidates.forEach((r) => {
+  const effectiveQueryWords = computeEffectiveWords(
+    query,
+    candidates.map((r) => r.displayInfo?.title ?? '')
+  );
+
+  const scored = candidates.map((r) => {
     const title = (r.displayInfo?.title ?? '').toLowerCase();
     const titleWords = relevantWords(title);
-    const score = queryWords.reduce((acc, w) => acc + (titleWords.includes(w) ? 1 : 0), 0);
-    const coverage = titleWords.length > 0 ? titleWords.filter((w) => queryWords.includes(w)).length / titleWords.length : 0;
-    if (score > bestScore || (score === bestScore && coverage > bestCoverage)) {
-      bestScore = score;
-      best = r;
-      bestCoverage = coverage;
-    }
+    const score = effectiveQueryWords.reduce((acc, w) => acc + (titleWords.includes(w) ? 1 : 0), 0);
+    const coverage =
+      titleWords.length > 0 ? titleWords.filter((w) => effectiveQueryWords.includes(w)).length / titleWords.length : 0;
+    return { r, score, coverage };
   });
-  const bestIndex = candidateIndexOf(best);
 
+  let best = scored[0];
+  scored.forEach((s) => {
+    if (s.score > best.score || (s.score === best.score && s.coverage > best.coverage)) best = s;
+  });
+
+  // Si dos o mas hoteles DISTINTOS empatan en lo bien que encajan (incluido el
+  // caso de que ninguno encaje en absoluto), no tenemos una base real para
+  // elegir uno en vez de otro sin mas contexto. En vez de arriesgarnos a un
+  // desempate silencioso que puede acertar o no, ofrecemos 2-3 opciones
+  // reales de Nueva York y que el cliente elija.
+  const tiedHotels = scored.filter(
+    (s) => s.score === best.score && s.coverage === best.coverage && s.r.destination?.destType === 'HOTEL'
+  );
+  const distinctTiedIds = new Set(tiedHotels.map((s) => s.r.destination?.destId));
+  if (distinctTiedIds.size >= 2) {
+    return {
+      needsDisambiguation: true,
+      options: tiedHotels.slice(0, 3).map((s) => s.r.displayInfo?.title).filter(Boolean),
+    };
+  }
+
+  const bestIndex = candidateIndexOf(best.r);
   for (let i = 0; i <= bestIndex; i++) {
     await destInput.press('ArrowDown');
     await page.waitForTimeout(150);
   }
   await destInput.press('Enter');
+  return null;
 }
 
 // Titi Hotels solo trabaja Nueva York; si el cliente da un nombre ambiguo sin
@@ -154,7 +175,10 @@ async function runRealSearch(page, { query, checkin, checkout }) {
     await destInput.click({ timeout: 8000, force: true });
   }
   await destInput.fill('');
-  await selectBestDestination(page, destInput, query);
+  const destinationResult = await selectBestDestination(page, destInput, query);
+  if (destinationResult?.needsDisambiguation) {
+    return destinationResult;
+  }
   await page.waitForTimeout(800);
 
   await pickCalendarDate(page, checkin);
@@ -178,20 +202,33 @@ async function applyBreakfastFilter(page) {
   }
 }
 
-// Como trabajamos solo con Nueva York, palabras como "new"/"york"/"hotel"
-// aparecen en el nombre de marca de muchos hoteles sin tener nada que ver con
-// lo que el cliente pidio de verdad (p.ej. "Riu Plaza New York Times Square"
-// ganaba a "Millennium Hotel Broadway Times Square" solo por tener "New York"
-// en el nombre). Las quitamos de la comparacion: en esta pagina de resultados
-// TODO ya es de Nueva York, asi que no aportan nada para distinguir un hotel
-// de otro.
-const STOPWORDS = new Set(['new', 'york', 'hotel', 'nyc', 'the']);
+// "hotel"/"the" son ruido puro, se quitan siempre. "new"/"york"/"nyc" NO se
+// quitan de forma fija: normalmente son relleno de ubicacion (todo en esta
+// pagina ya es de Nueva York), pero a veces son parte real del nombre de
+// marca del hotel (p.ej. "Row NYC", "Riu Plaza New York"). Cuales son "de
+// relleno" depende de cada busqueda en concreto - ver computeEffectiveWords.
+const STOPWORDS = new Set(['hotel', 'the']);
 
 function relevantWords(text) {
   return text
     .toLowerCase()
     .split(/[\s,.-]+/)
     .filter((w) => w.length > 2 && !STOPWORDS.has(w));
+}
+
+// Si una palabra de la busqueda aparece en la mayoria de los nombres que
+// estamos comparando, no aporta nada para distinguir entre ellos (es "de
+// relleno" para este conjunto concreto) - la quitamos. Si solo aparece en
+// uno o dos, es probable que sea parte real del nombre de un hotel concreto
+// y la dejamos contar a su favor.
+function computeEffectiveWords(query, candidateTexts) {
+  const rawWords = relevantWords(query);
+  const candidateWordSets = candidateTexts.map((t) => relevantWords(t));
+  const generic = new Set(
+    rawWords.filter((w) => candidateWordSets.filter((words) => words.includes(w)).length / candidateWordSets.length > 0.6)
+  );
+  const filtered = rawWords.filter((w) => !generic.has(w));
+  return filtered.length > 0 ? filtered : rawWords;
 }
 
 function scoreMatch(text, queryWords) {
@@ -233,7 +270,10 @@ async function extractBestCard(page, query) {
     });
   }, MAX_CARDS);
 
-  const queryWords = relevantWords(query);
+  const queryWords = computeEffectiveWords(
+    query,
+    rawCards.map((c) => c.name ?? '')
+  );
   let bestMatch = null;
   let cheapestOverall = null;
 
@@ -358,7 +398,10 @@ export async function checkBookingPrice({ query, checkin, checkout, adults = '2'
   const page = await context.newPage();
 
   try {
-    await runRealSearch(page, { query, checkin, checkout });
+    const searchOutcome = await runRealSearch(page, { query, checkin, checkout });
+    if (searchOutcome?.needsDisambiguation) {
+      return { found: false, needsDisambiguation: true, options: searchOutcome.options };
+    }
 
     if (rooms !== '1' || adults !== '2') {
       const url = new URL(page.url());

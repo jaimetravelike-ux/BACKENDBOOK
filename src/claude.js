@@ -105,11 +105,18 @@ export async function converse(session, userMessage) {
 }
 
 export async function phraseSearchResult(session, result) {
-  const instruction = result.found
-    ? `Resultado real de la comprobacion de precio para esta busqueda (no lo inventes, usalo tal cual): ${JSON.stringify(result)}.
+  let instruction;
+  if (result.needsDisambiguation) {
+    instruction = `No hay una unica coincidencia clara para el hotel que pidio el cliente. Estas son 2-3 opciones reales de Nueva York parecidas a lo que escribio: ${JSON.stringify(result.options)}.
 
-Cuentaselo al cliente en un mensaje natural y breve: confirma el nombre exacto del hotel encontrado (por si no coincide con lo que dijo, para que pueda corregirte), y el precio total para esas fechas. Si "breakfastRequested" es false, dile que el precio es sin desayuno por defecto y que puedes volver a mirarlo con desayuno incluido si lo prefiere. Si "extraChargesNotice" no es null, menciona ese cargo extra. Deja claro que es un precio de referencia, no el precio final de la reserva (eso se gestiona aparte). NUNCA menciones "Booking" ni ninguna web externa por su nombre - habla siempre en primera persona de Titi Hotels (p.ej. "hemos encontrado", "nuestro precio", "te comparamos el precio").`
-    : `La comprobacion de precio no encontro disponibilidad con esos criterios exactos (motivo: ${result.reason}). Dile al cliente de forma natural que no has encontrado disponibilidad justo con esas fechas/criterios, y preguntale si quiere que pruebes con fechas u opciones distintas. NUNCA menciones "Booking" ni ninguna web externa por su nombre.`;
+Preguntale de forma breve y natural cual de esas es la que quiere (dale las opciones tal cual, con sus nombres completos). No sigas con la busqueda todavia - espera a que el cliente elija una. En cuanto elija, usa ese nombre completo y exacto como hotelQuery al llamar a update_booking_slots.`;
+  } else if (result.found) {
+    instruction = `Resultado real de la comprobacion de precio para esta busqueda (no lo inventes, usalo tal cual): ${JSON.stringify(result)}.
+
+Cuentaselo al cliente en un mensaje natural y breve: confirma el nombre exacto del hotel encontrado (por si no coincide con lo que dijo, para que pueda corregirte), y el precio total para esas fechas. Si "breakfastRequested" es false, dile que el precio es sin desayuno por defecto y que puedes volver a mirarlo con desayuno incluido si lo prefiere. Si "extraChargesNotice" no es null, menciona ese cargo extra. Deja claro que es un precio de referencia, no el precio final de la reserva (eso se gestiona aparte). NUNCA menciones "Booking" ni ninguna web externa por su nombre - habla siempre en primera persona de Titi Hotels (p.ej. "hemos encontrado", "nuestro precio", "te comparamos el precio").`;
+  } else {
+    instruction = `La comprobacion de precio no encontro disponibilidad con esos criterios exactos (motivo: ${result.reason}). Dile al cliente de forma natural que no has encontrado disponibilidad justo con esas fechas/criterios, y preguntale si quiere que pruebes con fechas u opciones distintas. NUNCA menciones "Booking" ni ninguna web externa por su nombre.`;
+  }
 
   session.history.push({ role: 'user', content: instruction });
   const { text } = await runTurn(session.history, session.slots);
