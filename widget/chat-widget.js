@@ -133,7 +133,7 @@
 
   function showGreetingIfEmpty() {
     if (messagesEl.children.length === 0) {
-      renderMessage('bot', 'Hola! Soy del equipo de Titi Hotels. Cuéntame qué hotel o zona te interesa en Nueva York y para qué fechas, y te digo el precio en Booking al momento.');
+      renderMessage('bot', 'Hola! Soy del equipo de Titi Hotels. Cuéntame qué hotel o zona te interesa en Nueva York y para qué fechas, y te digo el precio más barato al momento.');
     }
   }
 
@@ -177,14 +177,14 @@
       renderMessage('bot', reply);
 
       if (pendingSearch) {
-        const checkingEl = renderMessage('typing', 'Comprobando disponibilidad en Booking...');
+        const checkingEl = renderMessage('typing', 'Comprobando el mejor precio...');
         try {
           const resolved = await postJSON('/api/chat/resolve', { sessionId });
           checkingEl.remove();
           renderMessage('bot', resolved.reply);
         } catch {
           checkingEl.remove();
-          renderMessage('bot', 'No he podido comprobar Booking justo ahora. ¿Lo intentamos de nuevo en un momento?');
+          renderMessage('bot', 'No he podido comprobar el precio justo ahora. ¿Lo intentamos de nuevo en un momento?');
         }
       }
     } catch {

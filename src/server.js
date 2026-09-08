@@ -77,7 +77,7 @@ app.post('/api/chat/resolve', async (req, res) => {
     const { sessionId } = req.body ?? {};
     const session = getSession(sessionId);
     session.pendingSearch = false;
-    res.status(500).json({ error: 'No se pudo comprobar la disponibilidad en Booking ahora mismo' });
+    res.status(500).json({ error: 'No se pudo comprobar el precio ahora mismo' });
   }
 });
 
