@@ -79,29 +79,35 @@ async function selectBestDestination(page, destInput, query) {
   }
   if (results.length === 0) return fallback();
 
-  const queryWords = query.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
-  let bestIndex = 0;
+  // Primero descartamos cualquier sugerencia que no sea realmente de Nueva
+  // York (nos ha pasado que un nombre corto trae de vuelta un apartamento en
+  // Chipre o Brasil que tambien se llama "New York algo"). Con eso descartado,
+  // puntuamos el NOMBRE del hotel (sin "new york"/"hotel", que no discriminan
+  // nada aqui) y desempatamos prefiriendo el nombre mas "limpio" para lo que
+  // pidio el cliente.
+  const nyResults = results.filter((r) => {
+    const label = (r.displayInfo?.label ?? '').toLowerCase();
+    return /new york|nueva york/.test(label) && r.destination?.countryCode === 'us';
+  });
+  const candidates = nyResults.length > 0 ? nyResults : results;
+  const candidateIndexOf = (r) => results.indexOf(r);
+
+  const queryWords = relevantWords(query);
+  let best = candidates[0];
   let bestScore = -1;
   let bestCoverage = -1;
-  results.forEach((r, i) => {
+  candidates.forEach((r) => {
     const title = (r.displayInfo?.title ?? '').toLowerCase();
-    const titleWords = title.split(/[\s,.-]+/).filter((w) => w.length > 2);
-    // Puntuamos contra el texto completo (nombre + ciudad), no solo el nombre:
-    // asi "The Plaza" (cuyo "New York" esta en la ubicacion, no en el nombre)
-    // no queda en desventaja frente a un hotel que se llama literalmente
-    // "Riu Plaza New York...". En empate, preferimos el nombre cuyas palabras
-    // estan mas "cubiertas" por lo que pidio el cliente (menos relleno de
-    // marca/cadena ajena a la busqueda) en vez de simplemente el mas corto.
-    const label = (r.displayInfo?.label ?? '').toLowerCase();
-    const score = queryWords.reduce((acc, w) => acc + (label.includes(w) ? 1 : 0), 0);
-    const titleMatches = titleWords.filter((w) => queryWords.includes(w)).length;
-    const coverage = titleWords.length > 0 ? titleMatches / titleWords.length : 0;
+    const titleWords = relevantWords(title);
+    const score = queryWords.reduce((acc, w) => acc + (titleWords.includes(w) ? 1 : 0), 0);
+    const coverage = titleWords.length > 0 ? titleWords.filter((w) => queryWords.includes(w)).length / titleWords.length : 0;
     if (score > bestScore || (score === bestScore && coverage > bestCoverage)) {
       bestScore = score;
-      bestIndex = i;
+      best = r;
       bestCoverage = coverage;
     }
   });
+  const bestIndex = candidateIndexOf(best);
 
   for (let i = 0; i <= bestIndex; i++) {
     await destInput.press('ArrowDown');
@@ -172,9 +178,25 @@ async function applyBreakfastFilter(page) {
   }
 }
 
+// Como trabajamos solo con Nueva York, palabras como "new"/"york"/"hotel"
+// aparecen en el nombre de marca de muchos hoteles sin tener nada que ver con
+// lo que el cliente pidio de verdad (p.ej. "Riu Plaza New York Times Square"
+// ganaba a "Millennium Hotel Broadway Times Square" solo por tener "New York"
+// en el nombre). Las quitamos de la comparacion: en esta pagina de resultados
+// TODO ya es de Nueva York, asi que no aportan nada para distinguir un hotel
+// de otro.
+const STOPWORDS = new Set(['new', 'york', 'hotel', 'nyc', 'the']);
+
+function relevantWords(text) {
+  return text
+    .toLowerCase()
+    .split(/[\s,.-]+/)
+    .filter((w) => w.length > 2 && !STOPWORDS.has(w));
+}
+
 function scoreMatch(text, queryWords) {
-  const lower = text.toLowerCase();
-  return queryWords.reduce((acc, w) => acc + (lower.includes(w) ? 1 : 0), 0);
+  const words = relevantWords(text);
+  return queryWords.reduce((acc, w) => acc + (words.includes(w) ? 1 : 0), 0);
 }
 
 // Que dos tarjetas empaten en numero de palabras coincidentes no significa que
@@ -185,7 +207,7 @@ function scoreMatch(text, queryWords) {
 // coincidencia de nombre. Medimos que fraccion del nombre de la tarjeta
 // esta explicada por las palabras de la busqueda.
 function titleCoverage(text, queryWords) {
-  const words = text.toLowerCase().split(/[\s,.-]+/).filter((w) => w.length > 2);
+  const words = relevantWords(text);
   if (words.length === 0) return 0;
   const matched = words.filter((w) => queryWords.includes(w)).length;
   return matched / words.length;
@@ -211,7 +233,7 @@ async function extractBestCard(page, query) {
     });
   }, MAX_CARDS);
 
-  const queryWords = query.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
+  const queryWords = relevantWords(query);
   let bestMatch = null;
   let cheapestOverall = null;
 
