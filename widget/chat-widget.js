@@ -23,6 +23,29 @@
     return res.json();
   }
 
+  // Comprobar el precio de verdad tarda 15-40s (el agente navega Booking como
+  // una persona). En vez de un "Comprobando..." estatico todo ese rato, vamos
+  // rotando curiosidades de Nueva York - se siente mucho menos largo.
+  const NYC_FACTS = [
+    'Comprobando el mejor precio...',
+    '¿Sabías que Central Park es más grande que Mónaco? 🗽',
+    'El metro de Nueva York no cierra nunca: funciona las 24 horas, los 365 días del año.',
+    'Times Square se llama así por el New York Times, que tuvo ahí su sede hace más de un siglo.',
+    'Nueva York tiene más de 26.000 restaurantes - casi uno por cada 340 habitantes.',
+    'El Empire State Building tiene su propio código postal.',
+    'Casi el 40% de los neoyorquinos nacieron fuera de Estados Unidos.',
+    'Ya casi está...',
+  ];
+
+  function startFactRotation(el) {
+    let i = 1;
+    const interval = setInterval(() => {
+      el.textContent = NYC_FACTS[i % NYC_FACTS.length];
+      i++;
+    }, 4200);
+    return () => clearInterval(interval);
+  }
+
   // Logica compartida de "enviar mensaje -> esperar respuesta -> si hace falta,
   // comprobar el precio real". La usan tanto el chat del hero como la burbuja
   // flotante, cada uno con su propio renderMessage().
@@ -52,12 +75,15 @@
 
         if (pendingSearch) {
           const checkingEl = renderMessage('typing', 'Comprobando el mejor precio...');
+          const stopFacts = startFactRotation(checkingEl);
           try {
             const resolved = await postJSON('/api/chat/resolve', { sessionId });
+            stopFacts();
             checkingEl.remove();
             renderMessage('bot', resolved.reply);
             if (resolved.result?.found && onResult) onResult(resolved.result);
           } catch {
+            stopFacts();
             checkingEl.remove();
             renderMessage('bot', 'No he podido comprobar el precio justo ahora. ¿Lo intentamos de nuevo en un momento?');
           }
