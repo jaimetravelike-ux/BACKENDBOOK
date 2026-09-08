@@ -26,13 +26,20 @@
   // Logica compartida de "enviar mensaje -> esperar respuesta -> si hace falta,
   // comprobar el precio real". La usan tanto el chat del hero como la burbuja
   // flotante, cada uno con su propio renderMessage().
-  function wireChat({ formEl, inputEl, sendBtn, renderMessage }) {
+  function wireChat({ formEl, inputEl, sendBtn, renderMessage, onFirstSend, onResult }) {
+    let started = false;
+
     async function sendMessage() {
       const text = inputEl.value.trim();
       if (!text) return;
       inputEl.value = '';
       if (sendBtn) sendBtn.disabled = true;
       inputEl.disabled = true;
+
+      if (!started && onFirstSend) {
+        started = true;
+        onFirstSend();
+      }
 
       renderMessage('user', text);
       const typingEl = renderMessage('typing', 'Escribiendo...');
@@ -49,6 +56,7 @@
             const resolved = await postJSON('/api/chat/resolve', { sessionId });
             checkingEl.remove();
             renderMessage('bot', resolved.reply);
+            if (resolved.result?.found && onResult) onResult(resolved.result);
           } catch {
             checkingEl.remove();
             renderMessage('bot', 'No he podido comprobar el precio justo ahora. ¿Lo intentamos de nuevo en un momento?');
@@ -78,6 +86,18 @@
     const heroInput = document.getElementById('heroChatInput');
     const heroThread = document.getElementById('heroThread');
     const heroSend = heroForm.querySelector('.chatbar-send');
+    const heroWrapper = document.querySelector('.hero-wrapper');
+
+    // Fotos genericas de Nueva York que ya tiene la web (no la foto real del
+    // hotel encontrado, para no depender de scrapear imagenes de Booking).
+    const NYC_PHOTOS = [
+      './assets/images/hero.jpg',
+      './assets/images/mid.jpg',
+      './assets/images/brook.jpg',
+      './assets/images/upper.jpg',
+      './assets/images/chelsea.jpg',
+      './assets/images/economico.jpg',
+    ];
 
     function renderHeroMessage(role, text) {
       const el = document.createElement('div');
@@ -89,7 +109,27 @@
       return el;
     }
 
-    wireChat({ formEl: heroForm, inputEl: heroInput, sendBtn: heroSend, renderMessage: renderHeroMessage });
+    function renderHeroPhoto() {
+      const photo = NYC_PHOTOS[Math.floor(Math.random() * NYC_PHOTOS.length)];
+      const wrap = document.createElement('div');
+      wrap.className = 'msg-photo';
+      wrap.innerHTML = `<img src="${photo}" alt="Nueva York" loading="lazy" />`;
+      heroThread.appendChild(wrap);
+      heroThread.scrollTop = heroThread.scrollHeight;
+    }
+
+    function focusChatMode() {
+      if (heroWrapper) heroWrapper.classList.add('chat-focused');
+    }
+
+    wireChat({
+      formEl: heroForm,
+      inputEl: heroInput,
+      sendBtn: heroSend,
+      renderMessage: renderHeroMessage,
+      onFirstSend: focusChatMode,
+      onResult: renderHeroPhoto,
+    });
 
     document.querySelectorAll('.hero-chip').forEach((chip) => {
       chip.addEventListener('click', () => {
