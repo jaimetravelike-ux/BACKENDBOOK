@@ -3,7 +3,6 @@
   const API_URL = (scriptTag && scriptTag.getAttribute('data-api-url')) || 'http://localhost:8787';
 
   const STORAGE_KEY = 'titiChatSessionId';
-  const HISTORY_KEY = 'titiChatHistory';
 
   function getSessionId() {
     let id = localStorage.getItem(STORAGE_KEY);
@@ -14,18 +13,103 @@
     return id;
   }
 
-  function loadHistory() {
-    try {
-      return JSON.parse(sessionStorage.getItem(HISTORY_KEY) || '[]');
-    } catch {
-      return [];
+  async function postJSON(path, body) {
+    const res = await fetch(`${API_URL}${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+
+  // Logica compartida de "enviar mensaje -> esperar respuesta -> si hace falta,
+  // comprobar el precio real". La usan tanto el chat del hero como la burbuja
+  // flotante, cada uno con su propio renderMessage().
+  function wireChat({ formEl, inputEl, sendBtn, renderMessage }) {
+    async function sendMessage() {
+      const text = inputEl.value.trim();
+      if (!text) return;
+      inputEl.value = '';
+      if (sendBtn) sendBtn.disabled = true;
+      inputEl.disabled = true;
+
+      renderMessage('user', text);
+      const typingEl = renderMessage('typing', 'Escribiendo...');
+
+      try {
+        const sessionId = getSessionId();
+        const { reply, pendingSearch } = await postJSON('/api/chat', { sessionId, message: text });
+        typingEl.remove();
+        renderMessage('bot', reply);
+
+        if (pendingSearch) {
+          const checkingEl = renderMessage('typing', 'Comprobando el mejor precio...');
+          try {
+            const resolved = await postJSON('/api/chat/resolve', { sessionId });
+            checkingEl.remove();
+            renderMessage('bot', resolved.reply);
+          } catch {
+            checkingEl.remove();
+            renderMessage('bot', 'No he podido comprobar el precio justo ahora. ¿Lo intentamos de nuevo en un momento?');
+          }
+        }
+      } catch {
+        typingEl.remove();
+        renderMessage('bot', 'Se me ha cortado la conexión. ¿Puedes escribirlo otra vez?');
+      } finally {
+        if (sendBtn) sendBtn.disabled = false;
+        inputEl.disabled = false;
+        inputEl.focus();
+      }
     }
+
+    formEl.addEventListener('submit', (e) => {
+      e.preventDefault();
+      sendMessage();
+    });
+
+    return { sendMessage };
   }
 
-  function saveHistory(history) {
-    sessionStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+  // --- Modo hero: barra grande en la portada que se convierte en hilo ---
+  const heroForm = document.getElementById('heroChatForm');
+  if (heroForm) {
+    const heroInput = document.getElementById('heroChatInput');
+    const heroThread = document.getElementById('heroThread');
+    const heroSend = heroForm.querySelector('.chatbar-send');
+
+    function renderHeroMessage(role, text) {
+      const el = document.createElement('div');
+      el.className = `msg ${role}`;
+      el.textContent = text;
+      heroThread.appendChild(el);
+      heroThread.classList.add('open');
+      heroThread.scrollTop = heroThread.scrollHeight;
+      return el;
+    }
+
+    wireChat({ formEl: heroForm, inputEl: heroInput, sendBtn: heroSend, renderMessage: renderHeroMessage });
+
+    document.querySelectorAll('.hero-chip').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        heroInput.value = chip.dataset.text;
+        heroInput.focus();
+      });
+    });
+
+    // El resto de la web (barrios, CTA de siempre) puede pedir que se abra el
+    // chat con un texto ya escrito, sin tener que tocar el input a mano.
+    window.titiChatPrefill = function (text) {
+      heroInput.value = text;
+      heroForm.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => heroInput.focus(), 500);
+    };
+
+    return; // con chat en el hero no hace falta la burbuja flotante duplicada
   }
 
+  // --- Modo burbuja flotante (paginas sin hero de chat) ---
   const css = `
     .titi-chat-launcher {
       position: fixed; bottom: 96px; right: 28px; z-index: 998;
@@ -108,16 +192,17 @@
       <button class="titi-chat-close" aria-label="Cerrar chat">&times;</button>
     </div>
     <div class="titi-chat-messages"></div>
-    <div class="titi-chat-inputrow">
+    <form class="titi-chat-inputrow">
       <input type="text" placeholder="Escribe tu mensaje..." />
-      <button class="titi-chat-send">Enviar</button>
-    </div>
+      <button class="titi-chat-send" type="submit">Enviar</button>
+    </form>
   `;
 
   document.body.appendChild(launcher);
   document.body.appendChild(panel);
 
   const messagesEl = panel.querySelector('.titi-chat-messages');
+  const formEl = panel.querySelector('.titi-chat-inputrow');
   const inputEl = panel.querySelector('input');
   const sendBtn = panel.querySelector('.titi-chat-send');
   const closeBtn = panel.querySelector('.titi-chat-close');
@@ -130,6 +215,8 @@
     messagesEl.scrollTop = messagesEl.scrollHeight;
     return el;
   }
+
+  wireChat({ formEl, inputEl, sendBtn, renderMessage });
 
   function showGreetingIfEmpty() {
     if (messagesEl.children.length === 0) {
@@ -149,56 +236,4 @@
 
   launcher.addEventListener('click', () => togglePanel());
   closeBtn.addEventListener('click', () => togglePanel(false));
-
-  async function postJSON(path, body) {
-    const res = await fetch(`${API_URL}${path}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
-  }
-
-  async function sendMessage() {
-    const text = inputEl.value.trim();
-    if (!text) return;
-    inputEl.value = '';
-    sendBtn.disabled = true;
-    inputEl.disabled = true;
-
-    renderMessage('user', text);
-    const typingEl = renderMessage('typing', 'Escribiendo...');
-
-    try {
-      const sessionId = getSessionId();
-      const { reply, pendingSearch } = await postJSON('/api/chat', { sessionId, message: text });
-      typingEl.remove();
-      renderMessage('bot', reply);
-
-      if (pendingSearch) {
-        const checkingEl = renderMessage('typing', 'Comprobando el mejor precio...');
-        try {
-          const resolved = await postJSON('/api/chat/resolve', { sessionId });
-          checkingEl.remove();
-          renderMessage('bot', resolved.reply);
-        } catch {
-          checkingEl.remove();
-          renderMessage('bot', 'No he podido comprobar el precio justo ahora. ¿Lo intentamos de nuevo en un momento?');
-        }
-      }
-    } catch {
-      typingEl.remove();
-      renderMessage('bot', 'Se me ha cortado la conexión. ¿Puedes escribirlo otra vez?');
-    } finally {
-      sendBtn.disabled = false;
-      inputEl.disabled = false;
-      inputEl.focus();
-    }
-  }
-
-  sendBtn.addEventListener('click', sendMessage);
-  inputEl.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') sendMessage();
-  });
 })();
