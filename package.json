@@ -1,0 +1,17 @@
+{
+  "name": "titi-hotels-chatbot",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Orquestador del chat de Titi Hotels: recoge datos de la conversacion (hotel/zona, fechas, habitaciones, desayuno) y, cuando estan completos, dispara la consulta de precio a Booking.",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.0",
+    "express": "^4.21.0",
+    "cors": "^2.8.5",
+    "playwright": "1.63.0"
+  }
+}
