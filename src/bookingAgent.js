@@ -41,6 +41,83 @@ async function pickCalendarDate(page, isoDate) {
   await page.waitForTimeout(300);
 }
 
+// Booking simplemente resalta su primera sugerencia por defecto, que no
+// siempre es la mejor coincidencia real (p.ej. buscando "Plaza" propone antes
+// un "Riu Plaza New York" que "The Plaza", el hotel famoso). En vez de
+// quedarnos con la primera, leemos la respuesta interna de autocompletado
+// (la misma que usa la propia caja de busqueda) y elegimos la sugerencia cuyo
+// nombre encaja mejor con lo que pidio el cliente antes de pulsar Enter.
+async function selectBestDestination(page, destInput, query) {
+  // Escribir letra a letra dispara una peticion de autocompletado por tecla y
+  // corre el riesgo de quedarnos con las sugerencias de un texto a medias.
+  // Con fill() Booking dispara como mucho un par de respuestas (un eco
+  // inmediato del texto tal cual, y la busqueda real de verdad) - nos quedamos
+  // con la ultima, que es la que trae las sugerencias reales.
+  const responses = [];
+  const onResponse = (r) => {
+    if (/dml\/graphql/i.test(r.url()) && r.status() === 200) responses.push(r);
+  };
+  page.on('response', onResponse);
+
+  await destInput.fill(query);
+  await page.waitForTimeout(1800);
+  page.off('response', onResponse);
+
+  const fallback = async () => {
+    await destInput.press('ArrowDown');
+    await destInput.press('Enter');
+  };
+
+  if (responses.length === 0) return fallback();
+
+  let results;
+  try {
+    const json = await responses[responses.length - 1].json();
+    results = json?.data?.autoCompleteSuggestions?.results ?? [];
+  } catch {
+    return fallback();
+  }
+  if (results.length === 0) return fallback();
+
+  const queryWords = query.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
+  let bestIndex = 0;
+  let bestScore = -1;
+  let bestCoverage = -1;
+  results.forEach((r, i) => {
+    const title = (r.displayInfo?.title ?? '').toLowerCase();
+    const titleWords = title.split(/[\s,.-]+/).filter((w) => w.length > 2);
+    // Puntuamos contra el texto completo (nombre + ciudad), no solo el nombre:
+    // asi "The Plaza" (cuyo "New York" esta en la ubicacion, no en el nombre)
+    // no queda en desventaja frente a un hotel que se llama literalmente
+    // "Riu Plaza New York...". En empate, preferimos el nombre cuyas palabras
+    // estan mas "cubiertas" por lo que pidio el cliente (menos relleno de
+    // marca/cadena ajena a la busqueda) en vez de simplemente el mas corto.
+    const label = (r.displayInfo?.label ?? '').toLowerCase();
+    const score = queryWords.reduce((acc, w) => acc + (label.includes(w) ? 1 : 0), 0);
+    const titleMatches = titleWords.filter((w) => queryWords.includes(w)).length;
+    const coverage = titleWords.length > 0 ? titleMatches / titleWords.length : 0;
+    if (score > bestScore || (score === bestScore && coverage > bestCoverage)) {
+      bestScore = score;
+      bestIndex = i;
+      bestCoverage = coverage;
+    }
+  });
+
+  for (let i = 0; i <= bestIndex; i++) {
+    await destInput.press('ArrowDown');
+    await page.waitForTimeout(150);
+  }
+  await destInput.press('Enter');
+}
+
+// Titi Hotels solo trabaja Nueva York; si el cliente da un nombre ambiguo sin
+// contexto de ciudad ("Plaza", "Row"...), forzamos "New York" para que la
+// busqueda no se vaya a una propiedad homonima en otra ciudad.
+function scopeToNewYork(query) {
+  if (/new york|nueva york|\bnyc\b/i.test(query)) return query;
+  return `${query} New York`;
+}
+
 async function runRealSearch(page, { query, checkin, checkout }) {
   await page.goto('https://www.booking.com/index.es.html', { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForTimeout(2000);
@@ -71,14 +148,7 @@ async function runRealSearch(page, { query, checkin, checkout }) {
     await destInput.click({ timeout: 8000, force: true });
   }
   await destInput.fill('');
-  await destInput.type(query, { delay: 90 });
-  await page.waitForTimeout(1200);
-
-  const suggestions = page.locator('[data-testid="autocomplete-result"]:visible, li[role="option"]:visible');
-  await suggestions.first().waitFor({ state: 'visible', timeout: 10000 });
-  await destInput.press('ArrowDown');
-  await page.waitForTimeout(250);
-  await destInput.press('Enter');
+  await selectBestDestination(page, destInput, query);
   await page.waitForTimeout(800);
 
   await pickCalendarDate(page, checkin);
@@ -105,6 +175,20 @@ async function applyBreakfastFilter(page) {
 function scoreMatch(text, queryWords) {
   const lower = text.toLowerCase();
   return queryWords.reduce((acc, w) => acc + (lower.includes(w) ? 1 : 0), 0);
+}
+
+// Que dos tarjetas empaten en numero de palabras coincidentes no significa que
+// sean igual de buenas: "The Plaza, A Fairmont Hotel" y "Club Quarters Hotel
+// ...New York" pueden empatar en "hotel"+"new york", pero el primero tiene
+// mucha menos "paja" ajena a la busqueda. Preferir el precio mas barato en
+// ese empate elegia sistematicamente el hotel equivocado cuando habia
+// coincidencia de nombre. Medimos que fraccion del nombre de la tarjeta
+// esta explicada por las palabras de la busqueda.
+function titleCoverage(text, queryWords) {
+  const words = text.toLowerCase().split(/[\s,.-]+/).filter((w) => w.length > 2);
+  if (words.length === 0) return 0;
+  const matched = words.filter((w) => queryWords.includes(w)).length;
+  return matched / words.length;
 }
 
 // Booking ya prioriza/pinea el hotel buscado entre las primeras tarjetas, asi
@@ -149,9 +233,13 @@ async function extractBestCard(page, query) {
     }
 
     const matchScore = scoreMatch(name, queryWords);
-    const entry = { name, priceText, numeric, breakfastMentioned, extraChargesNotice, matchScore, cardIndex: i };
+    const coverage = titleCoverage(name, queryWords);
+    const entry = { name, priceText, numeric, breakfastMentioned, extraChargesNotice, matchScore, coverage, cardIndex: i };
 
-    if (matchScore > 0 && (!bestMatch || matchScore > bestMatch.matchScore || (matchScore === bestMatch.matchScore && numeric < bestMatch.numeric))) {
+    if (
+      matchScore > 0 &&
+      (!bestMatch || matchScore > bestMatch.matchScore || (matchScore === bestMatch.matchScore && coverage > bestMatch.coverage))
+    ) {
       bestMatch = entry;
     }
     if (!cheapestOverall || numeric < cheapestOverall.numeric) {
@@ -183,6 +271,7 @@ export async function checkBookingPrice({ query, checkin, checkout, adults = '2'
   if (!query || !checkin || !checkout) {
     throw new Error('query, checkin y checkout son obligatorios');
   }
+  query = scopeToNewYork(query);
 
   const browser = await chromium.launch({
     headless,
