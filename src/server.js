@@ -18,6 +18,10 @@ app.get('/', (_req, res) => res.sendFile(path.join(__dirname, '..', 'test.html')
 const PORT = process.env.PORT || 8787;
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
+// Marcador temporal para confirmar sin ambiguedad que un deploy concreto esta
+// realmente en produccion (los builds de Railway a veces tardan mucho mas de
+// lo esperado, o el auto-deploy no se dispara).
+app.get('/version', (_req, res) => res.json({ marker: 'ny-safety-fix-v2' }));
 
 // Un turno de conversacion normal. Si con este mensaje ya se completan los datos
 // minimos (hotel/zona + fechas), la respuesta incluye pendingSearch:true - el
