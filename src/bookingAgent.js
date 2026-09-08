@@ -170,7 +170,15 @@ export async function checkBookingPrice({ query, checkin, checkout, adults = '2'
 
   const browser = await chromium.launch({
     headless,
-    args: ['--disable-blink-features=AutomationControlled'],
+    args: [
+      '--disable-blink-features=AutomationControlled',
+      // Sin esto Chromium no arranca dentro de un contenedor Docker (como en
+      // Render): el sandbox de Chrome necesita permisos que el contenedor no da.
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      // Evita quedarse sin memoria compartida en contenedores con /dev/shm pequeño.
+      '--disable-dev-shm-usage',
+    ],
   });
   const context = await browser.newContext({
     locale: 'es-ES',
