@@ -24,9 +24,10 @@ async function dismissOverlays(page) {
     }
   }
   try {
-    if (await page.locator('[data-bui-trap-root]').first().isVisible({ timeout: 1200 })) {
+    if (await page.locator('[data-bui-trap-root]').first().isVisible({ timeout: 2000 })) {
       const closeBtn = page.locator('[data-bui-trap-root] button').first();
-      await closeBtn.click({ timeout: 1200 }).catch(() => page.keyboard.press('Escape'));
+      await closeBtn.click({ timeout: 2000 }).catch(() => page.keyboard.press('Escape'));
+      await page.waitForTimeout(300);
     }
   } catch {
     // sin modal atrapando el foco
@@ -54,8 +55,21 @@ async function runRealSearch(page, { query, checkin, checkout }) {
   await page.mouse.wheel(0, -600);
   await page.waitForTimeout(1200);
 
+  // El modal de "Genius / inicia sesion" puede aparecer con retraso (a veces
+  // justo despues del scroll de calentamiento), tapando el buscador. Lo
+  // cerramos otra vez aqui, justo antes de clicar, y reintentamos si aun asi
+  // el clic falla por el overlay.
+  await dismissOverlays(page);
+  await page.waitForTimeout(300);
+
   const destInput = page.locator('input[name="ss"]').first();
-  await destInput.click({ timeout: 10000 });
+  try {
+    await destInput.click({ timeout: 8000 });
+  } catch {
+    await dismissOverlays(page);
+    await page.waitForTimeout(500);
+    await destInput.click({ timeout: 8000, force: true });
+  }
   await destInput.fill('');
   await destInput.type(query, { delay: 90 });
   await page.waitForTimeout(1200);
