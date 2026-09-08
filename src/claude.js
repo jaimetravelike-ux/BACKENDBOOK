@@ -110,6 +110,8 @@ export async function phraseSearchResult(session, result) {
     instruction = `No hay una unica coincidencia clara para el hotel que pidio el cliente. Estas son 2-3 opciones reales de Nueva York parecidas a lo que escribio: ${JSON.stringify(result.options)}.
 
 Preguntale de forma breve y natural cual de esas es la que quiere (dale las opciones tal cual, con sus nombres completos). No sigas con la busqueda todavia - espera a que el cliente elija una. En cuanto elija, usa ese nombre completo y exacto como hotelQuery al llamar a update_booking_slots.`;
+  } else if (result.notFoundInNewYork) {
+    instruction = `No se ha encontrado ningun hotel en Nueva York que coincida con lo que pidio el cliente (puede que el nombre este incompleto, mal escrito, o que ese hotel simplemente no exista en Nueva York). Dile de forma breve y natural que no encuentras ese hotel en Nueva York (recuerda que Titi Hotels solo trabaja hoteles de Nueva York) y preguntale el nombre completo del hotel o en que zona/barrio de Nueva York esta, para volver a intentarlo. NUNCA menciones "Booking" ni des el nombre de un hotel de otra ciudad como si fuera valido.`;
   } else if (result.found) {
     instruction = `Resultado real de la comprobacion de precio para esta busqueda (no lo inventes, usalo tal cual): ${JSON.stringify(result)}.
 

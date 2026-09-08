@@ -47,50 +47,66 @@ async function pickCalendarDate(page, isoDate) {
 // quedarnos con la primera, leemos la respuesta interna de autocompletado
 // (la misma que usa la propia caja de busqueda) y elegimos la sugerencia cuyo
 // nombre encaja mejor con lo que pidio el cliente antes de pulsar Enter.
-async function selectBestDestination(page, destInput, query) {
-  // Escribir letra a letra dispara una peticion de autocompletado por tecla y
-  // corre el riesgo de quedarnos con las sugerencias de un texto a medias.
-  // Con fill() Booking dispara como mucho un par de respuestas (un eco
-  // inmediato del texto tal cual, y la busqueda real de verdad) - nos quedamos
-  // con la ultima, que es la que trae las sugerencias reales.
+// El autocompletado de Booking no siempre responde igual de bien a la misma
+// busqueda (a veces trae una lista floja/irrelevante sin motivo aparente).
+// Encapsulamos un solo intento aqui para poder reintentarlo antes de rendirnos.
+async function captureAutocomplete(page, destInput, query) {
   const responses = [];
   const onResponse = (r) => {
     if (/dml\/graphql/i.test(r.url()) && r.status() === 200) responses.push(r);
   };
   page.on('response', onResponse);
-
+  await destInput.fill('');
   await destInput.fill(query);
   await page.waitForTimeout(1800);
   page.off('response', onResponse);
 
+  if (responses.length === 0) return [];
+  try {
+    const json = await responses[responses.length - 1].json();
+    return json?.data?.autoCompleteSuggestions?.results ?? [];
+  } catch {
+    return [];
+  }
+}
+
+async function selectBestDestination(page, destInput, query) {
   const fallback = async () => {
     await destInput.press('ArrowDown');
     await destInput.press('Enter');
     return null;
   };
 
-  if (responses.length === 0) return fallback();
-
-  let results;
-  try {
-    const json = await responses[responses.length - 1].json();
-    results = json?.data?.autoCompleteSuggestions?.results ?? [];
-  } catch {
-    return fallback();
-  }
-  if (results.length === 0) return fallback();
-
-  // Primero descartamos cualquier sugerencia que no sea realmente de Nueva
-  // York (nos ha pasado que un nombre corto trae de vuelta un apartamento en
-  // Chipre o Brasil que tambien se llama "New York algo"). Con eso descartado,
-  // puntuamos el NOMBRE del hotel (sin "new york"/"hotel", que no discriminan
-  // nada aqui) y desempatamos prefiriendo el nombre mas "limpio" para lo que
-  // pidio el cliente.
-  const nyResults = results.filter((r) => {
+  let results = await captureAutocomplete(page, destInput, query);
+  let nyResults = results.filter((r) => {
     const label = (r.displayInfo?.label ?? '').toLowerCase();
     return /new york|nueva york/.test(label) && r.destination?.countryCode === 'us';
   });
-  const candidates = nyResults.length > 0 ? nyResults : results;
+
+  // Si la primera pasada no trajo nada util (ni resultados, ni ninguno de
+  // verdad en Nueva York), reintentamos una vez mas antes de rendirnos - suele
+  // bastar para las respuestas flojas puntuales de Booking.
+  if (nyResults.length === 0) {
+    await page.waitForTimeout(500);
+    results = await captureAutocomplete(page, destInput, query);
+    nyResults = results.filter((r) => {
+      const label = (r.displayInfo?.label ?? '').toLowerCase();
+      return /new york|nueva york/.test(label) && r.destination?.countryCode === 'us';
+    });
+  }
+
+  if (results.length === 0) return fallback();
+
+  // Si NINGUNA sugerencia es de verdad de Nueva York (ni siquiera tras
+  // reintentar), NUNCA hay que caer en "usar lo que sea" - eso es justo lo que
+  // mando a un cliente real a un hotel en Estambul o Dubai buscando "el
+  // Plaza". Mejor no encontrar nada que encontrar el hotel equivocado en la
+  // ciudad equivocada.
+  if (nyResults.length === 0) {
+    return { notFoundInNewYork: true };
+  }
+
+  const candidates = nyResults;
   const candidateIndexOf = (r) => results.indexOf(r);
 
   const effectiveQueryWords = computeEffectiveWords(
@@ -176,7 +192,7 @@ async function runRealSearch(page, { query, checkin, checkout }) {
   }
   await destInput.fill('');
   const destinationResult = await selectBestDestination(page, destInput, query);
-  if (destinationResult?.needsDisambiguation) {
+  if (destinationResult?.needsDisambiguation || destinationResult?.notFoundInNewYork) {
     return destinationResult;
   }
   await page.waitForTimeout(800);
@@ -401,6 +417,9 @@ export async function checkBookingPrice({ query, checkin, checkout, adults = '2'
     const searchOutcome = await runRealSearch(page, { query, checkin, checkout });
     if (searchOutcome?.needsDisambiguation) {
       return { found: false, needsDisambiguation: true, options: searchOutcome.options };
+    }
+    if (searchOutcome?.notFoundInNewYork) {
+      return { found: false, notFoundInNewYork: true, reason: 'No se ha encontrado ese hotel en Nueva York' };
     }
 
     if (rooms !== '1' || adults !== '2') {
