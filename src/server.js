@@ -77,7 +77,12 @@ app.post('/api/chat/resolve', async (req, res) => {
     const { sessionId } = req.body ?? {};
     const session = getSession(sessionId);
     session.pendingSearch = false;
-    res.status(500).json({ error: 'No se pudo comprobar la disponibilidad en Booking ahora mismo' });
+    // TODO: quitar "debug" de la respuesta cuando el agente de Booking este
+    // estable en produccion - de momento ayuda a diagnosticar sin acceso a logs.
+    res.status(500).json({
+      error: 'No se pudo comprobar la disponibilidad en Booking ahora mismo',
+      debug: { message: err.message, stack: err.stack },
+    });
   }
 });
 
