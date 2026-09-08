@@ -93,7 +93,20 @@ async function runTurn(messages, slots) {
     ];
   }
 
-  return { text: finalText, slotUpdates };
+  return { text: scrubExternalMentions(finalText), slotUpdates };
+}
+
+// Red de seguridad: aunque el prompt le diga que no mencione "Booking", un
+// modelo de lenguaje no cumple una instruccion asi el 100% de las veces. En
+// vez de confiar solo en el prompt, reescribimos cualquier mencion antes de
+// que le llegue al cliente.
+function scrubExternalMentions(text) {
+  if (!text) return text;
+  return text
+    .replace(/precio de referencia en booking(\.com)?/gi, 'precio de referencia')
+    .replace(/en booking(\.com)?/gi, 'en nuestro sistema')
+    .replace(/booking\.com/gi, 'nuestro sistema')
+    .replace(/\bbooking\b/gi, 'nuestro sistema');
 }
 
 export async function converse(session, userMessage) {
