@@ -42,7 +42,8 @@ app.post('/api/chat', async (req, res) => {
     res.json({ sessionId, reply, pendingSearch: readyForSearch });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Error interno del chat' });
+    // TODO: quitar "debug" cuando esto este estable en produccion.
+    res.status(500).json({ error: 'Error interno del chat', debug: { message: err.message } });
   }
 });
 
