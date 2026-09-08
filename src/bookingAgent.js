@@ -107,51 +107,49 @@ function scoreMatch(text, queryWords) {
   return queryWords.reduce((acc, w) => acc + (lower.includes(w) ? 1 : 0), 0);
 }
 
+// Booking ya prioriza/pinea el hotel buscado entre las primeras tarjetas, asi
+// que no hace falta recorrer las ~25-28 de toda la ciudad: nos limitamos a las
+// primeras (MAX_CARDS) y hacemos toda la extraccion en una sola llamada de
+// browser -> node (en vez de una ronda de ida y vuelta por cada dato de cada
+// tarjeta), para no cargar de mas un contenedor con poca RAM.
+const MAX_CARDS = 8;
+
 async function extractBestCard(page, query) {
   await page.waitForSelector('[data-testid="property-card"]', { timeout: 20000 });
-  const cards = page.locator('[data-testid="property-card"]');
-  const count = await cards.count();
-  const queryWords = query.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
 
+  const rawCards = await page.evaluate((max) => {
+    const cards = Array.from(document.querySelectorAll('[data-testid="property-card"]')).slice(0, max);
+    return cards.map((card) => {
+      const name = card.querySelector('[data-testid="title"]')?.innerText ?? null;
+      const priceText = card.querySelector('[data-testid="price-and-discounted-price"]')?.innerText ?? null;
+      const fullText = card.innerText ?? '';
+      return { name, priceText, fullText };
+    });
+  }, MAX_CARDS);
+
+  const queryWords = query.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
   let bestMatch = null;
   let cheapestOverall = null;
 
-  for (let i = 0; i < count; i++) {
-    const card = cards.nth(i);
-    let name = null;
-    let priceText = null;
-    try {
-      name = await card.locator('[data-testid="title"]').first().innerText({ timeout: 2000 });
-    } catch {}
-    try {
-      priceText = await card.locator('[data-testid="price-and-discounted-price"]').first().innerText({ timeout: 2000 });
-    } catch {}
-    if (!priceText || !name) continue;
+  rawCards.forEach((raw, i) => {
+    const { name, priceText, fullText } = raw;
+    if (!priceText || !name) return;
 
     const numeric = Number(priceText.replace(/[^\d]/g, ''));
-    if (!Number.isFinite(numeric) || numeric <= 0) continue;
+    if (!Number.isFinite(numeric) || numeric <= 0) return;
 
-    let breakfastMentioned = false;
-    try {
-      const bfText = await card.locator('text=/desayuno/i').first().innerText({ timeout: 600 });
-      breakfastMentioned = /desayuno/i.test(bfText);
-    } catch {}
+    const breakfastMentioned = /desayuno/i.test(fullText);
 
     let extraChargesNotice = null;
-    try {
-      const cardText = await card.innerText({ timeout: 1000 });
-      const priceLineIdx = cardText.split('\n').findIndex((l) => /^Precio /.test(l));
-      const feeLine = cardText
-        .split('\n')
-        .slice(priceLineIdx + 1, priceLineIdx + 3)
-        .find((l) => /impuesto|cargo|tasa/i.test(l));
-      if (feeLine && !/^Incluye impuestos y cargos$/i.test(feeLine.trim())) {
-        extraChargesNotice = feeLine.trim();
-      }
-    } catch {}
+    const lines = fullText.split('\n');
+    const priceLineIdx = lines.findIndex((l) => /^Precio /.test(l));
+    const feeLine = lines.slice(priceLineIdx + 1, priceLineIdx + 3).find((l) => /impuesto|cargo|tasa/i.test(l));
+    if (feeLine && !/^Incluye impuestos y cargos$/i.test(feeLine.trim())) {
+      extraChargesNotice = feeLine.trim();
+    }
 
     const matchScore = scoreMatch(name, queryWords);
-    const entry = { name, priceText, numeric, breakfastMentioned, extraChargesNotice, matchScore, card };
+    const entry = { name, priceText, numeric, breakfastMentioned, extraChargesNotice, matchScore, cardIndex: i };
 
     if (matchScore > 0 && (!bestMatch || matchScore > bestMatch.matchScore || (matchScore === bestMatch.matchScore && numeric < bestMatch.numeric))) {
       bestMatch = entry;
@@ -159,9 +157,13 @@ async function extractBestCard(page, query) {
     if (!cheapestOverall || numeric < cheapestOverall.numeric) {
       cheapestOverall = entry;
     }
-  }
+  });
 
-  return bestMatch ?? cheapestOverall;
+  const chosen = bestMatch ?? cheapestOverall;
+  if (!chosen) return null;
+
+  const card = page.locator('[data-testid="property-card"]').nth(chosen.cardIndex);
+  return { ...chosen, card };
 }
 
 async function extractCancellationPolicy(cardLocator) {
@@ -192,6 +194,14 @@ export async function checkBookingPrice({ query, checkin, checkout, adults = '2'
       '--disable-setuid-sandbox',
       // Evita quedarse sin memoria compartida en contenedores con /dev/shm pequeño.
       '--disable-dev-shm-usage',
+      // Recorte de memoria para contenedores pequeños (Render free = 512MB):
+      // sin GPU, sin extensiones, sin trafico de fondo que no necesitamos.
+      '--disable-gpu',
+      '--disable-extensions',
+      '--disable-background-networking',
+      '--disable-default-apps',
+      '--mute-audio',
+      '--no-zygote',
     ],
   });
   const context = await browser.newContext({
@@ -204,12 +214,31 @@ export async function checkBookingPrice({ query, checkin, checkout, adults = '2'
     Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
   });
 
-  // Solo necesitamos el texto de la pagina (precios, nombres...), no como se ve.
-  // Bloquear imagenes/fuentes/medios reduce mucho el consumo de memoria de
-  // Chromium, critico en un contenedor con RAM limitada como el de Render.
+  // Solo necesitamos el texto de la pagina (precios, nombres...), no como se ve,
+  // ni sus mapas, anuncios o rastreadores. Bloquear todo eso reduce mucho el
+  // consumo de memoria de Chromium, critico en un contenedor con RAM limitada
+  // como el de Render.
+  const BLOCKED_HOST_PATTERNS = [
+    'maps.googleapis.com',
+    'maps.gstatic.com',
+    'google-analytics.com',
+    'googletagmanager.com',
+    'doubleclick.net',
+    'googlesyndication.com',
+    'facebook.net',
+    'facebook.com',
+    'criteo.com',
+    'adnxs.com',
+    'yieldlab.net',
+    'trustpilot.com',
+  ];
   await context.route('**/*', (route) => {
-    const type = route.request().resourceType();
+    const req = route.request();
+    const type = req.resourceType();
     if (type === 'image' || type === 'media' || type === 'font') {
+      return route.abort();
+    }
+    if (BLOCKED_HOST_PATTERNS.some((h) => req.url().includes(h))) {
       return route.abort();
     }
     return route.continue();
