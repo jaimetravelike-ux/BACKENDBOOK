@@ -42,8 +42,7 @@ app.post('/api/chat', async (req, res) => {
     res.json({ sessionId, reply, pendingSearch: readyForSearch });
   } catch (err) {
     console.error(err);
-    // TODO: quitar "debug" cuando esto este estable en produccion.
-    res.status(500).json({ error: 'Error interno del chat', debug: { message: err.message } });
+    res.status(500).json({ error: 'Error interno del chat' });
   }
 });
 
@@ -78,12 +77,7 @@ app.post('/api/chat/resolve', async (req, res) => {
     const { sessionId } = req.body ?? {};
     const session = getSession(sessionId);
     session.pendingSearch = false;
-    // TODO: quitar "debug" de la respuesta cuando el agente de Booking este
-    // estable en produccion - de momento ayuda a diagnosticar sin acceso a logs.
-    res.status(500).json({
-      error: 'No se pudo comprobar la disponibilidad en Booking ahora mismo',
-      debug: { message: err.message, stack: err.stack },
-    });
+    res.status(500).json({ error: 'No se pudo comprobar la disponibilidad en Booking ahora mismo' });
   }
 });
 
