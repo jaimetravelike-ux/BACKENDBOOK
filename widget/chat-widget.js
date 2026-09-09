@@ -333,6 +333,8 @@
 
     function focusChatMode() {
       if (heroWrapper) heroWrapper.classList.add('chat-focused');
+      document.body.classList.add('chat-locked');
+      document.documentElement.classList.add('chat-locked');
     }
 
     const heroChat = wireChat({
