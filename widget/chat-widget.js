@@ -202,22 +202,29 @@
         photos.length > 1
           ? `<div class="hotel-card-dots">${photos.map((_, i) => `<button class="${i === 0 ? 'active' : ''}" data-i="${i}" aria-label="Foto ${i + 1}"></button>`).join('')}</div>`
           : '';
+      const arrows =
+        photos.length > 1
+          ? `<button class="hotel-card-arrow prev" type="button" aria-label="Foto anterior">&#10094;</button>
+             <button class="hotel-card-arrow next" type="button" aria-label="Foto siguiente">&#10095;</button>`
+          : '';
 
       const favKey = (result.hotel || 'hotel').toLowerCase();
       const favActive = isFavorite(favKey);
 
       const rating = ratingInfo(result.reviewScore);
 
-      const metaParts = [];
-      if (result.nights) metaParts.push(`${result.nights} noche${result.nights === 1 ? '' : 's'}`);
-      if (result.adults) metaParts.push(`${result.adults} adulto${Number(result.adults) === 1 ? '' : 's'}`);
-      if (result.rooms) metaParts.push(`${result.rooms} habitación${Number(result.rooms) === 1 ? '' : 'es'}`);
+      const stayParts = [];
+      if (result.nights) stayParts.push(`${result.nights} noche${result.nights === 1 ? '' : 's'}`);
+      if (result.rooms) stayParts.push(`${result.rooms} habitación${Number(result.rooms) === 1 ? '' : 'es'}`);
+      const stayLine = stayParts.length ? `Por ${stayParts.join(' y ')}` : '';
 
       const taxesLine = result.includedTaxesAmount
-        ? `Impuestos y tasas incluidos: ${escapeHtml(result.includedTaxesAmount)}`
+        ? `Incluye tasas e impuestos (${escapeHtml(result.includedTaxesAmount)})`
         : result.extraChargesNotice
           ? escapeHtml(result.extraChargesNotice)
           : '';
+
+      const hasPrice = Boolean(result.totalPrice);
 
       wrap.innerHTML = `
         <div class="hotel-card-media">
@@ -225,7 +232,7 @@
             <svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-10.1-9.1C.4 9 1.4 5.3 4.7 4.2c2-.7 4.1 0 5.3 1.7 1.2-1.7 3.3-2.4 5.3-1.7 3.3 1.1 4.3 4.8 2.8 7.7C19.5 16.4 12 21 12 21z"/></svg>
           </button>
           ${result.discount ? `<div class="hotel-card-discount">${escapeHtml(result.discount.label)}</div>` : ''}
-          <div class="hotel-card-gallery">${slides}${dots}</div>
+          <div class="hotel-card-gallery">${slides}${arrows}${dots}</div>
         </div>
         <div class="hotel-card-body">
           <div class="hotel-card-head">
@@ -242,13 +249,19 @@
                 : ''
             }
           </div>
-          ${metaParts.length ? `<div class="hotel-card-meta">${metaParts.join(' · ')}</div>` : ''}
-          <div class="hotel-card-price">
-            ${result.discount?.originalPrice ? `<div class="hotel-card-price-original">${escapeHtml(result.discount.originalPrice)}</div>` : ''}
-            ${result.totalPrice ? `<div class="hotel-card-price-total">${escapeHtml(result.totalPrice)}</div>` : ''}
-            ${result.pricePerNight ? `<div class="hotel-card-price-night">${escapeHtml(result.pricePerNight)} / noche</div>` : ''}
-            ${taxesLine ? `<div class="hotel-card-price-taxes">${taxesLine}</div>` : ''}
-          </div>
+          ${
+            hasPrice
+              ? `<div class="hotel-card-price">
+                   ${result.discount?.percent ? `<span class="hotel-card-price-badge">-${result.discount.percent}%</span>` : ''}
+                   ${result.discount?.originalPrice ? `<div class="hotel-card-price-original">${escapeHtml(result.discount.originalPrice)}</div>` : ''}
+                   <div class="hotel-card-price-total">${escapeHtml(result.totalPrice)}</div>
+                   ${stayLine ? `<div class="hotel-card-price-stay">${stayLine}</div>` : ''}
+                   ${result.pricePerNight ? `<div class="hotel-card-price-night">${escapeHtml(result.pricePerNight)} por noche</div>` : ''}
+                   ${taxesLine ? `<div class="hotel-card-price-taxes">${taxesLine}</div>` : ''}
+                 </div>`
+              : ''
+          }
+          <button class="hotel-card-reserve" type="button">Reservar</button>
         </div>
       `;
 
@@ -257,6 +270,12 @@
         const next = !favBtn.classList.contains('active');
         favBtn.classList.toggle('active', next);
         setFavorite(favKey, next);
+      });
+
+      const reserveBtn = wrap.querySelector('.hotel-card-reserve');
+      reserveBtn.addEventListener('click', () => {
+        heroInput.value = `Quiero reservar el ${result.hotel || 'este hotel'} para esas fechas`;
+        heroChat.sendMessage();
       });
 
       if (photos.length > 1) {
@@ -268,6 +287,8 @@
           imgs.forEach((img, idx) => img.classList.toggle('active', idx === current));
           dotBtns.forEach((d, idx) => d.classList.toggle('active', idx === current));
         };
+        wrap.querySelector('.hotel-card-arrow.prev').addEventListener('click', () => show(current - 1));
+        wrap.querySelector('.hotel-card-arrow.next').addEventListener('click', () => show(current + 1));
         dotBtns.forEach((d) => d.addEventListener('click', () => show(Number(d.dataset.i))));
         const autoplay = setInterval(() => show(current + 1), 3500);
         wrap.addEventListener('mouseenter', () => clearInterval(autoplay));
@@ -285,7 +306,7 @@
       if (heroWrapper) heroWrapper.classList.add('chat-focused');
     }
 
-    wireChat({
+    const heroChat = wireChat({
       formEl: heroForm,
       inputEl: heroInput,
       sendBtn: heroSend,
