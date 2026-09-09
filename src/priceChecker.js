@@ -2,15 +2,20 @@
 // entre RapidAPI (rapido, con desglose de cargos) y Playwright (mas lento
 // pero probado y fiable) segun el caso:
 //
-// - Si el cliente pidio un HOTEL concreto (no una zona/barrio) y se resuelve
-//   su hotel_id: se intenta primero RapidAPI. Si responde con disponibilidad,
-//   se usa ese resultado (mas rapido, con cargos extra desglosados).
+// - Si el cliente pidio un HOTEL concreto (no una zona/barrio), no pidio
+//   desayuno, y se resuelve su hotel_id: se intenta primero RapidAPI. Si
+//   responde con disponibilidad, se usa ese resultado (mas rapido, con
+//   cargos extra desglosados).
 // - Si RapidAPI no responde, da timeout, o no tiene disponibilidad para esas
 //   fechas: se cae a Playwright (bookingAgent.checkBookingPrice), que hace
 //   la busqueda completa igual que antes.
-// - Si la busqueda es por zona/barrio (no un hotel concreto), se va directo
-//   a Playwright: RapidAPI necesita un hotel_id exacto, no sirve para
-//   "cualquier hotel en Times Square".
+// - Si la busqueda es por zona/barrio (no un hotel concreto), o el cliente
+//   SI pidio desayuno, se va directo a Playwright: RapidAPI necesita un
+//   hotel_id exacto (no sirve para "cualquier hotel en Times Square"), y el
+//   endpoint de RapidAPI que usamos (v1/hotels/search) devuelve un unico
+//   precio "representativo" del hotel sin garantia de que incluya desayuno -
+//   Playwright si sabe aplicar el filtro real "Desayuno incluido" de Booking,
+//   asi que es la unica fuente fiable cuando el desayuno importa.
 
 import { resolveHotelId, checkBookingPrice } from './bookingAgent.js';
 import { checkRapidApiPrice } from './rapidApiAgent.js';
@@ -33,7 +38,7 @@ export async function checkPrice({ query, checkin, checkout, adults = '2', rooms
     return { found: false, notFoundInNewYork: true, reason: 'No se ha encontrado ese hotel en Nueva York' };
   }
 
-  if (resolved.wasSpecificHotel && resolved.hotelId) {
+  if (resolved.wasSpecificHotel && resolved.hotelId && !breakfast) {
     const rapidResult = await checkRapidApiPrice({
       hotelId: resolved.hotelId,
       checkin,
@@ -49,6 +54,8 @@ export async function checkPrice({ query, checkin, checkout, adults = '2', rooms
         breakfastRequested: breakfast,
       };
     }
+  } else if (breakfast) {
+    console.log('[priceChecker] cliente pidio desayuno - va directo a Playwright (RapidAPI no garantiza desayuno incluido)');
   } else {
     console.log('[priceChecker] no es un hotel especifico (busqueda por zona) - va directo a Playwright');
   }
