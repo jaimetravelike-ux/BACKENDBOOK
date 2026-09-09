@@ -95,7 +95,13 @@
             stopFacts();
             checkingEl.remove();
             renderMessage('bot', resolved.reply);
-            if (resolved.result?.found && onResult) onResult(resolved.result);
+            if (resolved.result?.found && onResult) {
+              if (resolved.result.multiple && Array.isArray(resolved.result.hotels)) {
+                resolved.result.hotels.forEach((h) => onResult(h));
+              } else {
+                onResult(resolved.result);
+              }
+            }
           } catch {
             stopFacts();
             checkingEl.remove();

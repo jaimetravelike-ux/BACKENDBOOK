@@ -144,7 +144,8 @@ async function selectBestDestination(page, destInput, query) {
     };
   }
 
-  const wasSpecificHotel = best.r.destination?.destType === 'HOTEL';
+  const destType = best.r.destination?.destType ?? null;
+  const wasSpecificHotel = destType === 'HOTEL';
   const destId = best.r.destination?.destId ?? null;
   const hotelName = best.r.displayInfo?.title ?? null;
   const bestIndex = candidateIndexOf(best.r);
@@ -153,7 +154,7 @@ async function selectBestDestination(page, destInput, query) {
     await page.waitForTimeout(150);
   }
   await destInput.press('Enter');
-  return { wasSpecificHotel, destId, hotelName };
+  return { wasSpecificHotel, destId, destType, hotelName };
 }
 
 // Titi Hotels solo trabaja Nueva York; si el cliente da un nombre ambiguo sin
@@ -468,6 +469,11 @@ export async function resolveHotelId({ query, headless = true }) {
       hotelId: destinationResult?.destId ?? null,
       hotelName: destinationResult?.hotelName ?? null,
       wasSpecificHotel: Boolean(destinationResult?.wasSpecificHotel),
+      // Tipo de destino tal cual lo da Booking (HOTEL, CITY, DISTRICT,
+      // LANDMARK...). Cuando no es un hotel concreto, priceChecker.js lo usa
+      // para pedirle a RapidAPI varias opciones DENTRO de esa misma zona/
+      // ciudad en vez de tener que adivinar por palabras clave.
+      destType: destinationResult?.destType ?? null,
     };
   } finally {
     await browser.close();

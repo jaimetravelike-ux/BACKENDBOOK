@@ -125,6 +125,12 @@ export async function phraseSearchResult(session, result) {
 Preguntale de forma breve y natural cual de esas es la que quiere (dale las opciones tal cual, con sus nombres completos). No sigas con la busqueda todavia - espera a que el cliente elija una. En cuanto elija, usa ese nombre completo y exacto como hotelQuery al llamar a update_booking_slots.`;
   } else if (result.notFoundInNewYork) {
     instruction = `No se ha encontrado ningun hotel en Nueva York que coincida con lo que pidio el cliente (puede que el nombre este incompleto, mal escrito, o que ese hotel simplemente no exista en Nueva York). Dile de forma breve y natural que no encuentras ese hotel en Nueva York (recuerda que Titi Hotels solo trabaja hoteles de Nueva York) y preguntale el nombre completo del hotel o en que zona/barrio de Nueva York esta, para volver a intentarlo. NUNCA menciones "Booking" ni des el nombre de un hotel de otra ciudad como si fuera valido.`;
+  } else if (result.multiple) {
+    instruction = `La busqueda era por zona/ciudad en general (no un hotel concreto), asi que en vez de elegir uno solo se han encontrado ${result.hotels.length} opciones reales (las mas baratas) para esas fechas: ${JSON.stringify(result.hotels.map((h) => ({ hotel: h.hotel, city: h.city, totalPrice: h.totalPrice })))}.
+
+El cliente va a ver, justo debajo de tu mensaje, ${result.hotels.length} TARJETAS VISUALES (una por hotel) con foto, nombre, ciudad, valoracion, precio y desglose - toda esa informacion numerica ya esta ahi, no la repitas ni la enumeres en el texto. Tu mensaje debe ser muy breve (1-2 frases): di que le traes unas opciones para elegir y preguntale cual le encaja mas o si quiere que acotes mas la busqueda (por ejemplo por zona o presupuesto). Menciona SOLO si el precio es sin desayuno por defecto (y que puedes volver a mirarlo con desayuno si quiere) - eso no sale en las tarjetas.
+
+NUNCA menciones "Booking" ni ninguna web externa por su nombre - habla siempre en primera persona de Titi Hotels.`;
   } else if (result.found) {
     const hasCard = Array.isArray(result.photos) && result.photos.length > 0;
     instruction = `Resultado real de la comprobacion de precio para esta busqueda (no lo inventes, usalo tal cual): ${JSON.stringify(result)}.
