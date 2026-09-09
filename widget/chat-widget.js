@@ -224,7 +224,8 @@
       const stayParts = [];
       if (result.nights) stayParts.push(`${result.nights} noche${result.nights === 1 ? '' : 's'}`);
       if (result.rooms) stayParts.push(`${result.rooms} habitación${Number(result.rooms) === 1 ? '' : 'es'}`);
-      const stayLine = stayParts.length ? `Por ${stayParts.join(' y ')}` : '';
+      if (result.adults) stayParts.push(`${result.adults} adulto${Number(result.adults) === 1 ? '' : 's'}`);
+      const stayLine = stayParts.length ? `Por ${stayParts.join(', ')}` : '';
 
       const taxesLine = result.includedTaxesAmount
         ? `Incluye tasas e impuestos (${escapeHtml(result.includedTaxesAmount)})`
