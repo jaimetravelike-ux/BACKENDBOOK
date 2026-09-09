@@ -135,50 +135,127 @@
       return el;
     }
 
-    // Cuando el precio viene de RapidAPI tenemos fotos reales del hotel
-    // encontrado (result.photos); cuando cae al fallback de Playwright no
-    // las hay, y seguimos mostrando una foto generica de NYC como antes.
+    function escapeHtml(str) {
+      return String(str ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    // Paleta de la nota (verde = mejor, rojo = peor), en la linea de las
+    // insignias de rating que se ven en Booking/Civitatis.
+    function ratingInfo(score) {
+      if (score == null) return null;
+      if (score >= 9) return { label: 'Excepcional', className: 'r-superb' };
+      if (score >= 8) return { label: 'Muy bien', className: 'r-verygood' };
+      if (score >= 7) return { label: 'Bien', className: 'r-good' };
+      if (score >= 6) return { label: 'Aceptable', className: 'r-fair' };
+      return { label: 'Regular', className: 'r-poor' };
+    }
+
+    function isFavorite(key) {
+      try {
+        return localStorage.getItem('titiFav:' + key) === '1';
+      } catch {
+        return false;
+      }
+    }
+    function setFavorite(key, value) {
+      try {
+        if (value) localStorage.setItem('titiFav:' + key, '1');
+        else localStorage.removeItem('titiFav:' + key);
+      } catch {
+        // localStorage no disponible (privado/bloqueado) - el corazon simplemente no se recuerda
+      }
+    }
+
+    // Tarjeta de hotel al estilo Booking/Civitatis: carrusel + favorito,
+    // nombre, ciudad, insignia de nota, insignia de descuento, precio
+    // tachado + precio final, y desglose por noche/impuestos. Cuando el
+    // precio viene de RapidAPI (result.photos con datos reales) se rellena
+    // todo; cuando cae al fallback de Playwright, se muestra una version
+    // reducida con foto generica y solo el precio total.
     function renderHotelCard(result) {
       const realPhotos = Array.isArray(result?.photos) ? result.photos.filter(Boolean) : [];
+      const usingGenericPhoto = realPhotos.length === 0;
+      const photos = usingGenericPhoto ? [NYC_PHOTOS[Math.floor(Math.random() * NYC_PHOTOS.length)]] : realPhotos;
+
       const wrap = document.createElement('div');
       wrap.className = 'hotel-card';
 
-      if (realPhotos.length > 0) {
-        const slides = realPhotos
-          .map((url, i) => `<img src="${url}" alt="${result.hotel || 'Hotel'}" loading="lazy" class="${i === 0 ? 'active' : ''}" />`)
-          .join('');
-        const dots =
-          realPhotos.length > 1
-            ? `<div class="hotel-card-dots">${realPhotos.map((_, i) => `<button class="${i === 0 ? 'active' : ''}" data-i="${i}" aria-label="Foto ${i + 1}"></button>`).join('')}</div>`
-            : '';
-        wrap.innerHTML = `<div class="hotel-card-gallery">${slides}${dots}</div>`;
+      const slides = photos
+        .map((url, i) => `<img src="${url}" alt="${escapeHtml(result.hotel || 'Hotel')}" loading="lazy" class="${i === 0 ? 'active' : ''}" />`)
+        .join('');
+      const dots =
+        photos.length > 1
+          ? `<div class="hotel-card-dots">${photos.map((_, i) => `<button class="${i === 0 ? 'active' : ''}" data-i="${i}" aria-label="Foto ${i + 1}"></button>`).join('')}</div>`
+          : '';
 
-        if (realPhotos.length > 1) {
-          const imgs = wrap.querySelectorAll('.hotel-card-gallery img');
-          const dotBtns = wrap.querySelectorAll('.hotel-card-dots button');
-          let current = 0;
-          const show = (i) => {
-            current = (i + realPhotos.length) % realPhotos.length;
-            imgs.forEach((img, idx) => img.classList.toggle('active', idx === current));
-            dotBtns.forEach((d, idx) => d.classList.toggle('active', idx === current));
-          };
-          dotBtns.forEach((d) => d.addEventListener('click', () => show(Number(d.dataset.i))));
-          let autoplay = setInterval(() => show(current + 1), 3500);
-          wrap.addEventListener('mouseenter', () => clearInterval(autoplay));
-        }
-      } else {
-        const photo = NYC_PHOTOS[Math.floor(Math.random() * NYC_PHOTOS.length)];
-        wrap.innerHTML = `<div class="hotel-card-gallery"><img src="${photo}" alt="Nueva York" loading="lazy" class="active" /></div>`;
-      }
+      const favKey = (result.hotel || 'hotel').toLowerCase();
+      const favActive = isFavorite(favKey);
 
-      if (result?.hotel || result?.totalPrice) {
-        const info = document.createElement('div');
-        info.className = 'hotel-card-info';
-        info.innerHTML = `
-          ${result.hotel ? `<div class="hotel-card-name">${result.hotel}</div>` : ''}
-          ${result.totalPrice ? `<div class="hotel-card-price">${result.totalPrice}</div>` : ''}
-        `;
-        wrap.appendChild(info);
+      const rating = ratingInfo(result.reviewScore);
+
+      const metaParts = [];
+      if (result.nights) metaParts.push(`${result.nights} noche${result.nights === 1 ? '' : 's'}`);
+      if (result.adults) metaParts.push(`${result.adults} adulto${Number(result.adults) === 1 ? '' : 's'}`);
+      if (result.rooms) metaParts.push(`${result.rooms} habitación${Number(result.rooms) === 1 ? '' : 'es'}`);
+
+      const taxesLine = result.includedTaxesAmount
+        ? `Impuestos y tasas incluidos: ${escapeHtml(result.includedTaxesAmount)}`
+        : result.extraChargesNotice
+          ? escapeHtml(result.extraChargesNotice)
+          : '';
+
+      wrap.innerHTML = `
+        <div class="hotel-card-media">
+          <button class="hotel-card-fav ${favActive ? 'active' : ''}" type="button" aria-label="Guardar en favoritos">
+            <svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.6-10.1-9.1C.4 9 1.4 5.3 4.7 4.2c2-.7 4.1 0 5.3 1.7 1.2-1.7 3.3-2.4 5.3-1.7 3.3 1.1 4.3 4.8 2.8 7.7C19.5 16.4 12 21 12 21z"/></svg>
+          </button>
+          ${result.discount ? `<div class="hotel-card-discount">${escapeHtml(result.discount.label)}</div>` : ''}
+          <div class="hotel-card-gallery">${slides}${dots}</div>
+        </div>
+        <div class="hotel-card-body">
+          <div class="hotel-card-head">
+            <div class="hotel-card-titles">
+              <div class="hotel-card-name">${escapeHtml(result.hotel || '')}</div>
+              ${result.city ? `<div class="hotel-card-city">${escapeHtml(result.city)}</div>` : ''}
+            </div>
+            ${
+              rating
+                ? `<div class="hotel-card-rating ${rating.className}">
+                     <span class="hotel-card-rating-score">${result.reviewScore.toFixed(1)}</span>
+                     <span class="hotel-card-rating-text">${rating.label}${result.reviewCount ? ` · ${result.reviewCount} opiniones` : ''}</span>
+                   </div>`
+                : ''
+            }
+          </div>
+          ${metaParts.length ? `<div class="hotel-card-meta">${metaParts.join(' · ')}</div>` : ''}
+          <div class="hotel-card-price">
+            ${result.discount?.originalPrice ? `<div class="hotel-card-price-original">${escapeHtml(result.discount.originalPrice)}</div>` : ''}
+            ${result.totalPrice ? `<div class="hotel-card-price-total">${escapeHtml(result.totalPrice)}</div>` : ''}
+            ${result.pricePerNight ? `<div class="hotel-card-price-night">${escapeHtml(result.pricePerNight)} / noche</div>` : ''}
+            ${taxesLine ? `<div class="hotel-card-price-taxes">${taxesLine}</div>` : ''}
+          </div>
+        </div>
+      `;
+
+      const favBtn = wrap.querySelector('.hotel-card-fav');
+      favBtn.addEventListener('click', () => {
+        const next = !favBtn.classList.contains('active');
+        favBtn.classList.toggle('active', next);
+        setFavorite(favKey, next);
+      });
+
+      if (photos.length > 1) {
+        const imgs = wrap.querySelectorAll('.hotel-card-gallery img');
+        const dotBtns = wrap.querySelectorAll('.hotel-card-dots button');
+        let current = 0;
+        const show = (i) => {
+          current = (i + photos.length) % photos.length;
+          imgs.forEach((img, idx) => img.classList.toggle('active', idx === current));
+          dotBtns.forEach((d, idx) => d.classList.toggle('active', idx === current));
+        };
+        dotBtns.forEach((d) => d.addEventListener('click', () => show(Number(d.dataset.i))));
+        const autoplay = setInterval(() => show(current + 1), 3500);
+        wrap.addEventListener('mouseenter', () => clearInterval(autoplay));
       }
 
       heroThread.appendChild(wrap);

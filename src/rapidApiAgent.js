@@ -46,6 +46,27 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function nightsBetween(checkin, checkout) {
+  const ms = new Date(checkout) - new Date(checkin);
+  const nights = Math.round(ms / 86400000);
+  return Number.isFinite(nights) && nights > 0 ? nights : null;
+}
+
+// Descuento real (precio tachado vs precio final), cuando Booking lo marca
+// como tal - no lo inventamos si no viene en la respuesta.
+function extractDiscount(breakdown) {
+  const original = breakdown.strikethrough_amount?.value;
+  const final = breakdown.all_inclusive_amount?.value ?? breakdown.gross_amount?.value;
+  if (!original || !final || original <= final) return null;
+  const percent = Math.round((1 - final / original) * 100);
+  if (percent <= 0) return null;
+  return {
+    originalPrice: breakdown.strikethrough_amount?.amount_rounded ?? null,
+    percent,
+    label: breakdown.benefits?.[0]?.name ?? `-${percent}%`,
+  };
+}
+
 async function fetchOnce({ hotelId, checkin, checkout, adults, rooms, apiKey }) {
   const url = new URL(`https://${RAPIDAPI_HOST}/v1/hotels/search`);
   url.searchParams.set('dest_type', 'hotel');
@@ -88,12 +109,22 @@ async function fetchOnce({ hotelId, checkin, checkout, adults, rooms, apiKey }) 
 
     const breakdown = hotel.composite_price_breakdown;
     const photo = hotel.max_photo_url ?? hotel.main_photo_url ?? null;
+    const discount = extractDiscount(breakdown);
 
     console.log('[rapidapi] OK', { hotelId, hotel: hotel.hotel_name, price: breakdown.all_inclusive_amount?.amount_rounded });
     return {
       found: true,
       hotel: hotel.hotel_name ?? null,
+      city: hotel.city_name_en ?? hotel.city ?? null,
+      stars: hotel.class ?? null,
+      reviewScore: hotel.review_score ?? null,
+      reviewScoreWord: hotel.review_score_word ?? null,
+      reviewCount: hotel.review_nr ?? null,
       totalPrice: breakdown.all_inclusive_amount?.amount_rounded ?? null,
+      pricePerNight: breakdown.gross_amount_per_night?.amount_rounded ?? null,
+      includedTaxesAmount: breakdown.included_taxes_and_charges_amount?.amount_rounded ?? null,
+      discount,
+      nights: nightsBetween(checkin, checkout),
       breakfastMentionedOnCard: Boolean(hotel.hotel_include_breakfast),
       extraChargesNotice: buildExtraChargesSummary(breakdown),
       cancellationPolicy: hotel.is_free_cancellable ? 'Cancelación gratuita' : null,
