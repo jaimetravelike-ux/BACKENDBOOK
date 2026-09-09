@@ -125,13 +125,28 @@
       './assets/images/economico.jpg',
     ];
 
+    // El hilo tiene su propio scroll interno (no el de la pagina). Un solo
+    // scrollTop=scrollHeight justo tras appendChild a veces se queda corto
+    // porque el layout (fuentes, imagenes reservando su aspect-ratio) aun no
+    // ha terminado - por eso reintentamos en el siguiente frame y otra vez
+    // un poco despues, y ademas al cargar la primera imagen de la tarjeta.
+    function scrollThreadToBottom() {
+      heroThread.scrollTop = heroThread.scrollHeight;
+      requestAnimationFrame(() => {
+        heroThread.scrollTop = heroThread.scrollHeight;
+      });
+      setTimeout(() => {
+        heroThread.scrollTop = heroThread.scrollHeight;
+      }, 300);
+    }
+
     function renderHeroMessage(role, text) {
       const el = document.createElement('div');
       el.className = `msg ${role}`;
       el.textContent = text;
       heroThread.appendChild(el);
       heroThread.classList.add('open');
-      heroThread.scrollTop = heroThread.scrollHeight;
+      scrollThreadToBottom();
       return el;
     }
 
@@ -259,7 +274,11 @@
       }
 
       heroThread.appendChild(wrap);
-      heroThread.scrollTop = heroThread.scrollHeight;
+      scrollThreadToBottom();
+      const firstImg = wrap.querySelector('.hotel-card-gallery img');
+      if (firstImg && !firstImg.complete) {
+        firstImg.addEventListener('load', scrollThreadToBottom, { once: true });
+      }
     }
 
     function focusChatMode() {
