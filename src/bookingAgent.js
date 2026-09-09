@@ -144,13 +144,14 @@ async function selectBestDestination(page, destInput, query) {
     };
   }
 
+  const wasSpecificHotel = best.r.destination?.destType === 'HOTEL';
   const bestIndex = candidateIndexOf(best.r);
   for (let i = 0; i <= bestIndex; i++) {
     await destInput.press('ArrowDown');
     await page.waitForTimeout(150);
   }
   await destInput.press('Enter');
-  return null;
+  return { wasSpecificHotel };
 }
 
 // Titi Hotels solo trabaja Nueva York; si el cliente da un nombre ambiguo sin
@@ -205,6 +206,8 @@ async function runRealSearch(page, { query, checkin, checkout }) {
   await submit.click({ timeout: 10000 });
   await page.waitForLoadState('domcontentloaded', { timeout: 20000 }).catch(() => {});
   await page.waitForTimeout(3000);
+
+  return { wasSpecificHotel: Boolean(destinationResult?.wasSpecificHotel) };
 }
 
 async function applyBreakfastFilter(page) {
@@ -273,7 +276,7 @@ function titleCoverage(text, queryWords) {
 // tarjeta), para no cargar de mas un contenedor con poca RAM.
 const MAX_CARDS = 8;
 
-async function extractBestCard(page, query) {
+async function extractBestCard(page, query, { requireNameMatch = false } = {}) {
   await page.waitForSelector('[data-testid="property-card"]', { timeout: 20000 });
 
   const rawCards = await page.evaluate((max) => {
@@ -314,8 +317,17 @@ async function extractBestCard(page, query) {
     const coverage = titleCoverage(name, queryWords);
     const entry = { name, priceText, numeric, breakfastMentioned, extraChargesNotice, matchScore, coverage, cardIndex: i };
 
+    // Cuando se busca un hotel concreto, "algo de coincidencia" no basta - dos
+    // hoteles en el mismo barrio comparten palabras como "times"/"square" sin
+    // ser el mismo sitio. Exigimos que casi TODAS las palabras distintivas de
+    // la busqueda (las que ya sobrevivieron el filtro de palabras genericas)
+    // aparezcan en esta tarjeta - no basta con que la tarjeta tenga una de
+    // ellas entre otro monton de palabras propias de su nombre.
+    const queryCoverage = queryWords.length > 0 ? matchScore / queryWords.length : 0;
+    const passesBar = requireNameMatch ? queryCoverage >= 0.75 : matchScore > 0;
+
     if (
-      matchScore > 0 &&
+      passesBar &&
       (!bestMatch || matchScore > bestMatch.matchScore || (matchScore === bestMatch.matchScore && coverage > bestMatch.coverage))
     ) {
       bestMatch = entry;
@@ -324,6 +336,14 @@ async function extractBestCard(page, query) {
       cheapestOverall = entry;
     }
   });
+
+  // Si buscabamos un hotel concreto y NINGUNA tarjeta coincide con su nombre,
+  // es que ese hotel no tiene disponibilidad para esas fechas y Booking esta
+  // mostrando alternativas en su lugar. Devolver la mas barata de esas
+  // alternativas como si fuera el hotel pedido es justo lo que ha confundido
+  // a mas de un cliente ("pedi el Millennium y me dio otro hotel"). Mejor
+  // decir claramente que no hay disponibilidad en ESE hotel.
+  if (requireNameMatch && !bestMatch) return null;
 
   const chosen = bestMatch ?? cheapestOverall;
   if (!chosen) return null;
@@ -349,6 +369,12 @@ export async function checkBookingPrice({ query, checkin, checkout, adults = '2'
   if (!query || !checkin || !checkout) {
     throw new Error('query, checkin y checkout son obligatorios');
   }
+  // El "New York" que añadimos nosotros es solo para que la busqueda de
+  // destino no se vaya a otra ciudad - no debe contar a la hora de decidir
+  // que TARJETA de resultados es el hotel pedido (si no, "new"/"york" infla
+  // artificialmente la puntuacion de cualquier alternativa cuyo nombre las
+  // incluya, diluyendo lo que de verdad distingue al hotel).
+  const nameForMatching = query;
   query = scopeToNewYork(query);
 
   const browser = await chromium.launch({
@@ -435,9 +461,12 @@ export async function checkBookingPrice({ query, checkin, checkout, adults = '2'
       await dismissOverlays(page);
     }
 
-    const best = await extractBestCard(page, query);
+    const best = await extractBestCard(page, nameForMatching, { requireNameMatch: searchOutcome?.wasSpecificHotel });
     if (!best) {
-      return { found: false, reason: 'Sin resultados con disponibilidad para esos criterios', sourceUrl: page.url() };
+      const reason = searchOutcome?.wasSpecificHotel
+        ? 'Ese hotel en concreto no tiene disponibilidad para esas fechas'
+        : 'Sin resultados con disponibilidad para esos criterios';
+      return { found: false, reason, sourceUrl: page.url() };
     }
 
     const cancellationPolicy = await extractCancellationPolicy(best.card);
