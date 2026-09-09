@@ -135,11 +135,52 @@
       return el;
     }
 
-    function renderHeroPhoto() {
-      const photo = NYC_PHOTOS[Math.floor(Math.random() * NYC_PHOTOS.length)];
+    // Cuando el precio viene de RapidAPI tenemos fotos reales del hotel
+    // encontrado (result.photos); cuando cae al fallback de Playwright no
+    // las hay, y seguimos mostrando una foto generica de NYC como antes.
+    function renderHotelCard(result) {
+      const realPhotos = Array.isArray(result?.photos) ? result.photos.filter(Boolean) : [];
       const wrap = document.createElement('div');
-      wrap.className = 'msg-photo';
-      wrap.innerHTML = `<img src="${photo}" alt="Nueva York" loading="lazy" />`;
+      wrap.className = 'hotel-card';
+
+      if (realPhotos.length > 0) {
+        const slides = realPhotos
+          .map((url, i) => `<img src="${url}" alt="${result.hotel || 'Hotel'}" loading="lazy" class="${i === 0 ? 'active' : ''}" />`)
+          .join('');
+        const dots =
+          realPhotos.length > 1
+            ? `<div class="hotel-card-dots">${realPhotos.map((_, i) => `<button class="${i === 0 ? 'active' : ''}" data-i="${i}" aria-label="Foto ${i + 1}"></button>`).join('')}</div>`
+            : '';
+        wrap.innerHTML = `<div class="hotel-card-gallery">${slides}${dots}</div>`;
+
+        if (realPhotos.length > 1) {
+          const imgs = wrap.querySelectorAll('.hotel-card-gallery img');
+          const dotBtns = wrap.querySelectorAll('.hotel-card-dots button');
+          let current = 0;
+          const show = (i) => {
+            current = (i + realPhotos.length) % realPhotos.length;
+            imgs.forEach((img, idx) => img.classList.toggle('active', idx === current));
+            dotBtns.forEach((d, idx) => d.classList.toggle('active', idx === current));
+          };
+          dotBtns.forEach((d) => d.addEventListener('click', () => show(Number(d.dataset.i))));
+          let autoplay = setInterval(() => show(current + 1), 3500);
+          wrap.addEventListener('mouseenter', () => clearInterval(autoplay));
+        }
+      } else {
+        const photo = NYC_PHOTOS[Math.floor(Math.random() * NYC_PHOTOS.length)];
+        wrap.innerHTML = `<div class="hotel-card-gallery"><img src="${photo}" alt="Nueva York" loading="lazy" class="active" /></div>`;
+      }
+
+      if (result?.hotel || result?.totalPrice) {
+        const info = document.createElement('div');
+        info.className = 'hotel-card-info';
+        info.innerHTML = `
+          ${result.hotel ? `<div class="hotel-card-name">${result.hotel}</div>` : ''}
+          ${result.totalPrice ? `<div class="hotel-card-price">${result.totalPrice}</div>` : ''}
+        `;
+        wrap.appendChild(info);
+      }
+
       heroThread.appendChild(wrap);
       heroThread.scrollTop = heroThread.scrollHeight;
     }
@@ -154,7 +195,7 @@
       sendBtn: heroSend,
       renderMessage: renderHeroMessage,
       onFirstSend: focusChatMode,
-      onResult: renderHeroPhoto,
+      onResult: renderHotelCard,
     });
 
     document.querySelectorAll('.hero-chip').forEach((chip) => {

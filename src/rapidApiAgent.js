@@ -59,6 +59,22 @@ function buildExtraChargesSummary(breakdown) {
   return `Incluye ${parts.join(', ')}`;
 }
 
+const MAX_PHOTOS = 5;
+
+// Las fotos reales de la habitacion elegida viven en data.rooms[room_id].photos
+// (confirmado con datos reales), no en el bloque de precio. Como ya sabemos
+// exactamente que hotel es (hotel_id resuelto), estas fotos SI son del hotel
+// correcto - a diferencia de las genericas de NYC que se usaban antes como
+// respaldo cuando no habia forma fiable de saber la foto real.
+function extractPhotos(data, roomId) {
+  const photos = data?.rooms?.[roomId]?.photos;
+  if (!Array.isArray(photos) || photos.length === 0) return [];
+  return photos
+    .slice(0, MAX_PHOTOS)
+    .map((p) => p.url_original ?? p.url_max300)
+    .filter(Boolean);
+}
+
 /**
  * @param {{hotelId:string|number, checkin:string, checkout:string, adults?:string, rooms?:string, breakfast?:boolean}} params
  * @returns {Promise<object|null>} resultado con found:true, o null si no se pudo usar RapidAPI (el llamador debe caer a Playwright).
@@ -111,6 +127,10 @@ export async function checkRapidApiPrice({ hotelId, checkin, checkout, adults = 
       extraChargesNotice: buildExtraChargesSummary(breakdown),
       cancellationPolicy:
         chosen.transactional_policy_data?.policies?.find((p) => p.policy_type_key === 'free_cancellation')?.text ?? null,
+      // Fotos reales del hotel/habitacion (solo disponibles cuando el precio
+      // viene de RapidAPI - el fallback de Playwright no las trae, el widget
+      // debe seguir usando la foto generica de NYC en ese caso).
+      photos: extractPhotos(data, chosen.room_id),
       checkin,
       checkout,
       adults,
