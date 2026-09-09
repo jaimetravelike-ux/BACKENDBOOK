@@ -24,6 +24,7 @@ export async function checkPrice({ query, checkin, checkout, adults = '2', rooms
   }
 
   const resolved = await resolveHotelId({ query, headless });
+  console.log('[priceChecker] resolveHotelId ->', resolved);
 
   if (resolved.needsDisambiguation) {
     return { found: false, needsDisambiguation: true, options: resolved.options };
@@ -42,16 +43,20 @@ export async function checkPrice({ query, checkin, checkout, adults = '2', rooms
       breakfast,
     });
     if (rapidResult?.found) {
+      console.log('[priceChecker] usando RapidAPI');
       return {
         ...rapidResult,
         hotel: rapidResult.hotel ?? resolved.hotelName ?? query,
         breakfastRequested: breakfast,
       };
     }
+  } else {
+    console.log('[priceChecker] no es un hotel especifico (busqueda por zona) - va directo a Playwright');
   }
 
   // Fallback: zona/barrio (no hotel concreto), o RapidAPI no disponible/sin
   // resultado para estas fechas - reutilizamos la busqueda completa de
   // Playwright tal cual, que ya resuelve el destino por su cuenta.
+  console.log('[priceChecker] usando fallback de Playwright');
   return checkBookingPrice({ query, checkin, checkout, adults, rooms, breakfast, headless });
 }

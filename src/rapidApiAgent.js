@@ -81,7 +81,14 @@ function extractPhotos(data, roomId) {
  */
 export async function checkRapidApiPrice({ hotelId, checkin, checkout, adults = '2', rooms = '1', breakfast = false }) {
   const apiKey = process.env.RAPIDAPI_KEY;
-  if (!apiKey || !hotelId || !checkin || !checkout) return null;
+  if (!apiKey) {
+    console.warn('[rapidapi] sin RAPIDAPI_KEY configurada - saltando a Playwright');
+    return null;
+  }
+  if (!hotelId || !checkin || !checkout) {
+    console.warn('[rapidapi] faltan parametros obligatorios', { hotelId, checkin, checkout });
+    return null;
+  }
 
   const url = new URL(`https://${RAPIDAPI_HOST}/properties/detail`);
   url.searchParams.set('hotel_id', String(hotelId));
@@ -105,20 +112,33 @@ export async function checkRapidApiPrice({ hotelId, checkin, checkout, adults = 
         'x-rapidapi-host': RAPIDAPI_HOST,
       },
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      const bodySnippet = await res.text().catch(() => '');
+      console.warn('[rapidapi] respuesta no OK', res.status, bodySnippet.slice(0, 300));
+      return null;
+    }
 
     const json = await res.json();
     const data = Array.isArray(json) ? json[0] : json;
     if (!data || data.soldout === 1 || !Array.isArray(data.block) || data.block.length === 0) {
       // Sin disponibilidad via RapidAPI para estas fechas/hotel - no es un
       // error, simplemente esta fuente no nos sirve ahora mismo.
+      console.warn('[rapidapi] sin bloques disponibles', {
+        hotelId,
+        soldout: data?.soldout,
+        blockCount: Array.isArray(data?.block) ? data.block.length : 'sin campo block',
+      });
       return null;
     }
 
     const chosen = pickBestBlock(data.block, { adults, rooms, breakfast });
     const breakdown = chosen?.product_price_breakdown;
-    if (!chosen || !breakdown) return null;
+    if (!chosen || !breakdown) {
+      console.warn('[rapidapi] no se encontro bloque/breakdown valido tras filtrar', { hotelId, adults, rooms });
+      return null;
+    }
 
+    console.log('[rapidapi] OK', { hotelId, hotel: data.hotel_name, price: breakdown.all_inclusive_amount?.amount_rounded });
     return {
       found: true,
       hotel: data.hotel_name ?? null,
@@ -136,9 +156,10 @@ export async function checkRapidApiPrice({ hotelId, checkin, checkout, adults = 
       adults,
       rooms,
     };
-  } catch {
+  } catch (err) {
     // Timeout, red caida, JSON invalido... cualquier fallo aqui se trata
     // igual que "sin disponibilidad" - nunca debe tumbar la conversacion.
+    console.warn('[rapidapi] excepcion', err?.name, err?.message);
     return null;
   } finally {
     clearTimeout(timer);
