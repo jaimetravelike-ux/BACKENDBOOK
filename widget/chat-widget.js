@@ -130,17 +130,22 @@
     // porque el layout (fuentes, imagenes reservando su aspect-ratio) aun no
     // ha terminado - por eso reintentamos en el siguiente frame y otra vez
     // un poco despues, y ademas al cargar la primera imagen de la tarjeta.
-    function scrollThreadToBottom() {
-      heroThread.scrollTop = heroThread.scrollHeight;
-      requestAnimationFrame(() => {
+    function scrollThreadToBottom(targetEl) {
+      const doScroll = () => {
         heroThread.scrollTop = heroThread.scrollHeight;
-      });
-      setTimeout(() => {
-        heroThread.scrollTop = heroThread.scrollHeight;
-      }, 300);
-      setTimeout(() => {
-        heroThread.scrollTop = heroThread.scrollHeight;
-      }, 900);
+        // scrollIntoView es mas fiable que mover solo heroThread.scrollTop:
+        // tiene en cuenta el layout real del elemento (incluida su altura
+        // final con la imagen ya calculada) y ajusta cualquier contenedor
+        // con scroll por el camino, no solo heroThread.
+        if (targetEl && targetEl.isConnected) {
+          targetEl.scrollIntoView({ block: 'end', inline: 'nearest' });
+        }
+      };
+      doScroll();
+      requestAnimationFrame(doScroll);
+      setTimeout(doScroll, 300);
+      setTimeout(doScroll, 900);
+      setTimeout(doScroll, 1800);
     }
 
     function renderHeroMessage(role, text) {
@@ -149,7 +154,7 @@
       el.textContent = text;
       heroThread.appendChild(el);
       heroThread.classList.add('open');
-      scrollThreadToBottom();
+      scrollThreadToBottom(el);
       return el;
     }
 
@@ -298,10 +303,10 @@
       }
 
       heroThread.appendChild(wrap);
-      scrollThreadToBottom();
+      scrollThreadToBottom(wrap);
       const firstImg = wrap.querySelector('.hotel-card-gallery img');
       if (firstImg && !firstImg.complete) {
-        firstImg.addEventListener('load', scrollThreadToBottom, { once: true });
+        firstImg.addEventListener('load', () => scrollThreadToBottom(wrap), { once: true });
       }
     }
 
