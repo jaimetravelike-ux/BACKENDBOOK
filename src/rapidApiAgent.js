@@ -1,50 +1,33 @@
-// Agente aislado para RapidAPI (proveedor "Booking" de apidojo). Su unico
-// trabajo es, dado un hotel_id de Booking.com ya resuelto (via
-// bookingAgent.resolveHotelId), pedir el precio y el desglose de cargos
-// extra (resort fee, impuestos no incluidos en el precio mostrado...) de
-// forma rapida y estructurada - sin "navegar" Booking con un navegador real.
+// Agente aislado para RapidAPI. Su unico trabajo es, dado un hotel_id de
+// Booking.com ya resuelto (via bookingAgent.resolveHotelId, con Playwright),
+// pedir el precio y el desglose de cargos extra (resort fee, impuestos no
+// incluidos en el precio mostrado...) de forma rapida y estructurada.
 //
 // Si esto falla, tarda demasiado, o no encuentra disponibilidad, devuelve
 // null: el llamador (priceChecker.js) debe caer entonces al agente de
 // Playwright (bookingAgent.checkBookingPrice) como red de seguridad. Nunca
-// lanza fuera de aqui - cualquier fallo se trata como "no disponible via
-// RapidAPI", nunca como error fatal de la conversacion.
+// lanza fuera de aqui.
 //
-// Esquema confirmado con datos reales de properties/detail (Hotel Edison
-// Times Square, hotel_id=1169919): cada elemento de data.block[] trae
-// product_price_breakdown con net_amount, gross_amount, all_inclusive_amount
+// NOTA HISTORICA: la primera version de este agente usaba el proveedor
+// "apidojo" (properties/detail). Se cambio al proveedor "tipsters" porque
+// apidojo devolvia soldout:1/block:[] de forma inconsistente para peticiones
+// identicas (confirmado comparando directamente contra su propio playground,
+// no era un problema de nuestros parametros). El endpoint de tipsters usado
+// aqui (v1/hotels/search) es una busqueda de disponibilidad real, no una
+// consulta de "detalle" de un hotel concreto, y no mostro ese problema en las
+// pruebas. Los UFI/dest_id de Booking.com son los mismos entre ambos
+// proveedores (confirmado: dest_id de Nueva York = 20088325 en los dos).
+//
+// Esquema confirmado con datos reales (search hotels, dest_type=hotel):
+// cada hotel real en result[] tiene type:"property_card" y trae
+// composite_price_breakdown con net_amount, gross_amount, all_inclusive_amount
 // (el total real con todo incluido) y excluded_amount (impuestos/cargos no
-// incluidos en gross_amount), ademas de items[] con el desglose linea a
-// linea (kind: charge/discount, inclusion_type: included/excluded).
+// incluidos en gross_amount), ademas de items[] con el desglose linea a linea
+// (kind: charge/discount, inclusion_type: included/excluded) - mismo formato
+// que ya sabiamos parsear.
 
-const RAPIDAPI_HOST = 'apidojo-booking-v1.p.rapidapi.com';
-// UFI de la ciudad de Nueva York, confirmado en respuestas reales de
-// properties/detail (campo wl_dest_id: "city::20088325").
-const NYC_DEST_ID = '20088325';
-const TIMEOUT_MS = 3000;
-
-function pickBestBlock(blocks, { adults, rooms, breakfast }) {
-  const wantedAdults = Number(adults) || 2;
-  const wantedRooms = Number(rooms) || 1;
-
-  const matchesCapacity = (b) => {
-    const capacity = Number(b.nr_adults ?? b.max_occupancy ?? 0);
-    const available = Number(b.room_count ?? 0);
-    return capacity >= wantedAdults && available >= wantedRooms;
-  };
-  const matchesBreakfast = (b) => (breakfast ? Boolean(b.breakfast_included) : true);
-
-  let pool = blocks.filter((b) => matchesCapacity(b) && matchesBreakfast(b));
-  if (pool.length === 0) pool = blocks.filter(matchesCapacity);
-  if (pool.length === 0) pool = blocks;
-  if (pool.length === 0) return null;
-
-  return pool.reduce((cheapest, b) => {
-    const price = Number(b.product_price_breakdown?.all_inclusive_amount?.value ?? Infinity);
-    const cheapestPrice = Number(cheapest?.product_price_breakdown?.all_inclusive_amount?.value ?? Infinity);
-    return price < cheapestPrice ? b : cheapest;
-  }, pool[0]);
-}
+const RAPIDAPI_HOST = 'booking-com.p.rapidapi.com';
+const TIMEOUT_MS = 4000;
 
 // Los cargos ya vienen desglosados por Booking (incluidos y no incluidos en
 // el precio base). Como usamos all_inclusive_amount como precio total, todos
@@ -59,43 +42,24 @@ function buildExtraChargesSummary(breakdown) {
   return `Incluye ${parts.join(', ')}`;
 }
 
-const MAX_PHOTOS = 5;
-
-// Las fotos reales de la habitacion elegida viven en data.rooms[room_id].photos
-// (confirmado con datos reales), no en el bloque de precio. Como ya sabemos
-// exactamente que hotel es (hotel_id resuelto), estas fotos SI son del hotel
-// correcto - a diferencia de las genericas de NYC que se usaban antes como
-// respaldo cuando no habia forma fiable de saber la foto real.
-function extractPhotos(data, roomId) {
-  const photos = data?.rooms?.[roomId]?.photos;
-  if (!Array.isArray(photos) || photos.length === 0) return [];
-  return photos
-    .slice(0, MAX_PHOTOS)
-    .map((p) => p.url_original ?? p.url_max300)
-    .filter(Boolean);
-}
-
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-// Un unico intento de llamada. Separado de checkRapidApiPrice para poder
-// reintentarlo: hemos visto en produccion que la MISMA peticion (mismo
-// hotel_id, mismas fechas) a veces responde soldout:1/block:[] y, repetida
-// poco despues, responde con datos reales completos - parece un problema de
-// consistencia/cache del lado de RapidAPI, no de nuestros parametros
-// (verificado comparando contra el propio playground de RapidAPI).
-async function fetchOnce({ hotelId, checkin, checkout, adults, rooms, breakfast, apiKey }) {
-  const url = new URL(`https://${RAPIDAPI_HOST}/properties/detail`);
-  url.searchParams.set('hotel_id', String(hotelId));
-  url.searchParams.set('dest_ids', NYC_DEST_ID);
-  url.searchParams.set('search_type', 'CITY');
-  url.searchParams.set('arrival_date', checkin);
-  url.searchParams.set('departure_date', checkout);
-  url.searchParams.set('adults', String(adults));
-  url.searchParams.set('room_qty', String(rooms));
-  url.searchParams.set('currency_code', 'USD');
-  url.searchParams.set('languagecode', 'es');
+async function fetchOnce({ hotelId, checkin, checkout, adults, rooms, apiKey }) {
+  const url = new URL(`https://${RAPIDAPI_HOST}/v1/hotels/search`);
+  url.searchParams.set('dest_type', 'hotel');
+  url.searchParams.set('dest_id', String(hotelId));
+  url.searchParams.set('checkin_date', checkin);
+  url.searchParams.set('checkout_date', checkout);
+  url.searchParams.set('adults_number', String(adults));
+  url.searchParams.set('room_number', String(rooms));
+  url.searchParams.set('filter_by_currency', 'USD');
+  url.searchParams.set('locale', 'en-gb');
+  url.searchParams.set('units', 'metric');
+  url.searchParams.set('order_by', 'popularity');
+  url.searchParams.set('page_number', '0');
+  url.searchParams.set('include_adjacency', 'false');
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
@@ -115,36 +79,28 @@ async function fetchOnce({ hotelId, checkin, checkout, adults, rooms, breakfast,
     }
 
     const json = await res.json();
-    const data = Array.isArray(json) ? json[0] : json;
-    if (!data || data.soldout === 1 || !Array.isArray(data.block) || data.block.length === 0) {
-      console.warn('[rapidapi] sin bloques disponibles', {
-        hotelId,
-        soldout: data?.soldout,
-        blockCount: Array.isArray(data?.block) ? data.block.length : 'sin campo block',
-      });
+    const results = Array.isArray(json?.result) ? json.result : [];
+    const hotel = results.find((r) => r?.type === 'property_card' && r?.composite_price_breakdown);
+    if (!hotel) {
+      console.warn('[rapidapi] sin resultado con precio para este hotel_id', { hotelId, resultCount: results.length });
       return null;
     }
 
-    const chosen = pickBestBlock(data.block, { adults, rooms, breakfast });
-    const breakdown = chosen?.product_price_breakdown;
-    if (!chosen || !breakdown) {
-      console.warn('[rapidapi] no se encontro bloque/breakdown valido tras filtrar', { hotelId, adults, rooms });
-      return null;
-    }
+    const breakdown = hotel.composite_price_breakdown;
+    const photo = hotel.max_photo_url ?? hotel.main_photo_url ?? null;
 
-    console.log('[rapidapi] OK', { hotelId, hotel: data.hotel_name, price: breakdown.all_inclusive_amount?.amount_rounded });
+    console.log('[rapidapi] OK', { hotelId, hotel: hotel.hotel_name, price: breakdown.all_inclusive_amount?.amount_rounded });
     return {
       found: true,
-      hotel: data.hotel_name ?? null,
+      hotel: hotel.hotel_name ?? null,
       totalPrice: breakdown.all_inclusive_amount?.amount_rounded ?? null,
-      breakfastMentionedOnCard: Boolean(chosen.breakfast_included),
+      breakfastMentionedOnCard: Boolean(hotel.hotel_include_breakfast),
       extraChargesNotice: buildExtraChargesSummary(breakdown),
-      cancellationPolicy:
-        chosen.transactional_policy_data?.policies?.find((p) => p.policy_type_key === 'free_cancellation')?.text ?? null,
-      // Fotos reales del hotel/habitacion (solo disponibles cuando el precio
-      // viene de RapidAPI - el fallback de Playwright no las trae, el widget
-      // debe seguir usando la foto generica de NYC en ese caso).
-      photos: extractPhotos(data, chosen.room_id),
+      cancellationPolicy: hotel.is_free_cancellable ? 'Cancelación gratuita' : null,
+      // Solo una foto real por ahora (main_photo_url/max_photo_url) - a
+      // diferencia del fallback generico de NYC, esta SI es del hotel
+      // correcto porque la busqueda fue por su hotel_id exacto.
+      photos: photo ? [photo] : [],
       checkin,
       checkout,
       adults,
@@ -167,7 +123,7 @@ const RETRY_DELAY_MS = 500;
  * @param {{hotelId:string|number, checkin:string, checkout:string, adults?:string, rooms?:string, breakfast?:boolean}} params
  * @returns {Promise<object|null>} resultado con found:true, o null si no se pudo usar RapidAPI (el llamador debe caer a Playwright).
  */
-export async function checkRapidApiPrice({ hotelId, checkin, checkout, adults = '2', rooms = '1', breakfast = false }) {
+export async function checkRapidApiPrice({ hotelId, checkin, checkout, adults = '2', rooms = '1' }) {
   const apiKey = process.env.RAPIDAPI_KEY;
   if (!apiKey) {
     console.warn('[rapidapi] sin RAPIDAPI_KEY configurada - saltando a Playwright');
@@ -179,7 +135,7 @@ export async function checkRapidApiPrice({ hotelId, checkin, checkout, adults = 
   }
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    const result = await fetchOnce({ hotelId, checkin, checkout, adults, rooms, breakfast, apiKey });
+    const result = await fetchOnce({ hotelId, checkin, checkout, adults, rooms, apiKey });
     if (result) return result;
     if (attempt < MAX_ATTEMPTS) {
       console.warn(`[rapidapi] intento ${attempt} sin datos, reintentando...`);

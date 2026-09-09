@@ -40,7 +40,6 @@ export async function checkPrice({ query, checkin, checkout, adults = '2', rooms
       checkout,
       adults,
       rooms,
-      breakfast,
     });
     if (rapidResult?.found) {
       console.log('[priceChecker] usando RapidAPI');
