@@ -138,6 +138,9 @@
       setTimeout(() => {
         heroThread.scrollTop = heroThread.scrollHeight;
       }, 300);
+      setTimeout(() => {
+        heroThread.scrollTop = heroThread.scrollHeight;
+      }, 900);
     }
 
     function renderHeroMessage(role, text) {
