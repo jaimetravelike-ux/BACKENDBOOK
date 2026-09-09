@@ -75,21 +75,17 @@ function extractPhotos(data, roomId) {
     .filter(Boolean);
 }
 
-/**
- * @param {{hotelId:string|number, checkin:string, checkout:string, adults?:string, rooms?:string, breakfast?:boolean}} params
- * @returns {Promise<object|null>} resultado con found:true, o null si no se pudo usar RapidAPI (el llamador debe caer a Playwright).
- */
-export async function checkRapidApiPrice({ hotelId, checkin, checkout, adults = '2', rooms = '1', breakfast = false }) {
-  const apiKey = process.env.RAPIDAPI_KEY;
-  if (!apiKey) {
-    console.warn('[rapidapi] sin RAPIDAPI_KEY configurada - saltando a Playwright');
-    return null;
-  }
-  if (!hotelId || !checkin || !checkout) {
-    console.warn('[rapidapi] faltan parametros obligatorios', { hotelId, checkin, checkout });
-    return null;
-  }
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
+// Un unico intento de llamada. Separado de checkRapidApiPrice para poder
+// reintentarlo: hemos visto en produccion que la MISMA peticion (mismo
+// hotel_id, mismas fechas) a veces responde soldout:1/block:[] y, repetida
+// poco despues, responde con datos reales completos - parece un problema de
+// consistencia/cache del lado de RapidAPI, no de nuestros parametros
+// (verificado comparando contra el propio playground de RapidAPI).
+async function fetchOnce({ hotelId, checkin, checkout, adults, rooms, breakfast, apiKey }) {
   const url = new URL(`https://${RAPIDAPI_HOST}/properties/detail`);
   url.searchParams.set('hotel_id', String(hotelId));
   url.searchParams.set('dest_ids', NYC_DEST_ID);
@@ -121,8 +117,6 @@ export async function checkRapidApiPrice({ hotelId, checkin, checkout, adults = 
     const json = await res.json();
     const data = Array.isArray(json) ? json[0] : json;
     if (!data || data.soldout === 1 || !Array.isArray(data.block) || data.block.length === 0) {
-      // Sin disponibilidad via RapidAPI para estas fechas/hotel - no es un
-      // error, simplemente esta fuente no nos sirve ahora mismo.
       console.warn('[rapidapi] sin bloques disponibles', {
         hotelId,
         soldout: data?.soldout,
@@ -164,4 +158,33 @@ export async function checkRapidApiPrice({ hotelId, checkin, checkout, adults = 
   } finally {
     clearTimeout(timer);
   }
+}
+
+const MAX_ATTEMPTS = 2;
+const RETRY_DELAY_MS = 500;
+
+/**
+ * @param {{hotelId:string|number, checkin:string, checkout:string, adults?:string, rooms?:string, breakfast?:boolean}} params
+ * @returns {Promise<object|null>} resultado con found:true, o null si no se pudo usar RapidAPI (el llamador debe caer a Playwright).
+ */
+export async function checkRapidApiPrice({ hotelId, checkin, checkout, adults = '2', rooms = '1', breakfast = false }) {
+  const apiKey = process.env.RAPIDAPI_KEY;
+  if (!apiKey) {
+    console.warn('[rapidapi] sin RAPIDAPI_KEY configurada - saltando a Playwright');
+    return null;
+  }
+  if (!hotelId || !checkin || !checkout) {
+    console.warn('[rapidapi] faltan parametros obligatorios', { hotelId, checkin, checkout });
+    return null;
+  }
+
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const result = await fetchOnce({ hotelId, checkin, checkout, adults, rooms, breakfast, apiKey });
+    if (result) return result;
+    if (attempt < MAX_ATTEMPTS) {
+      console.warn(`[rapidapi] intento ${attempt} sin datos, reintentando...`);
+      await sleep(RETRY_DELAY_MS);
+    }
+  }
+  return null;
 }
