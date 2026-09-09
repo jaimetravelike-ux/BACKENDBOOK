@@ -37,10 +37,24 @@
     'Ya casi está...',
   ];
 
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  // Antes siempre empezaba por el mismo indice, asi que en una comprobacion
+  // tipica (15-40s, ~4-9 curiosidades mostradas) casi siempre se veian las
+  // mismas 2-3 primeras. Ahora se baraja el orden (menos el mensaje inicial,
+  // que ya se ve antes de empezar a rotar) cada vez que se lanza.
   function startFactRotation(el) {
-    let i = 1;
+    const facts = shuffle(NYC_FACTS.slice(1));
+    let i = 0;
     const interval = setInterval(() => {
-      el.textContent = NYC_FACTS[i % NYC_FACTS.length];
+      el.textContent = facts[i % facts.length];
       i++;
     }, 4200);
     return () => clearInterval(interval);
