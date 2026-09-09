@@ -145,13 +145,15 @@ async function selectBestDestination(page, destInput, query) {
   }
 
   const wasSpecificHotel = best.r.destination?.destType === 'HOTEL';
+  const destId = best.r.destination?.destId ?? null;
+  const hotelName = best.r.displayInfo?.title ?? null;
   const bestIndex = candidateIndexOf(best.r);
   for (let i = 0; i <= bestIndex; i++) {
     await destInput.press('ArrowDown');
     await page.waitForTimeout(150);
   }
   await destInput.press('Enter');
-  return { wasSpecificHotel };
+  return { wasSpecificHotel, destId, hotelName };
 }
 
 // Titi Hotels solo trabaja Nueva York; si el cliente da un nombre ambiguo sin
@@ -162,7 +164,12 @@ function scopeToNewYork(query) {
   return `${query} New York`;
 }
 
-async function runRealSearch(page, { query, checkin, checkout }) {
+// Solo la parte de "elegir destino" de la busqueda (home -> calentar ->
+// escribir -> autocompletado). Separado de runRealSearch para poder
+// reutilizarlo en resolveHotelId, que solo necesita identificar el hotel
+// (para RapidAPI) sin llegar a elegir fechas ni pulsar Buscar - mucho mas
+// rapido que una busqueda completa.
+async function openAndSelectDestination(page, query) {
   await page.goto('https://www.booking.com/index.es.html', { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForTimeout(2000);
   await dismissOverlays(page);
@@ -193,6 +200,11 @@ async function runRealSearch(page, { query, checkin, checkout }) {
   }
   await destInput.fill('');
   const destinationResult = await selectBestDestination(page, destInput, query);
+  return destinationResult;
+}
+
+async function runRealSearch(page, { query, checkin, checkout }) {
+  const destinationResult = await openAndSelectDestination(page, query);
   if (destinationResult?.needsDisambiguation || destinationResult?.notFoundInNewYork) {
     return destinationResult;
   }
@@ -207,7 +219,11 @@ async function runRealSearch(page, { query, checkin, checkout }) {
   await page.waitForLoadState('domcontentloaded', { timeout: 20000 }).catch(() => {});
   await page.waitForTimeout(3000);
 
-  return { wasSpecificHotel: Boolean(destinationResult?.wasSpecificHotel) };
+  return {
+    wasSpecificHotel: Boolean(destinationResult?.wasSpecificHotel),
+    destId: destinationResult?.destId ?? null,
+    hotelName: destinationResult?.hotelName ?? null,
+  };
 }
 
 async function applyBreakfastFilter(page) {
@@ -361,22 +377,11 @@ async function extractCancellationPolicy(cardLocator) {
   }
 }
 
-/**
- * Consulta Booking.com y devuelve el precio mas barato que cumple los criterios.
- * @param {{query:string, checkin:string, checkout:string, adults?:string, rooms?:string, breakfast?:boolean, headless?:boolean}} params
- */
-export async function checkBookingPrice({ query, checkin, checkout, adults = '2', rooms = '1', breakfast = false, headless = true }) {
-  if (!query || !checkin || !checkout) {
-    throw new Error('query, checkin y checkout son obligatorios');
-  }
-  // El "New York" que añadimos nosotros es solo para que la busqueda de
-  // destino no se vaya a otra ciudad - no debe contar a la hora de decidir
-  // que TARJETA de resultados es el hotel pedido (si no, "new"/"york" infla
-  // artificialmente la puntuacion de cualquier alternativa cuyo nombre las
-  // incluya, diluyendo lo que de verdad distingue al hotel).
-  const nameForMatching = query;
-  query = scopeToNewYork(query);
-
+// Lanzamiento de navegador/contexto compartido entre checkBookingPrice
+// (busqueda completa) y resolveHotelId (solo identificar el hotel, mas
+// ligero) - misma configuracion anti-deteccion y de ahorro de memoria en
+// ambos casos.
+async function launchContext(headless) {
   const browser = await chromium.launch({
     headless,
     args: [
@@ -437,6 +442,55 @@ export async function checkBookingPrice({ query, checkin, checkout, adults = '2'
     return route.continue();
   });
 
+  return { browser, context };
+}
+
+/**
+ * Version ligera: solo identifica el hotel (destId de Booking, que coincide
+ * con el hotel_id que usa RapidAPI para hoteles) sin llegar a elegir fechas
+ * ni pulsar Buscar. Mucho mas rapida que checkBookingPrice completo - se usa
+ * para poder consultar despues el precio via RapidAPI en vez de scrapear.
+ * @param {{query:string, headless?:boolean}} params
+ */
+export async function resolveHotelId({ query, headless = true }) {
+  const scopedQuery = scopeToNewYork(query);
+  const { browser, context } = await launchContext(headless);
+  const page = await context.newPage();
+  try {
+    const destinationResult = await openAndSelectDestination(page, scopedQuery);
+    if (destinationResult?.needsDisambiguation) {
+      return { needsDisambiguation: true, options: destinationResult.options };
+    }
+    if (destinationResult?.notFoundInNewYork) {
+      return { notFoundInNewYork: true };
+    }
+    return {
+      hotelId: destinationResult?.destId ?? null,
+      hotelName: destinationResult?.hotelName ?? null,
+      wasSpecificHotel: Boolean(destinationResult?.wasSpecificHotel),
+    };
+  } finally {
+    await browser.close();
+  }
+}
+
+/**
+ * Consulta Booking.com y devuelve el precio mas barato que cumple los criterios.
+ * @param {{query:string, checkin:string, checkout:string, adults?:string, rooms?:string, breakfast?:boolean, headless?:boolean}} params
+ */
+export async function checkBookingPrice({ query, checkin, checkout, adults = '2', rooms = '1', breakfast = false, headless = true }) {
+  if (!query || !checkin || !checkout) {
+    throw new Error('query, checkin y checkout son obligatorios');
+  }
+  // El "New York" que añadimos nosotros es solo para que la busqueda de
+  // destino no se vaya a otra ciudad - no debe contar a la hora de decidir
+  // que TARJETA de resultados es el hotel pedido (si no, "new"/"york" infla
+  // artificialmente la puntuacion de cualquier alternativa cuyo nombre las
+  // incluya, diluyendo lo que de verdad distingue al hotel).
+  const nameForMatching = query;
+  query = scopeToNewYork(query);
+
+  const { browser, context } = await launchContext(headless);
   const page = await context.newPage();
 
   try {

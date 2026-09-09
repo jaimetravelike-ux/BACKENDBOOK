@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getSession, slotsComplete, searchKey } from './sessionStore.js';
 import { converse, phraseSearchResult } from './claude.js';
-import { checkBookingPrice } from './bookingAgent.js';
+import { checkPrice } from './priceChecker.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -21,7 +21,7 @@ app.get('/health', (_req, res) => res.json({ ok: true }));
 // Marcador temporal para confirmar sin ambiguedad que un deploy concreto esta
 // realmente en produccion (los builds de Railway a veces tardan mucho mas de
 // lo esperado, o el auto-deploy no se dispara).
-app.get('/version', (_req, res) => res.json({ marker: 'availability-fix-v3' }));
+app.get('/version', (_req, res) => res.json({ marker: 'rapidapi-primary-v1' }));
 
 // Un turno de conversacion normal. Si con este mensaje ya se completan los datos
 // minimos (hotel/zona + fechas), la respuesta incluye pendingSearch:true - el
@@ -62,7 +62,7 @@ app.post('/api/chat/resolve', async (req, res) => {
     }
 
     const { slots } = session;
-    const result = await checkBookingPrice({
+    const result = await checkPrice({
       query: slots.hotelQuery,
       checkin: slots.checkin,
       checkout: slots.checkout,
