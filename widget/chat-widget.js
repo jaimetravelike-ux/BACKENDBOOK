@@ -351,8 +351,11 @@
           // Aqui termina el flujo por ahora: nombre y email son obligatorios
           // y, en cuanto haya pasarela de pago conectada, este es el punto
           // donde se redirigiria a pagar - no se manda ningun mensaje mas al
-          // chat, la card se queda como confirmacion final por si misma.
-          reserveBtn.textContent = '✓ Solicitud enviada';
+          // chat, la card se queda como confirmacion final por si misma. El
+          // boton mantiene el texto "Reservar" (no "Solicitud enviada") a
+          // peticion expresa - solo queda deshabilitado para no duplicar el
+          // envio, con la confirmacion en el texto de abajo.
+          reserveBtn.textContent = 'Reservar';
           leadError.hidden = true;
           leadError.className = 'hotel-card-lead-success';
           leadError.textContent = 'Gracias. En breve te contactamos para completar el pago.';
