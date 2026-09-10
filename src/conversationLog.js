@@ -28,6 +28,20 @@ function init() {
           resolved BOOLEAN NOT NULL DEFAULT false,
           result JSONB
         );
+        CREATE TABLE IF NOT EXISTS leads (
+          id BIGSERIAL PRIMARY KEY,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+          session_id TEXT,
+          name TEXT NOT NULL,
+          email TEXT NOT NULL,
+          hotel TEXT,
+          city TEXT,
+          checkin TEXT,
+          checkout TEXT,
+          adults TEXT,
+          rooms TEXT,
+          total_price TEXT
+        );
       `)
       .then(() => true)
       .catch((err) => {
@@ -79,6 +93,42 @@ export async function listConversations({ limit = 200 } = {}) {
     `SELECT session_id, created_at, updated_at, history, slots, resolved, result
      FROM conversations
      ORDER BY updated_at DESC
+     LIMIT $1`,
+    [limit],
+  );
+  return rows;
+}
+
+// Datos de contacto que el cliente deja directamente en la card del hotel
+// (nombre + email), en vez de tener que escribirlos por chat. Si Postgres no
+// esta disponible, se lanza el error hacia arriba - aqui SI hace falta que
+// el llamador sepa que no se guardo, para poder avisar al cliente.
+export async function logLead(lead) {
+  if (!(await init())) throw new Error('Postgres no configurado');
+  await pool.query(
+    `INSERT INTO leads (session_id, name, email, hotel, city, checkin, checkout, adults, rooms, total_price)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+    [
+      lead.sessionId ?? null,
+      lead.name,
+      lead.email,
+      lead.hotel ?? null,
+      lead.city ?? null,
+      lead.checkin ?? null,
+      lead.checkout ?? null,
+      lead.adults ?? null,
+      lead.rooms ?? null,
+      lead.totalPrice ?? null,
+    ],
+  );
+}
+
+export async function listLeads({ limit = 300 } = {}) {
+  if (!(await init())) return [];
+  const { rows } = await pool.query(
+    `SELECT id, created_at, name, email, hotel, city, checkin, checkout, adults, rooms, total_price
+     FROM leads
+     ORDER BY created_at DESC
      LIMIT $1`,
     [limit],
   );

@@ -290,6 +290,11 @@
                  </div>`
               : ''
           }
+          <div class="hotel-card-lead">
+            <input class="hotel-card-lead-name" type="text" placeholder="Tu nombre" autocomplete="name" />
+            <input class="hotel-card-lead-email" type="email" placeholder="Tu correo electrónico" autocomplete="email" />
+            <div class="hotel-card-lead-error" hidden></div>
+          </div>
           <button class="hotel-card-reserve" type="button">Reservar</button>
         </div>
       `;
@@ -301,10 +306,60 @@
         setFavorite(favKey, next);
       });
 
+      const nameInput = wrap.querySelector('.hotel-card-lead-name');
+      const emailInput = wrap.querySelector('.hotel-card-lead-email');
+      const leadError = wrap.querySelector('.hotel-card-lead-error');
       const reserveBtn = wrap.querySelector('.hotel-card-reserve');
-      reserveBtn.addEventListener('click', () => {
-        heroInput.value = `Quiero reservar el ${result.hotel || 'este hotel'} para esas fechas`;
-        heroChat.sendMessage();
+
+      // En vez de mandar al cliente de vuelta a escribir en el chat (nombre,
+      // email...), se recogen aqui mismo en la card - mas rapido para el
+      // cliente y llega ya estructurado, sin tener que interpretarlo de un
+      // mensaje de texto libre.
+      reserveBtn.addEventListener('click', async () => {
+        const name = nameInput.value.trim();
+        const email = emailInput.value.trim();
+        const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+        if (!name || !emailOk) {
+          leadError.textContent = !name
+            ? 'Escribe tu nombre para reservar.'
+            : 'Escribe un correo electrónico válido.';
+          leadError.hidden = false;
+          (!name ? nameInput : emailInput).focus();
+          return;
+        }
+        leadError.hidden = true;
+
+        reserveBtn.disabled = true;
+        reserveBtn.textContent = 'Enviando...';
+        nameInput.disabled = true;
+        emailInput.disabled = true;
+
+        try {
+          await postJSON('/api/lead', {
+            sessionId: getSessionId(),
+            name,
+            email,
+            hotel: result.hotel || null,
+            city: result.city || null,
+            checkin: result.checkin || null,
+            checkout: result.checkout || null,
+            adults: result.adults || null,
+            rooms: result.rooms || null,
+            totalPrice: result.totalPrice || null,
+          });
+          reserveBtn.textContent = '✓ Solicitud enviada';
+          heroInput.value = `Quiero reservar el ${result.hotel || 'este hotel'} para esas fechas, ya he dejado mis datos (${name})`;
+          heroChat.sendMessage();
+        } catch (err) {
+          console.warn('[hotel-card] no se pudo enviar la solicitud de reserva', err);
+          reserveBtn.disabled = false;
+          reserveBtn.textContent = 'Reservar';
+          nameInput.disabled = false;
+          emailInput.disabled = false;
+          leadError.textContent = 'No se pudo enviar. Inténtalo de nuevo en un momento.';
+          leadError.hidden = false;
+        }
       });
 
       if (photos.length > 1) {

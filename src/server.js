@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { getSession, slotsComplete, searchKey } from './sessionStore.js';
 import { converse, phraseSearchResult } from './claude.js';
 import { checkPrice } from './priceChecker.js';
-import { logTurn, logResolved, listConversations } from './conversationLog.js';
+import { logTurn, logResolved, listConversations, logLead, listLeads } from './conversationLog.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -91,6 +91,92 @@ app.post('/api/chat/resolve', async (req, res) => {
   }
 });
 
+function isValidEmail(value) {
+  return typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+// Datos de contacto que el cliente deja directamente en la card del hotel
+// (nombre + email), en vez de escribirlos por chat.
+app.post('/api/lead', async (req, res) => {
+  try {
+    const { sessionId, name, email, hotel, city, checkin, checkout, adults, rooms, totalPrice } = req.body ?? {};
+
+    if (typeof name !== 'string' || !name.trim()) {
+      return res.status(400).json({ error: 'Falta el nombre' });
+    }
+    if (!isValidEmail(email)) {
+      return res.status(400).json({ error: 'Email invalido' });
+    }
+
+    await logLead({
+      sessionId,
+      name: name.trim(),
+      email: email.trim(),
+      hotel,
+      city,
+      checkin,
+      checkout,
+      adults,
+      rooms,
+      totalPrice,
+    });
+
+    res.status(201).json({ ok: true });
+  } catch (err) {
+    console.error('[api/lead] error', err);
+    res.status(500).json({ error: 'No se pudo guardar la solicitud' });
+  }
+});
+
+app.get('/admin/leads', async (req, res) => {
+  const key = process.env.ADMIN_KEY;
+  if (!key || req.query.key !== key) {
+    return res.status(401).send('No autorizado. Añade ?key=... a la URL.');
+  }
+
+  let rows;
+  try {
+    rows = await listLeads({ limit: 300 });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send('No se pudieron leer las solicitudes.');
+  }
+
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  const bodyRows = rows.map((row) => `<tr>
+      <td>${esc(new Date(row.created_at).toLocaleString('es-ES'))}</td>
+      <td>${esc(row.name)}</td>
+      <td><a href="mailto:${esc(row.email)}" style="color:#f2b705">${esc(row.email)}</a></td>
+      <td>${esc(row.hotel)}</td>
+      <td>${esc(row.city)}</td>
+      <td>${esc(row.checkin)} → ${esc(row.checkout)}</td>
+      <td>${esc(row.adults ?? '')} / ${esc(row.rooms ?? '')}</td>
+      <td>${esc(row.total_price)}</td>
+    </tr>`).join('\n');
+
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(`<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Solicitudes de reserva - Titi Hotels</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #15171c; color: #f0ece0; margin: 0; padding: 24px; }
+  h1 { font-size: 18px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid #333; text-align: left; vertical-align: top; }
+  th { color: #f2b705; position: sticky; top: 0; background: #15171c; }
+  tr:hover { background: #1e2128; }
+  .count { color: #a6a196; font-size: 12px; margin-bottom: 12px; }
+</style></head>
+<body>
+  <h1>Solicitudes de reserva (${rows.length})</h1>
+  <div class="count">Ordenadas por más reciente. Recarga la página para ver las nuevas. <a href="/admin/conversations?key=${esc(req.query.key)}" style="color:#f2b705">Ver conversaciones</a></div>
+  <table>
+    <thead><tr><th>Fecha</th><th>Nombre</th><th>Email</th><th>Hotel</th><th>Ciudad</th><th>Fechas</th><th>Adultos/Hab.</th><th>Precio</th></tr></thead>
+    <tbody>${bodyRows}</tbody>
+  </table>
+</body></html>`);
+});
+
 // Panel muy basico para ver las conversaciones guardadas: que se pregunto,
 // en que dato se quedaron y si llegaron a ver un precio o no. Protegido con
 // una clave simple por query string (?key=...) - no es un sistema de login
@@ -152,7 +238,7 @@ app.get('/admin/conversations', async (req, res) => {
 </style></head>
 <body>
   <h1>Conversaciones (${rows.length})</h1>
-  <div class="count">Ordenadas por última actividad. Recarga la página para ver las nuevas.</div>
+  <div class="count">Ordenadas por última actividad. Recarga la página para ver las nuevas. <a href="/admin/leads?key=${esc(req.query.key)}" style="color:#f2b705">Ver solicitudes de reserva</a></div>
   <table>
     <thead><tr><th>Última actividad</th><th>Nº msgs</th><th>Último mensaje del cliente</th><th>Hotel/zona</th><th>Fechas</th><th>Adultos/Hab.</th><th>Paso</th></tr></thead>
     <tbody>${bodyRows}</tbody>
