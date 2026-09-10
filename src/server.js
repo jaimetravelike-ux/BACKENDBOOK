@@ -157,7 +157,7 @@ app.get('/admin/leads', async (req, res) => {
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.send(`<!doctype html>
-<html lang="es"><head><meta charset="utf-8"><title>Solicitudes de reserva - Titi Hotels</title>
+<html lang="es"><head><meta charset="utf-8"><title>Solicitudes de reserva - BedCopilot</title>
 <style>
   body { font-family: system-ui, sans-serif; background: #15171c; color: #f0ece0; margin: 0; padding: 24px; }
   h1 { font-size: 18px; }
@@ -226,7 +226,7 @@ app.get('/admin/conversations', async (req, res) => {
 
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.send(`<!doctype html>
-<html lang="es"><head><meta charset="utf-8"><title>Conversaciones - Titi Hotels</title>
+<html lang="es"><head><meta charset="utf-8"><title>Conversaciones - BedCopilot</title>
 <style>
   body { font-family: system-ui, sans-serif; background: #15171c; color: #f0ece0; margin: 0; padding: 24px; }
   h1 { font-size: 18px; }
@@ -247,5 +247,5 @@ app.get('/admin/conversations', async (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Titi Hotels chatbot backend escuchando en http://localhost:${PORT}`);
+  console.log(`BedCopilot chatbot backend escuchando en http://localhost:${PORT}`);
 });

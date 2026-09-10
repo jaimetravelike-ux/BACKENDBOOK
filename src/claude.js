@@ -30,7 +30,7 @@ const UPDATE_SLOTS_TOOL = {
 
 function systemPrompt(slots) {
   const today = new Date().toISOString().slice(0, 10);
-  return `Eres el agente de atencion de Titi Hotels, una agencia especializada solo en hoteles de Nueva York. Hablas por el chat de la web.
+  return `Eres el agente de atencion de BedCopilot, una agencia especializada solo en hoteles de Nueva York. Hablas por el chat de la web.
 
 Tono: cercano y natural, como una persona real de la agencia (nunca como un formulario ni un bot robotico). Frases cortas, sin exceso de emojis, en español de España.
 
@@ -46,7 +46,7 @@ Llama a la herramienta update_booking_slots cada vez que el cliente aporte o con
 
 Datos que ya tienes de turnos anteriores: ${JSON.stringify(slots)}
 
-Cuando tengas ya hotel/zona + fecha de entrada + fecha de salida (los demas datos pueden quedar en su valor por defecto), NO sigas preguntando mas cosas: dile al cliente de forma natural que vas a comprobar el mejor precio ahora mismo y que le puede llevar un momento. No inventes ningun precio ni disponibilidad tu mismo - eso lo compruebas aparte. NUNCA menciones "Booking" ni ninguna web externa por su nombre - de cara al cliente, el precio lo comprueba Titi Hotels.
+Cuando tengas ya hotel/zona + fecha de entrada + fecha de salida (los demas datos pueden quedar en su valor por defecto), NO sigas preguntando mas cosas: dile al cliente de forma natural que vas a comprobar el mejor precio ahora mismo y que le puede llevar un momento. No inventes ningun precio ni disponibilidad tu mismo - eso lo compruebas aparte. NUNCA menciones "Booking" ni ninguna web externa por su nombre - de cara al cliente, el precio lo comprueba BedCopilot.
 
 Si el cliente pregunta algo que no tiene que ver con reservar un hotel en Nueva York, respondele brevemente y con amabilidad, y reconduce la conversacion hacia recoger esos datos.`;
 }
@@ -124,13 +124,13 @@ export async function phraseSearchResult(session, result) {
 
 Preguntale de forma breve y natural cual de esas es la que quiere (dale las opciones tal cual, con sus nombres completos). No sigas con la busqueda todavia - espera a que el cliente elija una. En cuanto elija, usa ese nombre completo y exacto como hotelQuery al llamar a update_booking_slots.`;
   } else if (result.notFoundInNewYork) {
-    instruction = `No se ha encontrado ningun hotel en Nueva York que coincida con lo que pidio el cliente (puede que el nombre este incompleto, mal escrito, o que ese hotel simplemente no exista en Nueva York). Dile de forma breve y natural que no encuentras ese hotel en Nueva York (recuerda que Titi Hotels solo trabaja hoteles de Nueva York) y preguntale el nombre completo del hotel o en que zona/barrio de Nueva York esta, para volver a intentarlo. NUNCA menciones "Booking" ni des el nombre de un hotel de otra ciudad como si fuera valido.`;
+    instruction = `No se ha encontrado ningun hotel en Nueva York que coincida con lo que pidio el cliente (puede que el nombre este incompleto, mal escrito, o que ese hotel simplemente no exista en Nueva York). Dile de forma breve y natural que no encuentras ese hotel en Nueva York (recuerda que BedCopilot solo trabaja hoteles de Nueva York) y preguntale el nombre completo del hotel o en que zona/barrio de Nueva York esta, para volver a intentarlo. NUNCA menciones "Booking" ni des el nombre de un hotel de otra ciudad como si fuera valido.`;
   } else if (result.multiple) {
     instruction = `La busqueda era por zona/ciudad en general (no un hotel concreto), asi que en vez de elegir uno solo se han encontrado ${result.hotels.length} opciones reales (las mas baratas) para esas fechas: ${JSON.stringify(result.hotels.map((h) => ({ hotel: h.hotel, city: h.city, totalPrice: h.totalPrice })))}.
 
 El cliente va a ver, justo debajo de tu mensaje, ${result.hotels.length} TARJETAS VISUALES (una por hotel) con foto, nombre, ciudad, valoracion, precio y desglose - toda esa informacion numerica ya esta ahi, no la repitas ni la enumeres en el texto. Tu mensaje debe ser muy breve (1-2 frases): di que le traes unas opciones para elegir y preguntale cual le encaja mas o si quiere que acotes mas la busqueda (por ejemplo por zona o presupuesto). Menciona SOLO si el precio es sin desayuno por defecto (y que puedes volver a mirarlo con desayuno si quiere) - eso no sale en las tarjetas.
 
-NUNCA menciones "Booking" ni ninguna web externa por su nombre - habla siempre en primera persona de Titi Hotels.`;
+NUNCA menciones "Booking" ni ninguna web externa por su nombre - habla siempre en primera persona de BedCopilot.`;
   } else if (result.found) {
     const hasCard = Array.isArray(result.photos) && result.photos.length > 0;
     instruction = `Resultado real de la comprobacion de precio para esta busqueda (no lo inventes, usalo tal cual): ${JSON.stringify(result)}.
@@ -141,7 +141,7 @@ ${
     : `Aqui no hay tarjeta visual (solo texto), asi que cuentaselo tu de forma natural y breve: confirma el nombre exacto del hotel encontrado (por si no coincide con lo que dijo, para que pueda corregirte), y el precio total para esas fechas. Si "breakfastRequested" es false, dile que el precio es sin desayuno por defecto y que puedes volver a mirarlo con desayuno incluido si lo prefiere. Si "extraChargesNotice" no es null, menciona ese cargo extra. Deja claro que es un precio de referencia, no el precio final de la reserva (eso se gestiona aparte).`
 }
 
-NUNCA menciones "Booking" ni ninguna web externa por su nombre - habla siempre en primera persona de Titi Hotels (p.ej. "hemos encontrado", "nuestro precio", "te comparamos el precio").`;
+NUNCA menciones "Booking" ni ninguna web externa por su nombre - habla siempre en primera persona de BedCopilot (p.ej. "hemos encontrado", "nuestro precio", "te comparamos el precio").`;
   } else {
     instruction = `La comprobacion de precio no encontro disponibilidad con esos criterios exactos (motivo: ${result.reason}). Dile al cliente de forma natural que no has encontrado disponibilidad justo con esas fechas/criterios, y preguntale si quiere que pruebes con fechas u opciones distintas. NUNCA menciones "Booking" ni ninguna web externa por su nombre.`;
   }

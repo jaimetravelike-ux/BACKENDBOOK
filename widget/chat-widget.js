@@ -532,7 +532,7 @@
 
   const launcher = document.createElement('button');
   launcher.className = 'titi-chat-launcher';
-  launcher.setAttribute('aria-label', 'Abrir chat de Titi Hotels');
+  launcher.setAttribute('aria-label', 'Abrir chat de BedCopilot');
   launcher.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#15171C" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>';
 
   const panel = document.createElement('div');
@@ -540,7 +540,7 @@
   panel.innerHTML = `
     <div class="titi-chat-header">
       <div>
-        <div class="titi-chat-header-title">Titi Hotels</div>
+        <div class="titi-chat-header-title">BedCopilot</div>
         <div class="titi-chat-header-sub">Consulta tu hotel en Nueva York</div>
       </div>
       <button class="titi-chat-close" aria-label="Cerrar chat">&times;</button>
@@ -574,7 +574,7 @@
 
   function showGreetingIfEmpty() {
     if (messagesEl.children.length === 0) {
-      renderMessage('bot', 'Hola! Soy del equipo de Titi Hotels. Cuéntame qué hotel o zona te interesa en Nueva York y para qué fechas, y te digo el precio más barato al momento.');
+      renderMessage('bot', 'Hola! Soy del equipo de BedCopilot. Cuéntame qué hotel o zona te interesa en Nueva York y para qué fechas, y te digo el precio más barato al momento.');
     }
   }
 
