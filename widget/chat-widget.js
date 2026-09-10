@@ -268,6 +268,7 @@
             <div class="hotel-card-titles">
               <div class="hotel-card-name">${escapeHtml(result.hotel || '')}</div>
               ${result.city ? `<div class="hotel-card-city">${escapeHtml(result.city)}</div>` : ''}
+              ${result.roomName ? `<div class="hotel-card-room">${escapeHtml(result.roomName)}</div>` : ''}
             </div>
             ${
               rating

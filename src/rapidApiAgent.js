@@ -75,25 +75,45 @@ function extractDiscount(breakdown) {
   };
 }
 
-// TEMPORAL: prueba varios endpoints candidatos para ver si alguno da el
-// nombre legible del tipo de habitacion. Fire-and-forget, nunca bloquea el
-// flujo normal.
-async function probeRoomEndpoints(hotelId) {
+const ROOM_NAME_TIMEOUT_MS = 3000;
+
+// v1/hotels/room-list da el nombre real de la habitacion concreta que se
+// esta reservando (p.ej. "Signature 1 King Bed"), algo que v1/hotels/search
+// no trae (solo un unit_type_id interno sin nombre). Devuelve el nombre de
+// la primera oferta (la que se corresponde con el precio ya mostrado) o
+// null si falla/tarda - nunca bloquea ni rompe el flujo de precio.
+async function fetchRoomName(hotelId, { checkin, checkout, adults }) {
   const apiKey = process.env.RAPIDAPI_KEY;
-  if (!apiKey || !hotelId) return;
-  const candidates = [
-    `v1/hotels/room-list?hotel_id=${hotelId}&checkin_date=2026-10-20&checkout_date=2026-10-22&adults_number_by_rooms=2&units=metric&currency=USD&query=&locale=en-gb`,
-  ];
-  for (const path of candidates) {
-    try {
-      const res = await fetch(`https://${RAPIDAPI_HOST}/${path}`, {
-        headers: { 'x-rapidapi-key': apiKey, 'x-rapidapi-host': RAPIDAPI_HOST },
-      });
-      const text = await res.text();
-      console.log('[rapidapi][DEBUG-PROBE]', path.split('?')[0], res.status, text.slice(0, 1500));
-    } catch (err) {
-      console.log('[rapidapi][DEBUG-PROBE-ERR]', path.split('?')[0], err?.message);
-    }
+  if (!apiKey || !hotelId) return null;
+
+  const url = new URL(`https://${RAPIDAPI_HOST}/v1/hotels/room-list`);
+  url.searchParams.set('hotel_id', String(hotelId));
+  url.searchParams.set('checkin_date', checkin);
+  url.searchParams.set('checkout_date', checkout);
+  url.searchParams.set('adults_number_by_rooms', String(adults || '2'));
+  url.searchParams.set('units', 'metric');
+  url.searchParams.set('currency', 'USD');
+  url.searchParams.set('query', '');
+  url.searchParams.set('locale', 'en-gb');
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ROOM_NAME_TIMEOUT_MS);
+
+  try {
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: { 'x-rapidapi-key': apiKey, 'x-rapidapi-host': RAPIDAPI_HOST },
+    });
+    if (!res.ok) return null;
+    const json = await res.json();
+    const offers = Array.isArray(json) ? json : [];
+    const name = offers[0]?.block?.[0]?.name_without_policy ?? null;
+    return typeof name === 'string' && name.trim() ? name.trim() : null;
+  } catch (err) {
+    console.warn('[rapidapi] nombre de habitacion: excepcion (se omite)', err?.name, err?.message);
+    return null;
+  } finally {
+    clearTimeout(timer);
   }
 }
 
@@ -103,8 +123,6 @@ async function probeRoomEndpoints(hotelId) {
 function parseHotelCard(hotel, { checkin, checkout, adults, rooms }) {
   const breakdown = hotel.composite_price_breakdown;
   if (!breakdown) return null;
-  // TEMPORAL: probando endpoints candidatos para el nombre de la habitacion.
-  probeRoomEndpoints(hotel.hotel_id).catch(() => {});
   const photo = hotel.max_photo_url ?? hotel.main_photo_url ?? null;
   const discount = extractDiscount(breakdown);
 
@@ -124,6 +142,9 @@ function parseHotelCard(hotel, { checkin, checkout, adults, rooms }) {
     breakfastMentionedOnCard: Boolean(hotel.hotel_include_breakfast),
     extraChargesNotice: buildExtraChargesSummary(breakdown),
     cancellationPolicy: hotel.is_free_cancellable ? 'Cancelación gratuita' : null,
+    // Se rellena aparte (fetchRoomName) solo para hotel concreto - null hasta
+    // entonces, y se queda null si esa llamada falla o tarda demasiado.
+    roomName: null,
     // Solo una foto real por ahora (max_photo_url/main_photo_url) - a
     // diferencia del fallback generico de NYC, esta SI es del hotel
     // correcto porque la busqueda fue por su hotel_id/zona exacta.
@@ -234,7 +255,7 @@ export async function checkRapidApiPrice({ hotelId, checkin, checkout, adults = 
   }
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    const [cards, galleryPhotos] = await Promise.all([
+    const [cards, galleryPhotos, roomName] = await Promise.all([
       fetchHotelSearch({
         destType: 'hotel',
         destId: hotelId,
@@ -246,13 +267,15 @@ export async function checkRapidApiPrice({ hotelId, checkin, checkout, adults = 
         apiKey,
       }),
       fetchHotelPhotos(hotelId, apiKey),
+      fetchRoomName(hotelId, { checkin, checkout, adults }),
     ]);
     const parsed = cards?.[0] ? parseHotelCard(cards[0], { checkin, checkout, adults, rooms }) : null;
     if (parsed) {
       // La galeria real (si llego a tiempo) sustituye a la unica foto
       // "representativa" que trae la busqueda de precio.
       if (galleryPhotos.length > 0) parsed.photos = galleryPhotos;
-      console.log('[rapidapi] OK', { hotelId, hotel: parsed.hotel, price: parsed.totalPrice, photos: parsed.photos.length });
+      parsed.roomName = roomName;
+      console.log('[rapidapi] OK', { hotelId, hotel: parsed.hotel, price: parsed.totalPrice, photos: parsed.photos.length, roomName });
       return parsed;
     }
     console.warn('[rapidapi] sin resultado con precio para este hotel_id', { hotelId, attempt });
