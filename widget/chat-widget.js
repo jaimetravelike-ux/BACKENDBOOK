@@ -347,6 +347,26 @@
       document.documentElement.classList.add('chat-locked');
     }
 
+    // Deshace exactamente lo que hace focusChatMode, incluida la posicion de
+    // scroll de la pagina de antes de entrar al chat (si no, al soltar el
+    // position:fixed el navegador se iria arriba del todo).
+    function exitChatMode() {
+      if (heroWrapper) heroWrapper.classList.remove('chat-focused');
+      const scrollY = Number(document.body.dataset.lockedScrollY || 0);
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.classList.remove('chat-locked');
+      document.documentElement.classList.remove('chat-locked');
+      window.scrollTo(0, scrollY);
+    }
+
+    const chatExitBtn = document.getElementById('chatExitBtn');
+    if (chatExitBtn) {
+      chatExitBtn.addEventListener('click', exitChatMode);
+    }
+
     const heroChat = wireChat({
       formEl: heroForm,
       inputEl: heroInput,
