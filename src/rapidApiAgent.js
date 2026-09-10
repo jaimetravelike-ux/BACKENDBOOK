@@ -81,6 +81,9 @@ function extractDiscount(breakdown) {
 function parseHotelCard(hotel, { checkin, checkout, adults, rooms }) {
   const breakdown = hotel.composite_price_breakdown;
   if (!breakdown) return null;
+  // TEMPORAL: para ver si hay datos de tipo de habitacion en la respuesta.
+  console.log('[rapidapi][DEBUG-ROOMTYPE]', JSON.stringify(Object.keys(hotel)));
+  console.log('[rapidapi][DEBUG-ROOMTYPE-UNIT]', JSON.stringify(hotel.unit_configuration_label ?? null), JSON.stringify(hotel.room_type ?? null));
   const photo = hotel.max_photo_url ?? hotel.main_photo_url ?? null;
   const discount = extractDiscount(breakdown);
 
