@@ -12,6 +12,10 @@ const EMPTY_SLOTS = {
   breakfast: null, // true | false | null (sin preferencia)
 };
 
+export function hasSession(sessionId) {
+  return sessions.has(sessionId);
+}
+
 export function getSession(sessionId) {
   if (!sessions.has(sessionId)) {
     sessions.set(sessionId, {

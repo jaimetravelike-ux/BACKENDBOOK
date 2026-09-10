@@ -83,7 +83,12 @@
 
       try {
         const sessionId = getSessionId();
-        const { reply, pendingSearch } = await postJSON('/api/chat', { sessionId, message: text });
+        const { reply, pendingSearch } = await postJSON('/api/chat', {
+          sessionId,
+          message: text,
+          referrer: document.referrer || null,
+          landingUrl: window.location.href,
+        });
         typingEl.remove();
         renderMessage('bot', reply);
 

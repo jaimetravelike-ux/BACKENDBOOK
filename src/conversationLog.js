@@ -28,6 +28,13 @@ function init() {
           resolved BOOLEAN NOT NULL DEFAULT false,
           result JSONB
         );
+        ALTER TABLE conversations ADD COLUMN IF NOT EXISTS country TEXT;
+        ALTER TABLE conversations ADD COLUMN IF NOT EXISTS city TEXT;
+        ALTER TABLE conversations ADD COLUMN IF NOT EXISTS referrer TEXT;
+        ALTER TABLE conversations ADD COLUMN IF NOT EXISTS utm_source TEXT;
+        ALTER TABLE conversations ADD COLUMN IF NOT EXISTS utm_medium TEXT;
+        ALTER TABLE conversations ADD COLUMN IF NOT EXISTS utm_campaign TEXT;
+        ALTER TABLE conversations ADD COLUMN IF NOT EXISTS traffic_source TEXT;
         CREATE TABLE IF NOT EXISTS leads (
           id BIGSERIAL PRIMARY KEY,
           created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -69,12 +76,24 @@ function init() {
 export async function logTurn(sessionId, session) {
   try {
     if (!(await init())) return;
+    const v = session.visitorInfo ?? {};
     await pool.query(
-      `INSERT INTO conversations (session_id, history, slots, updated_at)
-       VALUES ($1, $2, $3, now())
+      `INSERT INTO conversations (session_id, history, slots, updated_at, country, city, referrer, utm_source, utm_medium, utm_campaign, traffic_source)
+       VALUES ($1, $2, $3, now(), $4, $5, $6, $7, $8, $9, $10)
        ON CONFLICT (session_id)
        DO UPDATE SET history = $2, slots = $3, updated_at = now()`,
-      [sessionId, JSON.stringify(session.history), JSON.stringify(session.slots)],
+      [
+        sessionId,
+        JSON.stringify(session.history),
+        JSON.stringify(session.slots),
+        v.country ?? null,
+        v.city ?? null,
+        v.referrer ?? null,
+        v.utmSource ?? null,
+        v.utmMedium ?? null,
+        v.utmCampaign ?? null,
+        v.trafficSource ?? null,
+      ],
     );
   } catch (err) {
     console.warn('[conversationLog] fallo guardando turno', err?.message);
@@ -86,12 +105,25 @@ export async function logTurn(sessionId, session) {
 export async function logResolved(sessionId, session, result) {
   try {
     if (!(await init())) return;
+    const v = session.visitorInfo ?? {};
     await pool.query(
-      `INSERT INTO conversations (session_id, history, slots, resolved, result, updated_at)
-       VALUES ($1, $2, $3, true, $4, now())
+      `INSERT INTO conversations (session_id, history, slots, resolved, result, updated_at, country, city, referrer, utm_source, utm_medium, utm_campaign, traffic_source)
+       VALUES ($1, $2, $3, true, $4, now(), $5, $6, $7, $8, $9, $10, $11)
        ON CONFLICT (session_id)
        DO UPDATE SET history = $2, slots = $3, resolved = true, result = $4, updated_at = now()`,
-      [sessionId, JSON.stringify(session.history), JSON.stringify(session.slots), JSON.stringify(result ?? null)],
+      [
+        sessionId,
+        JSON.stringify(session.history),
+        JSON.stringify(session.slots),
+        JSON.stringify(result ?? null),
+        v.country ?? null,
+        v.city ?? null,
+        v.referrer ?? null,
+        v.utmSource ?? null,
+        v.utmMedium ?? null,
+        v.utmCampaign ?? null,
+        v.trafficSource ?? null,
+      ],
     );
   } catch (err) {
     console.warn('[conversationLog] fallo guardando resolucion', err?.message);
@@ -101,7 +133,8 @@ export async function logResolved(sessionId, session, result) {
 export async function listConversations({ limit = 200 } = {}) {
   if (!(await init())) return [];
   const { rows } = await pool.query(
-    `SELECT session_id, created_at, updated_at, history, slots, resolved, result
+    `SELECT session_id, created_at, updated_at, history, slots, resolved, result,
+            country, city, referrer, utm_source, utm_medium, utm_campaign, traffic_source
      FROM conversations
      ORDER BY updated_at DESC
      LIMIT $1`,

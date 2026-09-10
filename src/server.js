@@ -3,16 +3,20 @@ import cors from 'cors';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { getSession, slotsComplete, searchKey } from './sessionStore.js';
+import { getSession, hasSession, slotsComplete, searchKey } from './sessionStore.js';
 import { converse, phraseSearchResult } from './claude.js';
 import { checkPrice } from './priceChecker.js';
 import { logTurn, logResolved, listConversations, logLead, listLeads, logContact, listContacts } from './conversationLog.js';
 import { upsertProviderRate, listProviderRates } from './providerRates.js';
 import { sendContactNotification } from './mailer.js';
+import { lookupGeo, computeTrafficSource, parseUtmParams } from './geoip.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const app = express();
+// Railway esta detras de un proxy - sin esto, req.ip da la IP interna del
+// proxy en vez de la IP real del visitante, y la geolocalizacion sale mal.
+app.set('trust proxy', true);
 app.use(cors());
 app.use(express.json());
 app.use('/widget', express.static(path.join(__dirname, '..', 'widget')));
@@ -31,12 +35,31 @@ app.get('/version', (_req, res) => res.json({ marker: 'rapidapi-primary-v1' }));
 // widget entonces llama a /api/chat/resolve para disparar la consulta a Booking.
 app.post('/api/chat', async (req, res) => {
   try {
-    const { sessionId: incomingId, message } = req.body ?? {};
+    const { sessionId: incomingId, message, referrer, landingUrl } = req.body ?? {};
     if (!message || typeof message !== 'string') {
       return res.status(400).json({ error: 'Falta "message"' });
     }
     const sessionId = incomingId || randomUUID();
+    const isNewSession = !hasSession(sessionId);
     const session = getSession(sessionId);
+
+    if (isNewSession) {
+      // Se calcula solo la primera vez que vemos esta sesion - de donde viene
+      // el visitante no cambia turno a turno, y asi no repetimos la llamada
+      // de geolocalizacion en cada mensaje.
+      const ip = req.ip || (req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+      const geo = await lookupGeo(ip);
+      const { utmSource, utmMedium, utmCampaign } = parseUtmParams(landingUrl);
+      session.visitorInfo = {
+        country: geo.country,
+        city: geo.city,
+        referrer: referrer || null,
+        utmSource,
+        utmMedium,
+        utmCampaign,
+        trafficSource: computeTrafficSource({ referrer, utmSource, utmMedium }),
+      };
+    }
 
     const reply = await converse(session, message);
 
@@ -296,12 +319,15 @@ app.get('/admin/conversations', async (req, res) => {
 
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+  const roleLabel = (role) => (role === 'user' ? 'Cliente' : 'BedCopilot');
+
   const bodyRows = rows.map((row) => {
     const history = Array.isArray(row.history) ? row.history : [];
     const userMsgs = history.filter((m) => m.role === 'user');
     const lastUserMsg = userMsgs[userMsgs.length - 1]?.content ?? '';
     const slots = row.slots ?? {};
     const step = conversationStep(row);
+    const fullThread = history.map((m) => `<div class="msg ${esc(m.role)}"><b>${esc(roleLabel(m.role))}:</b> ${esc(m.content)}</div>`).join('\n');
     return `<tr>
       <td>${esc(new Date(row.updated_at).toLocaleString('es-ES'))}</td>
       <td>${history.length}</td>
@@ -310,6 +336,10 @@ app.get('/admin/conversations', async (req, res) => {
       <td>${esc(slots.checkin)} → ${esc(slots.checkout)}</td>
       <td>${esc(slots.adults ?? '')} / ${esc(slots.rooms ?? '')}</td>
       <td>${esc(step)}</td>
+      <td>${esc(row.country) || '—'}</td>
+      <td>${esc(row.city) || '—'}</td>
+      <td>${esc(row.traffic_source) || '—'}</td>
+      <td><details><summary>Ver conversación</summary><div class="thread">${fullThread || '<i>Sin mensajes</i>'}</div></details></td>
     </tr>`;
   }).join('\n');
 
@@ -324,12 +354,18 @@ app.get('/admin/conversations', async (req, res) => {
   th { color: #6c8cff; position: sticky; top: 0; background: #0e1533; }
   tr:hover { background: #141b3d; }
   .count { color: #a6a196; font-size: 12px; margin-bottom: 12px; }
+  details summary { cursor: pointer; color: #6c8cff; font-weight: 600; white-space: nowrap; }
+  .thread { margin-top: 8px; max-width: 480px; max-height: 260px; overflow-y: auto; background: #0a0e21; border: 1px solid #333; border-radius: 6px; padding: 10px; }
+  .thread .msg { padding: 6px 0; border-bottom: 1px solid #22263f; white-space: pre-wrap; font-size: 12.5px; }
+  .thread .msg:last-child { border-bottom: none; }
+  .thread .msg.user b { color: #6c8cff; }
+  .thread .msg.assistant b { color: #38e1c6; }
 </style></head>
 <body>
   <h1>Conversaciones (${rows.length})</h1>
   <div class="count">Ordenadas por última actividad. Recarga la página para ver las nuevas. <a href="/admin/leads?key=${esc(req.query.key)}" style="color:#6c8cff">Ver solicitudes de reserva</a> · <a href="/admin/contacts?key=${esc(req.query.key)}" style="color:#6c8cff">Ver consultas de contacto</a> · <a href="/admin/provider-rates?key=${esc(req.query.key)}" style="color:#6c8cff">Ver caché de precios</a></div>
   <table>
-    <thead><tr><th>Última actividad</th><th>Nº msgs</th><th>Último mensaje del cliente</th><th>Hotel/zona</th><th>Fechas</th><th>Adultos/Hab.</th><th>Paso</th></tr></thead>
+    <thead><tr><th>Última actividad</th><th>Nº msgs</th><th>Último mensaje del cliente</th><th>Hotel/zona</th><th>Fechas</th><th>Adultos/Hab.</th><th>Paso</th><th>País</th><th>Ciudad</th><th>Origen</th><th>Hilo completo</th></tr></thead>
     <tbody>${bodyRows}</tbody>
   </table>
 </body></html>`);
