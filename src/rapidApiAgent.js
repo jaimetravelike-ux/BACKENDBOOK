@@ -82,9 +82,7 @@ async function probeRoomEndpoints(hotelId) {
   const apiKey = process.env.RAPIDAPI_KEY;
   if (!apiKey || !hotelId) return;
   const candidates = [
-    `v1/hotels/room-list?hotel_id=${hotelId}&checkin_date=2026-10-20&checkout_date=2026-10-22&adults_number_by_rooms=2&locale=en-gb`,
-    `v1/hotels/roomAvailability?hotel_id=${hotelId}&checkin_date=2026-10-20&checkout_date=2026-10-22&locale=en-gb`,
-    `v1/hotels/description?hotel_id=${hotelId}&locale=en-gb`,
+    `v1/hotels/room-list?hotel_id=${hotelId}&checkin_date=2026-10-20&checkout_date=2026-10-22&adults_number_by_rooms=2&units=metric&currency=USD&query=&locale=en-gb`,
   ];
   for (const path of candidates) {
     try {
@@ -92,7 +90,7 @@ async function probeRoomEndpoints(hotelId) {
         headers: { 'x-rapidapi-key': apiKey, 'x-rapidapi-host': RAPIDAPI_HOST },
       });
       const text = await res.text();
-      console.log('[rapidapi][DEBUG-PROBE]', path.split('?')[0], res.status, text.slice(0, 400));
+      console.log('[rapidapi][DEBUG-PROBE]', path.split('?')[0], res.status, text.slice(0, 1500));
     } catch (err) {
       console.log('[rapidapi][DEBUG-PROBE-ERR]', path.split('?')[0], err?.message);
     }
