@@ -77,14 +77,38 @@ function extractDiscount(breakdown) {
 
 const ROOM_NAME_TIMEOUT_MS = 3000;
 
+// Construye un texto de politica de cancelacion legible en español a partir
+// del bloque de tarifa de v1/hotels/room-list. Mucho mas detallado que el
+// booleano is_free_cancellable de v1/hotels/search: aqui viene la fecha
+// limite real de cancelacion gratuita (block.paymentterms.cancellation,
+// confirmado con datos reales - cuando refundable:1 trae date_raw con la
+// fecha limite en formato YYYY-MM-DD; cuando refundable:0 es no reembolsable).
+function buildCancellationPolicy(block) {
+  const cancellation = block?.paymentterms?.cancellation;
+  if (!cancellation) return null;
+  if (cancellation.refundable === 1) {
+    if (cancellation.date_raw) {
+      const deadline = new Date(`${cancellation.date_raw}T00:00:00`);
+      if (!Number.isNaN(deadline.getTime())) {
+        const formatted = deadline.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        return `Cancelación gratuita hasta el ${formatted}`;
+      }
+    }
+    return 'Cancelación gratuita';
+  }
+  return 'No reembolsable';
+}
+
 // v1/hotels/room-list da el nombre real de la habitacion concreta que se
 // esta reservando (p.ej. "Signature 1 King Bed"), algo que v1/hotels/search
-// no trae (solo un unit_type_id interno sin nombre). Devuelve el nombre de
-// la primera oferta (la que se corresponde con el precio ya mostrado) o
-// null si falla/tarda - nunca bloquea ni rompe el flujo de precio.
-async function fetchRoomName(hotelId, { checkin, checkout, adults }) {
+// no trae (solo un unit_type_id interno sin nombre), y tambien la politica de
+// cancelacion detallada de esa misma tarifa (ver buildCancellationPolicy).
+// Devuelve los datos de la primera oferta (la que se corresponde con el
+// precio ya mostrado) o valores null si falla/tarda - nunca bloquea ni rompe
+// el flujo de precio.
+async function fetchRoomDetails(hotelId, { checkin, checkout, adults }) {
   const apiKey = process.env.RAPIDAPI_KEY;
-  if (!apiKey || !hotelId) return null;
+  if (!apiKey || !hotelId) return { roomName: null, cancellationPolicy: null };
 
   const url = new URL(`https://${RAPIDAPI_HOST}/v1/hotels/room-list`);
   url.searchParams.set('hotel_id', String(hotelId));
@@ -104,14 +128,18 @@ async function fetchRoomName(hotelId, { checkin, checkout, adults }) {
       signal: controller.signal,
       headers: { 'x-rapidapi-key': apiKey, 'x-rapidapi-host': RAPIDAPI_HOST },
     });
-    if (!res.ok) return null;
+    if (!res.ok) return { roomName: null, cancellationPolicy: null };
     const json = await res.json();
     const offers = Array.isArray(json) ? json : [];
-    const name = offers[0]?.block?.[0]?.name_without_policy ?? null;
-    return typeof name === 'string' && name.trim() ? name.trim() : null;
+    const block = offers[0]?.block?.[0];
+    const name = block?.name_without_policy ?? null;
+    return {
+      roomName: typeof name === 'string' && name.trim() ? name.trim() : null,
+      cancellationPolicy: buildCancellationPolicy(block),
+    };
   } catch (err) {
-    console.warn('[rapidapi] nombre de habitacion: excepcion (se omite)', err?.name, err?.message);
-    return null;
+    console.warn('[rapidapi] detalles de habitacion: excepcion (se omite)', err?.name, err?.message);
+    return { roomName: null, cancellationPolicy: null };
   } finally {
     clearTimeout(timer);
   }
@@ -141,7 +169,7 @@ function parseHotelCard(hotel, { checkin, checkout, adults, rooms }) {
     nights: nightsBetween(checkin, checkout),
     breakfastMentionedOnCard: Boolean(hotel.hotel_include_breakfast),
     extraChargesNotice: buildExtraChargesSummary(breakdown),
-    cancellationPolicy: hotel.is_free_cancellable ? 'Cancelación gratuita' : null,
+    cancellationPolicy: hotel.is_free_cancellable ? 'Cancelación gratuita' : 'No reembolsable',
     // Se rellena aparte (fetchRoomName) solo para hotel concreto - null hasta
     // entonces, y se queda null si esa llamada falla o tarda demasiado.
     roomName: null,
@@ -255,7 +283,7 @@ export async function checkRapidApiPrice({ hotelId, checkin, checkout, adults = 
   }
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    const [cards, galleryPhotos, roomName] = await Promise.all([
+    const [cards, galleryPhotos, roomDetails] = await Promise.all([
       fetchHotelSearch({
         destType: 'hotel',
         destId: hotelId,
@@ -267,15 +295,20 @@ export async function checkRapidApiPrice({ hotelId, checkin, checkout, adults = 
         apiKey,
       }),
       fetchHotelPhotos(hotelId, apiKey),
-      fetchRoomName(hotelId, { checkin, checkout, adults }),
+      fetchRoomDetails(hotelId, { checkin, checkout, adults }),
     ]);
     const parsed = cards?.[0] ? parseHotelCard(cards[0], { checkin, checkout, adults, rooms }) : null;
     if (parsed) {
       // La galeria real (si llego a tiempo) sustituye a la unica foto
       // "representativa" que trae la busqueda de precio.
       if (galleryPhotos.length > 0) parsed.photos = galleryPhotos;
-      parsed.roomName = roomName;
-      console.log('[rapidapi] OK', { hotelId, hotel: parsed.hotel, price: parsed.totalPrice, photos: parsed.photos.length, roomName });
+      parsed.roomName = roomDetails.roomName;
+      // La politica detallada de room-list (con fecha limite si aplica)
+      // sustituye al booleano generico de v1/hotels/search cuando esta
+      // disponible - si esta llamada fallo/tardo, se queda el valor ya
+      // puesto por parseHotelCard a partir de is_free_cancellable.
+      if (roomDetails.cancellationPolicy) parsed.cancellationPolicy = roomDetails.cancellationPolicy;
+      console.log('[rapidapi] OK', { hotelId, hotel: parsed.hotel, price: parsed.totalPrice, photos: parsed.photos.length, roomName: roomDetails.roomName, cancellationPolicy: parsed.cancellationPolicy });
       return parsed;
     }
     console.warn('[rapidapi] sin resultado con precio para este hotel_id', { hotelId, attempt });
