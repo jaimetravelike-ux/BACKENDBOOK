@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { getSession, hasSession, slotsComplete, searchKey } from './sessionStore.js';
 import { converse, phraseSearchResult } from './claude.js';
 import { checkPrice } from './priceChecker.js';
-import { logTurn, logResolved, listConversations, logLead, listLeads, logContact, listContacts } from './conversationLog.js';
+import { logTurn, logResolved, listConversations, logLead, listLeads, logContact, listContacts, getAnalyticsSummary } from './conversationLog.js';
 import { upsertProviderRate, listProviderRates } from './providerRates.js';
 import { sendContactNotification } from './mailer.js';
 import { lookupGeo, computeTrafficSource, parseUtmParams } from './geoip.js';
@@ -232,7 +232,7 @@ app.get('/admin/contacts', async (req, res) => {
 </style></head>
 <body>
   <h1>Consultas de contacto (${rows.length})</h1>
-  <div class="count">Ordenadas por más reciente. <a href="/admin/leads?key=${esc(req.query.key)}" style="color:#6c8cff">Ver solicitudes de reserva</a> · <a href="/admin/conversations?key=${esc(req.query.key)}" style="color:#6c8cff">Ver conversaciones</a> · <a href="/admin/provider-rates?key=${esc(req.query.key)}" style="color:#6c8cff">Ver caché de precios</a></div>
+  <div class="count">Ordenadas por más reciente. <a href="/admin/leads?key=${esc(req.query.key)}" style="color:#6c8cff">Ver solicitudes de reserva</a> · <a href="/admin/conversations?key=${esc(req.query.key)}" style="color:#6c8cff">Ver conversaciones</a> · <a href="/admin/provider-rates?key=${esc(req.query.key)}" style="color:#6c8cff">Ver caché de precios</a> · <a href="/admin/analytics?key=${esc(req.query.key)}" style="color:#6c8cff">Ver analíticas</a></div>
   <table>
     <thead><tr><th>Fecha</th><th>Nombre</th><th>Email</th><th>Hotel/zona</th><th>Fechas</th><th>Mensaje</th></tr></thead>
     <tbody>${bodyRows}</tbody>
@@ -281,7 +281,7 @@ app.get('/admin/leads', async (req, res) => {
 </style></head>
 <body>
   <h1>Solicitudes de reserva (${rows.length})</h1>
-  <div class="count">Ordenadas por más reciente. Recarga la página para ver las nuevas. <a href="/admin/conversations?key=${esc(req.query.key)}" style="color:#6c8cff">Ver conversaciones</a> · <a href="/admin/contacts?key=${esc(req.query.key)}" style="color:#6c8cff">Ver consultas de contacto</a> · <a href="/admin/provider-rates?key=${esc(req.query.key)}" style="color:#6c8cff">Ver caché de precios</a></div>
+  <div class="count">Ordenadas por más reciente. Recarga la página para ver las nuevas. <a href="/admin/conversations?key=${esc(req.query.key)}" style="color:#6c8cff">Ver conversaciones</a> · <a href="/admin/contacts?key=${esc(req.query.key)}" style="color:#6c8cff">Ver consultas de contacto</a> · <a href="/admin/provider-rates?key=${esc(req.query.key)}" style="color:#6c8cff">Ver caché de precios</a> · <a href="/admin/analytics?key=${esc(req.query.key)}" style="color:#6c8cff">Ver analíticas</a></div>
   <table>
     <thead><tr><th>Fecha</th><th>Nombre</th><th>Email</th><th>Hotel</th><th>Ciudad</th><th>Fechas</th><th>Adultos/Hab.</th><th>Precio</th></tr></thead>
     <tbody>${bodyRows}</tbody>
@@ -363,7 +363,7 @@ app.get('/admin/conversations', async (req, res) => {
 </style></head>
 <body>
   <h1>Conversaciones (${rows.length})</h1>
-  <div class="count">Ordenadas por última actividad. Recarga la página para ver las nuevas. <a href="/admin/leads?key=${esc(req.query.key)}" style="color:#6c8cff">Ver solicitudes de reserva</a> · <a href="/admin/contacts?key=${esc(req.query.key)}" style="color:#6c8cff">Ver consultas de contacto</a> · <a href="/admin/provider-rates?key=${esc(req.query.key)}" style="color:#6c8cff">Ver caché de precios</a></div>
+  <div class="count">Ordenadas por última actividad. Recarga la página para ver las nuevas. <a href="/admin/leads?key=${esc(req.query.key)}" style="color:#6c8cff">Ver solicitudes de reserva</a> · <a href="/admin/contacts?key=${esc(req.query.key)}" style="color:#6c8cff">Ver consultas de contacto</a> · <a href="/admin/provider-rates?key=${esc(req.query.key)}" style="color:#6c8cff">Ver caché de precios</a> · <a href="/admin/analytics?key=${esc(req.query.key)}" style="color:#6c8cff">Ver analíticas</a></div>
   <table>
     <thead><tr><th>Última actividad</th><th>Nº msgs</th><th>Último mensaje del cliente</th><th>Hotel/zona</th><th>Fechas</th><th>Adultos/Hab.</th><th>Paso</th><th>País</th><th>Ciudad</th><th>Origen</th><th>Hilo completo</th></tr></thead>
     <tbody>${bodyRows}</tbody>
@@ -445,11 +445,141 @@ app.get('/admin/provider-rates', async (req, res) => {
 </style></head>
 <body>
   <h1>Caché de precios por proveedor (${rows.length})</h1>
-  <div class="count">Ordenada por hotel y proveedor. <a href="/admin/leads?key=${esc(req.query.key)}" style="color:#6c8cff">Ver solicitudes de reserva</a> · <a href="/admin/contacts?key=${esc(req.query.key)}" style="color:#6c8cff">Ver consultas de contacto</a> · <a href="/admin/conversations?key=${esc(req.query.key)}" style="color:#6c8cff">Ver conversaciones</a></div>
+  <div class="count">Ordenada por hotel y proveedor. <a href="/admin/leads?key=${esc(req.query.key)}" style="color:#6c8cff">Ver solicitudes de reserva</a> · <a href="/admin/contacts?key=${esc(req.query.key)}" style="color:#6c8cff">Ver consultas de contacto</a> · <a href="/admin/conversations?key=${esc(req.query.key)}" style="color:#6c8cff">Ver conversaciones</a> · <a href="/admin/analytics?key=${esc(req.query.key)}" style="color:#6c8cff">Ver analíticas</a></div>
   <table>
     <thead><tr><th>Hotel</th><th>Proveedor</th><th>Fechas</th><th>Precio neto EUR</th><th>Precio original</th><th>Tasa incluida</th><th>Nota tasa</th><th>Régimen</th><th>Consultado</th></tr></thead>
     <tbody>${bodyRows}</tbody>
   </table>
+</body></html>`);
+});
+
+// Panel visual con graficos (Chart.js via CDN) sobre los mismos datos que ya
+// se guardan en conversations/leads/contacts - KPIs, serie temporal, top
+// paises, origen de trafico y embudo de conversion.
+app.get('/admin/analytics', async (req, res) => {
+  const key = process.env.ADMIN_KEY;
+  if (!key || req.query.key !== key) {
+    return res.status(401).send('No autorizado. Añade ?key=... a la URL.');
+  }
+
+  let data;
+  try {
+    data = await getAnalyticsSummary();
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send('No se pudieron calcular las analíticas.');
+  }
+
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const pctFound = data.totalResolved > 0 ? Math.round((data.totalFound / data.totalResolved) * 100) : 0;
+
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(`<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Analíticas - BedCopilot</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<style>
+  body { font-family: system-ui, sans-serif; background: #0e1533; color: #f0ece0; margin: 0; padding: 24px; }
+  h1 { font-size: 18px; }
+  .count { color: #a6a196; font-size: 12px; margin-bottom: 20px; }
+  .count a { color: #6c8cff; }
+  .kpis { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
+  .kpi { background: #141b3d; border: 1px solid #2a3060; border-radius: 10px; padding: 16px 22px; min-width: 150px; }
+  .kpi .num { font-size: 30px; font-weight: 800; color: #6c8cff; }
+  .kpi .label { font-size: 12px; color: #cfd6f7; margin-top: 4px; }
+  .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .chart-card { background: #141b3d; border: 1px solid #2a3060; border-radius: 10px; padding: 18px; }
+  .chart-card h2 { font-size: 14px; margin: 0 0 12px; color: #cfd6f7; }
+  .chart-card.full { grid-column: 1 / -1; }
+  canvas { max-height: 280px; }
+  @media (max-width: 800px) { .charts { grid-template-columns: 1fr; } }
+</style></head>
+<body>
+  <h1>Analíticas (${data.totalConversations} conversaciones)</h1>
+  <div class="count">
+    <a href="/admin/conversations?key=${esc(req.query.key)}">Ver conversaciones</a> ·
+    <a href="/admin/leads?key=${esc(req.query.key)}">Ver solicitudes de reserva</a> ·
+    <a href="/admin/contacts?key=${esc(req.query.key)}">Ver consultas de contacto</a> ·
+    <a href="/admin/provider-rates?key=${esc(req.query.key)}">Ver caché de precios</a>
+  </div>
+
+  <div class="kpis">
+    <div class="kpi"><div class="num">${data.totalConversations}</div><div class="label">Conversaciones totales</div></div>
+    <div class="kpi"><div class="num">${data.totalLeads}</div><div class="label">Solicitudes de reserva</div></div>
+    <div class="kpi"><div class="num">${data.totalContacts}</div><div class="label">Consultas de contacto</div></div>
+    <div class="kpi"><div class="num">${pctFound}%</div><div class="label">Conversaciones que vieron un precio</div></div>
+  </div>
+
+  <div class="charts">
+    <div class="chart-card full">
+      <h2>Conversaciones por día (últimos 30 días)</h2>
+      <canvas id="chartDaily"></canvas>
+    </div>
+    <div class="chart-card">
+      <h2>Top países</h2>
+      <canvas id="chartCountry"></canvas>
+    </div>
+    <div class="chart-card">
+      <h2>Origen del tráfico</h2>
+      <canvas id="chartSource"></canvas>
+    </div>
+    <div class="chart-card full">
+      <h2>Embudo de conversión</h2>
+      <canvas id="chartFunnel"></canvas>
+    </div>
+  </div>
+
+<script>
+const analyticsData = ${JSON.stringify(data)};
+
+Chart.defaults.color = '#cfd6f7';
+Chart.defaults.borderColor = '#2a3060';
+
+new Chart(document.getElementById('chartDaily'), {
+  type: 'line',
+  data: {
+    labels: analyticsData.byDay.map(d => d.day),
+    datasets: [{
+      label: 'Conversaciones',
+      data: analyticsData.byDay.map(d => d.count),
+      borderColor: '#6c8cff',
+      backgroundColor: 'rgba(108,140,255,0.15)',
+      fill: true,
+      tension: 0.3,
+    }],
+  },
+  options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } },
+});
+
+new Chart(document.getElementById('chartCountry'), {
+  type: 'bar',
+  data: {
+    labels: analyticsData.byCountry.map(d => d.country),
+    datasets: [{ label: 'Conversaciones', data: analyticsData.byCountry.map(d => d.count), backgroundColor: '#6c8cff' }],
+  },
+  options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } } },
+});
+
+new Chart(document.getElementById('chartSource'), {
+  type: 'doughnut',
+  data: {
+    labels: analyticsData.byTrafficSource.map(d => d.source),
+    datasets: [{ data: analyticsData.byTrafficSource.map(d => d.count), backgroundColor: ['#6c8cff', '#38e1c6', '#a78bfa', '#f4a261', '#e76f51', '#2a9d8f', '#e9c46a'] }],
+  },
+});
+
+new Chart(document.getElementById('chartFunnel'), {
+  type: 'bar',
+  data: {
+    labels: ['Entraron', 'Dieron hotel/zona', 'Dieron fechas', 'Vieron precio'],
+    datasets: [{
+      label: 'Conversaciones',
+      data: [analyticsData.funnel.total, analyticsData.funnel.gaveHotel, analyticsData.funnel.gaveDates, analyticsData.funnel.sawPrice],
+      backgroundColor: ['#6c8cff', '#7ea0ff', '#38e1c6', '#2ec4a6'],
+    }],
+  },
+  options: { indexAxis: 'y', plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } } },
+});
+</script>
 </body></html>`);
 });
 

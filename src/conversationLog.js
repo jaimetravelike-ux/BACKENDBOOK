@@ -143,6 +143,86 @@ export async function listConversations({ limit = 200 } = {}) {
   return rows;
 }
 
+// Agregados para el panel /admin/analytics: KPIs, serie temporal, top
+// paises, origen de trafico y embudo de conversion. Varias queries en
+// paralelo contra las mismas tablas ya existentes, sin tablas nuevas.
+export async function getAnalyticsSummary() {
+  if (!(await init())) {
+    return {
+      totalConversations: 0,
+      totalLeads: 0,
+      totalContacts: 0,
+      totalResolved: 0,
+      totalFound: 0,
+      byDay: [],
+      byCountry: [],
+      byTrafficSource: [],
+      funnel: { total: 0, gaveHotel: 0, gaveDates: 0, sawPrice: 0 },
+    };
+  }
+
+  const [kpis, byDay, byCountry, byTrafficSource, funnel] = await Promise.all([
+    pool.query(`
+      SELECT
+        (SELECT COUNT(*) FROM conversations) AS total_conversations,
+        (SELECT COUNT(*) FROM leads) AS total_leads,
+        (SELECT COUNT(*) FROM contacts) AS total_contacts,
+        (SELECT COUNT(*) FROM conversations WHERE resolved = true) AS total_resolved,
+        (SELECT COUNT(*) FROM conversations WHERE resolved = true AND (result->>'found') = 'true') AS total_found
+    `),
+    pool.query(`
+      SELECT TO_CHAR(DATE(created_at), 'YYYY-MM-DD') AS day, COUNT(*) AS count
+      FROM conversations
+      WHERE created_at >= now() - interval '30 days'
+      GROUP BY DATE(created_at)
+      ORDER BY DATE(created_at) ASC
+    `),
+    pool.query(`
+      SELECT country, COUNT(*) AS count
+      FROM conversations
+      WHERE country IS NOT NULL
+      GROUP BY country
+      ORDER BY count DESC
+      LIMIT 10
+    `),
+    pool.query(`
+      SELECT traffic_source, COUNT(*) AS count
+      FROM conversations
+      WHERE traffic_source IS NOT NULL
+      GROUP BY traffic_source
+      ORDER BY count DESC
+    `),
+    pool.query(`
+      SELECT
+        COUNT(*) AS total,
+        COUNT(*) FILTER (WHERE slots->>'hotelQuery' IS NOT NULL) AS gave_hotel,
+        COUNT(*) FILTER (WHERE slots->>'checkin' IS NOT NULL AND slots->>'checkout' IS NOT NULL) AS gave_dates,
+        COUNT(*) FILTER (WHERE resolved = true AND (result->>'found') = 'true') AS saw_price
+      FROM conversations
+    `),
+  ]);
+
+  const k = kpis.rows[0];
+  const f = funnel.rows[0];
+
+  return {
+    totalConversations: Number(k.total_conversations),
+    totalLeads: Number(k.total_leads),
+    totalContacts: Number(k.total_contacts),
+    totalResolved: Number(k.total_resolved),
+    totalFound: Number(k.total_found),
+    byDay: byDay.rows.map((r) => ({ day: r.day, count: Number(r.count) })),
+    byCountry: byCountry.rows.map((r) => ({ country: r.country, count: Number(r.count) })),
+    byTrafficSource: byTrafficSource.rows.map((r) => ({ source: r.traffic_source, count: Number(r.count) })),
+    funnel: {
+      total: Number(f.total),
+      gaveHotel: Number(f.gave_hotel),
+      gaveDates: Number(f.gave_dates),
+      sawPrice: Number(f.saw_price),
+    },
+  };
+}
+
 // Datos de contacto que el cliente deja directamente en la card del hotel
 // (nombre + email), en vez de tener que escribirlos por chat. Si Postgres no
 // esta disponible, se lanza el error hacia arriba - aqui SI hace falta que
