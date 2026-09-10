@@ -54,8 +54,6 @@ function nightsBetween(checkin, checkout) {
 // Playwright, para mantener transparencia sobre resort fees/impuestos.
 function buildExtraChargesSummary(breakdown) {
   if (!breakdown) return null;
-  // TEMPORAL: ver por que el resort fee del Edison no sale en el aviso.
-  console.log('[rapidapi][DEBUG-BREAKDOWN]', JSON.stringify(breakdown));
   const chargeItems = (breakdown.items ?? []).filter((it) => it.kind === 'charge');
   if (chargeItems.length === 0) return null;
   const parts = chargeItems.map((it) => `${it.name}: ${it.item_amount?.amount_rounded ?? it.item_amount?.value}`);

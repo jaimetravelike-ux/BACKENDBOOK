@@ -247,10 +247,14 @@
       if (result.adults) stayParts.push(`${result.adults} adulto${Number(result.adults) === 1 ? '' : 's'}`);
       const stayLine = stayParts.length ? `Por ${stayParts.join(', ')}` : '';
 
-      const taxesLine = result.includedTaxesAmount
-        ? `Incluye tasas e impuestos (${escapeHtml(result.includedTaxesAmount)})`
-        : result.extraChargesNotice
-          ? escapeHtml(result.extraChargesNotice)
+      // El desglose detallado (extraChargesNotice, p.ej. "Tax: X, Resort fee: Y")
+      // va SIEMPRE primero si existe - nunca se puede esconder un cargo como
+      // el resort fee detras de un total generico "incluye tasas e impuestos".
+      // Solo si Booking no da ese desglose, se cae al total generico.
+      const taxesLine = result.extraChargesNotice
+        ? escapeHtml(result.extraChargesNotice)
+        : result.includedTaxesAmount
+          ? `Incluye tasas e impuestos (${escapeHtml(result.includedTaxesAmount)})`
           : '';
 
       const hasPrice = Boolean(result.totalPrice);
