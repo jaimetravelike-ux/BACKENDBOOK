@@ -111,6 +111,45 @@ function parseHotelCard(hotel, { checkin, checkout, adults, rooms }) {
   };
 }
 
+const PHOTOS_TIMEOUT_MS = 3000;
+const MAX_PHOTOS = 6;
+
+// Endpoint dedicado de galeria (v1/hotels/photos) - de verdad tiene fotos
+// reales del hotel (decenas), a diferencia de v1/hotels/search que solo trae
+// una unica foto "representativa". Se llama en paralelo al precio para no
+// alargar el tiempo de respuesta; si falla o tarda, se sigue con la unica
+// foto que ya trae la busqueda de precio (nunca bloquea ni rompe nada).
+async function fetchHotelPhotos(hotelId, apiKey) {
+  const url = new URL(`https://${RAPIDAPI_HOST}/v1/hotels/photos`);
+  url.searchParams.set('hotel_id', String(hotelId));
+  url.searchParams.set('locale', 'en-gb');
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), PHOTOS_TIMEOUT_MS);
+
+  try {
+    const res = await fetch(url, {
+      signal: controller.signal,
+      headers: {
+        'x-rapidapi-key': apiKey,
+        'x-rapidapi-host': RAPIDAPI_HOST,
+      },
+    });
+    if (!res.ok) return [];
+    const json = await res.json();
+    const list = Array.isArray(json) ? json : [];
+    return list
+      .slice(0, MAX_PHOTOS)
+      .map((p) => p.url_1440 ?? p.url_max ?? p.url_square60 ?? null)
+      .filter(Boolean);
+  } catch (err) {
+    console.warn('[rapidapi] fotos: excepcion (se sigue solo con la foto principal)', err?.name, err?.message);
+    return [];
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function fetchHotelSearch({ destType, destId, checkin, checkout, adults, rooms, orderBy, apiKey }) {
   const url = new URL(`https://${RAPIDAPI_HOST}/v1/hotels/search`);
   url.searchParams.set('dest_type', String(destType || 'city').toLowerCase());
@@ -171,19 +210,25 @@ export async function checkRapidApiPrice({ hotelId, checkin, checkout, adults = 
   }
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    const cards = await fetchHotelSearch({
-      destType: 'hotel',
-      destId: hotelId,
-      checkin,
-      checkout,
-      adults,
-      rooms,
-      orderBy: 'popularity',
-      apiKey,
-    });
+    const [cards, galleryPhotos] = await Promise.all([
+      fetchHotelSearch({
+        destType: 'hotel',
+        destId: hotelId,
+        checkin,
+        checkout,
+        adults,
+        rooms,
+        orderBy: 'popularity',
+        apiKey,
+      }),
+      fetchHotelPhotos(hotelId, apiKey),
+    ]);
     const parsed = cards?.[0] ? parseHotelCard(cards[0], { checkin, checkout, adults, rooms }) : null;
     if (parsed) {
-      console.log('[rapidapi] OK', { hotelId, hotel: parsed.hotel, price: parsed.totalPrice });
+      // La galeria real (si llego a tiempo) sustituye a la unica foto
+      // "representativa" que trae la busqueda de precio.
+      if (galleryPhotos.length > 0) parsed.photos = galleryPhotos;
+      console.log('[rapidapi] OK', { hotelId, hotel: parsed.hotel, price: parsed.totalPrice, photos: parsed.photos.length });
       return parsed;
     }
     console.warn('[rapidapi] sin resultado con precio para este hotel_id', { hotelId, attempt });

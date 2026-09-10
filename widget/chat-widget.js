@@ -348,9 +348,15 @@
             rooms: result.rooms || null,
             totalPrice: result.totalPrice || null,
           });
+          // Aqui termina el flujo por ahora: nombre y email son obligatorios
+          // y, en cuanto haya pasarela de pago conectada, este es el punto
+          // donde se redirigiria a pagar - no se manda ningun mensaje mas al
+          // chat, la card se queda como confirmacion final por si misma.
           reserveBtn.textContent = '✓ Solicitud enviada';
-          heroInput.value = `Quiero reservar el ${result.hotel || 'este hotel'} para esas fechas, ya he dejado mis datos (${name})`;
-          heroChat.sendMessage();
+          leadError.hidden = true;
+          leadError.className = 'hotel-card-lead-success';
+          leadError.textContent = 'Gracias. En breve te contactamos para completar el pago.';
+          leadError.hidden = false;
         } catch (err) {
           console.warn('[hotel-card] no se pudo enviar la solicitud de reserva', err);
           reserveBtn.disabled = false;
