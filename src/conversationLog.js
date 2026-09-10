@@ -42,6 +42,17 @@ function init() {
           rooms TEXT,
           total_price TEXT
         );
+        CREATE TABLE IF NOT EXISTS contacts (
+          id BIGSERIAL PRIMARY KEY,
+          created_at TIMESTAMPTZ DEFAULT now(),
+          name TEXT,
+          email TEXT,
+          phone TEXT,
+          hotel_or_zone TEXT,
+          checkin TEXT,
+          checkout TEXT,
+          message TEXT
+        );
       `)
       .then(() => true)
       .catch((err) => {
@@ -128,6 +139,38 @@ export async function listLeads({ limit = 300 } = {}) {
   const { rows } = await pool.query(
     `SELECT id, created_at, name, email, hotel, city, checkin, checkout, adults, rooms, total_price
      FROM leads
+     ORDER BY created_at DESC
+     LIMIT $1`,
+    [limit],
+  );
+  return rows;
+}
+
+// Consultas del formulario de contacto de la web (sustituye al antiguo boton
+// de WhatsApp). Igual que logLead, lanza el error hacia arriba si falla -
+// perder un contacto real debe ser visible, no silencioso.
+export async function logContact(contact) {
+  if (!(await init())) throw new Error('Postgres no configurado');
+  await pool.query(
+    `INSERT INTO contacts (name, email, phone, hotel_or_zone, checkin, checkout, message)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+    [
+      contact.name,
+      contact.email ?? null,
+      contact.phone ?? null,
+      contact.hotelOrZone ?? null,
+      contact.checkin ?? null,
+      contact.checkout ?? null,
+      contact.message ?? null,
+    ],
+  );
+}
+
+export async function listContacts({ limit = 300 } = {}) {
+  if (!(await init())) return [];
+  const { rows } = await pool.query(
+    `SELECT id, created_at, name, email, phone, hotel_or_zone, checkin, checkout, message
+     FROM contacts
      ORDER BY created_at DESC
      LIMIT $1`,
     [limit],

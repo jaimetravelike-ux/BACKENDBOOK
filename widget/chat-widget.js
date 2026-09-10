@@ -468,7 +468,7 @@
     .titi-chat-launcher {
       position: fixed; bottom: 96px; right: 28px; z-index: 998;
       width: 58px; height: 58px; border-radius: 50%;
-      background: #F2B705; color: #15171C; border: none; cursor: pointer;
+      background: #6C8CFF; color: #0E1533; border: none; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       box-shadow: 0 6px 24px rgba(242,183,5,0.45);
       transition: transform 0.2s;
@@ -489,7 +489,7 @@
     .titi-chat-panel.open { opacity: 1; transform: none; pointer-events: auto; }
 
     .titi-chat-header {
-      background: #15171C; color: #fff; padding: 16px 18px;
+      background: #0E1533; color: #fff; padding: 16px 18px;
       display: flex; align-items: center; justify-content: space-between;
     }
     .titi-chat-header-title { font-weight: 800; font-size: 14px; letter-spacing: 0.02em; text-transform: uppercase; }
@@ -499,23 +499,23 @@
 
     .titi-chat-messages {
       flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px;
-      background: #F6F2E7;
+      background: #F3F5FC;
     }
     .titi-chat-msg { max-width: 82%; padding: 10px 13px; border-radius: 10px; font-size: 13.5px; line-height: 1.5; white-space: pre-wrap; }
-    .titi-chat-msg.user { align-self: flex-end; background: #F2B705; color: #15171C; border-bottom-right-radius: 2px; }
-    .titi-chat-msg.bot { align-self: flex-start; background: #fff; color: #15171C; border: 1px solid #EDE7D6; border-bottom-left-radius: 2px; }
-    .titi-chat-msg.typing { align-self: flex-start; background: #fff; border: 1px solid #EDE7D6; color: #6B7280; font-style: italic; }
+    .titi-chat-msg.user { align-self: flex-end; background: #6C8CFF; color: #0E1533; border-bottom-right-radius: 2px; }
+    .titi-chat-msg.bot { align-self: flex-start; background: #fff; color: #0E1533; border: 1px solid #E3E7F5; border-bottom-left-radius: 2px; }
+    .titi-chat-msg.typing { align-self: flex-start; background: #fff; border: 1px solid #E3E7F5; color: #5B6178; font-style: italic; }
 
     .titi-chat-inputrow {
-      display: flex; gap: 8px; padding: 12px; border-top: 1px solid #EDE7D6; background: #fff;
+      display: flex; gap: 8px; padding: 12px; border-top: 1px solid #E3E7F5; background: #fff;
     }
     .titi-chat-inputrow input {
-      flex: 1; border: 1.5px solid #EDE7D6; border-radius: 8px; padding: 10px 12px;
+      flex: 1; border: 1.5px solid #E3E7F5; border-radius: 8px; padding: 10px 12px;
       font-size: 13.5px; font-family: inherit; outline: none;
     }
-    .titi-chat-inputrow input:focus { border-color: #F2B705; }
+    .titi-chat-inputrow input:focus { border-color: #6C8CFF; }
     .titi-chat-send {
-      background: #15171C; color: #F2B705; border: none; border-radius: 8px;
+      background: #0E1533; color: #6C8CFF; border: none; border-radius: 8px;
       padding: 0 16px; font-weight: 700; font-size: 13px; cursor: pointer;
     }
     .titi-chat-send:disabled { opacity: 0.5; cursor: default; }
@@ -533,7 +533,7 @@
   const launcher = document.createElement('button');
   launcher.className = 'titi-chat-launcher';
   launcher.setAttribute('aria-label', 'Abrir chat de BedCopilot');
-  launcher.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#15171C" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>';
+  launcher.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="#0E1533" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>';
 
   const panel = document.createElement('div');
   panel.className = 'titi-chat-panel';
