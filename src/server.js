@@ -7,6 +7,7 @@ import { getSession, slotsComplete, searchKey } from './sessionStore.js';
 import { converse, phraseSearchResult } from './claude.js';
 import { checkPrice } from './priceChecker.js';
 import { logTurn, logResolved, listConversations, logLead, listLeads, logContact, listContacts } from './conversationLog.js';
+import { upsertProviderRate, listProviderRates } from './providerRates.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -197,7 +198,7 @@ app.get('/admin/contacts', async (req, res) => {
 </style></head>
 <body>
   <h1>Consultas de contacto (${rows.length})</h1>
-  <div class="count">Ordenadas por más reciente. <a href="/admin/leads?key=${esc(req.query.key)}" style="color:#6c8cff">Ver solicitudes de reserva</a> · <a href="/admin/conversations?key=${esc(req.query.key)}" style="color:#6c8cff">Ver conversaciones</a></div>
+  <div class="count">Ordenadas por más reciente. <a href="/admin/leads?key=${esc(req.query.key)}" style="color:#6c8cff">Ver solicitudes de reserva</a> · <a href="/admin/conversations?key=${esc(req.query.key)}" style="color:#6c8cff">Ver conversaciones</a> · <a href="/admin/provider-rates?key=${esc(req.query.key)}" style="color:#6c8cff">Ver caché de precios</a></div>
   <table>
     <thead><tr><th>Fecha</th><th>Nombre</th><th>Email</th><th>Hotel/zona</th><th>Fechas</th><th>Mensaje</th></tr></thead>
     <tbody>${bodyRows}</tbody>
@@ -246,7 +247,7 @@ app.get('/admin/leads', async (req, res) => {
 </style></head>
 <body>
   <h1>Solicitudes de reserva (${rows.length})</h1>
-  <div class="count">Ordenadas por más reciente. Recarga la página para ver las nuevas. <a href="/admin/conversations?key=${esc(req.query.key)}" style="color:#6c8cff">Ver conversaciones</a> · <a href="/admin/contacts?key=${esc(req.query.key)}" style="color:#6c8cff">Ver consultas de contacto</a></div>
+  <div class="count">Ordenadas por más reciente. Recarga la página para ver las nuevas. <a href="/admin/conversations?key=${esc(req.query.key)}" style="color:#6c8cff">Ver conversaciones</a> · <a href="/admin/contacts?key=${esc(req.query.key)}" style="color:#6c8cff">Ver consultas de contacto</a> · <a href="/admin/provider-rates?key=${esc(req.query.key)}" style="color:#6c8cff">Ver caché de precios</a></div>
   <table>
     <thead><tr><th>Fecha</th><th>Nombre</th><th>Email</th><th>Hotel</th><th>Ciudad</th><th>Fechas</th><th>Adultos/Hab.</th><th>Precio</th></tr></thead>
     <tbody>${bodyRows}</tbody>
@@ -315,9 +316,91 @@ app.get('/admin/conversations', async (req, res) => {
 </style></head>
 <body>
   <h1>Conversaciones (${rows.length})</h1>
-  <div class="count">Ordenadas por última actividad. Recarga la página para ver las nuevas. <a href="/admin/leads?key=${esc(req.query.key)}" style="color:#6c8cff">Ver solicitudes de reserva</a> · <a href="/admin/contacts?key=${esc(req.query.key)}" style="color:#6c8cff">Ver consultas de contacto</a></div>
+  <div class="count">Ordenadas por última actividad. Recarga la página para ver las nuevas. <a href="/admin/leads?key=${esc(req.query.key)}" style="color:#6c8cff">Ver solicitudes de reserva</a> · <a href="/admin/contacts?key=${esc(req.query.key)}" style="color:#6c8cff">Ver consultas de contacto</a> · <a href="/admin/provider-rates?key=${esc(req.query.key)}" style="color:#6c8cff">Ver caché de precios</a></div>
   <table>
     <thead><tr><th>Última actividad</th><th>Nº msgs</th><th>Último mensaje del cliente</th><th>Hotel/zona</th><th>Fechas</th><th>Adultos/Hab.</th><th>Paso</th></tr></thead>
+    <tbody>${bodyRows}</tbody>
+  </table>
+</body></html>`);
+});
+
+// Escritura de la cache de precios por proveedor (RateHawk, TBO, Expedia...).
+// La rellena un proceso de refresco con las cuentas B2B propias, no el cliente
+// final - por eso va protegida con la misma clave admin, no es publica.
+app.post('/admin/seed-provider-rate', async (req, res) => {
+  const key = process.env.ADMIN_KEY;
+  if (!key || req.query.key !== key) {
+    return res.status(401).json({ error: 'No autorizado' });
+  }
+
+  const {
+    hotelName, provider, checkin, checkout,
+    netPriceEur, currencyOriginal, netPriceOriginal,
+    taxIncluded, extraFeeNote, regimen,
+  } = req.body ?? {};
+
+  if (!hotelName || !provider || !checkin || !checkout) {
+    return res.status(400).json({ error: 'Faltan hotelName, provider, checkin o checkout' });
+  }
+
+  try {
+    await upsertProviderRate({
+      hotelName, provider, checkin, checkout,
+      netPriceEur, currencyOriginal, netPriceOriginal,
+      taxIncluded, extraFeeNote, regimen,
+    });
+    res.status(201).json({ ok: true });
+  } catch (err) {
+    console.error('[admin/seed-provider-rate] error', err);
+    res.status(500).json({ error: 'No se pudo guardar el precio' });
+  }
+});
+
+app.get('/admin/provider-rates', async (req, res) => {
+  const key = process.env.ADMIN_KEY;
+  if (!key || req.query.key !== key) {
+    return res.status(401).send('No autorizado. Añade ?key=... a la URL.');
+  }
+
+  let rows;
+  try {
+    rows = await listProviderRates({ limit: 500 });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).send('No se pudo leer la caché de precios.');
+  }
+
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  const bodyRows = rows.map((row) => `<tr>
+      <td>${esc(row.hotel_name)}</td>
+      <td>${esc(row.provider)}</td>
+      <td>${esc(row.checkin)} → ${esc(row.checkout)}</td>
+      <td>${row.net_price_eur != null ? esc(row.net_price_eur) + ' €' : ''}</td>
+      <td>${row.net_price_original != null ? esc(row.net_price_original) + ' ' + esc(row.currency_original) : ''}</td>
+      <td>${row.tax_included === true ? 'Sí' : row.tax_included === false ? 'No' : ''}</td>
+      <td>${esc(row.extra_fee_note)}</td>
+      <td>${esc(row.regimen)}</td>
+      <td>${esc(new Date(row.fetched_at).toLocaleString('es-ES'))}</td>
+    </tr>`).join('\n');
+
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(`<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Caché de precios - BedCopilot</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #0e1533; color: #f0ece0; margin: 0; padding: 24px; }
+  h1 { font-size: 18px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { padding: 8px 10px; border-bottom: 1px solid #333; text-align: left; vertical-align: top; }
+  th { color: #6c8cff; position: sticky; top: 0; background: #0e1533; }
+  tr:hover { background: #141b3d; }
+  .count { color: #a6a196; font-size: 12px; margin-bottom: 12px; }
+</style></head>
+<body>
+  <h1>Caché de precios por proveedor (${rows.length})</h1>
+  <div class="count">Ordenada por hotel y proveedor. <a href="/admin/leads?key=${esc(req.query.key)}" style="color:#6c8cff">Ver solicitudes de reserva</a> · <a href="/admin/contacts?key=${esc(req.query.key)}" style="color:#6c8cff">Ver consultas de contacto</a> · <a href="/admin/conversations?key=${esc(req.query.key)}" style="color:#6c8cff">Ver conversaciones</a></div>
+  <table>
+    <thead><tr><th>Hotel</th><th>Proveedor</th><th>Fechas</th><th>Precio neto EUR</th><th>Precio original</th><th>Tasa incluida</th><th>Nota tasa</th><th>Régimen</th><th>Consultado</th></tr></thead>
     <tbody>${bodyRows}</tbody>
   </table>
 </body></html>`);
