@@ -12,6 +12,7 @@
     "@anthropic-ai/sdk": "^0.32.0",
     "cors": "^2.8.5",
     "express": "^4.21.0",
+    "nodemailer": "^10.0.3",
     "pg": "^8.23.0",
     "playwright": "1.63.0"
   }

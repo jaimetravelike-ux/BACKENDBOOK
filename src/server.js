@@ -8,6 +8,7 @@ import { converse, phraseSearchResult } from './claude.js';
 import { checkPrice } from './priceChecker.js';
 import { logTurn, logResolved, listConversations, logLead, listLeads, logContact, listContacts } from './conversationLog.js';
 import { upsertProviderRate, listProviderRates } from './providerRates.js';
+import { sendContactNotification } from './mailer.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -143,6 +144,16 @@ app.post('/api/contact', async (req, res) => {
     }
 
     await logContact({
+      name: name.trim(),
+      email: email ? email.trim() : null,
+      phone,
+      hotelOrZone,
+      checkin,
+      checkout,
+      message,
+    });
+
+    await sendContactNotification({
       name: name.trim(),
       email: email ? email.trim() : null,
       phone,
