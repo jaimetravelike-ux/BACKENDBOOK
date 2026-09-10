@@ -81,6 +81,14 @@ function extractDiscount(breakdown) {
 function parseHotelCard(hotel, { checkin, checkout, adults, rooms }) {
   const breakdown = hotel.composite_price_breakdown;
   if (!breakdown) return null;
+  // TEMPORAL: buscando el nombre legible del tipo de habitacion.
+  console.log('[rapidapi][DEBUG-UNITS-FULL]', JSON.stringify(hotel.matching_units_configuration ?? null));
+  console.log('[rapidapi][DEBUG-ROOMNAME]', JSON.stringify({
+    unit_configuration_label: hotel.unit_configuration_label,
+    room_name: hotel.room_name,
+    rooms: hotel.rooms,
+    block: hotel.block,
+  }));
   const photo = hotel.max_photo_url ?? hotel.main_photo_url ?? null;
   const discount = extractDiscount(breakdown);
 
