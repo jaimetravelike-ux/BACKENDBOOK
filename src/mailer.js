@@ -44,6 +44,7 @@ export async function sendContactNotification({ name, email, phone, hotelOrZone,
         message || '',
       ].join('\n'),
     });
+    console.log('[mailer] email de aviso enviado correctamente');
   } catch (err) {
     console.warn('[mailer] no se pudo enviar el email de aviso', err?.message);
   }
