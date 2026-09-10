@@ -75,20 +75,38 @@ function extractDiscount(breakdown) {
   };
 }
 
+// TEMPORAL: prueba varios endpoints candidatos para ver si alguno da el
+// nombre legible del tipo de habitacion. Fire-and-forget, nunca bloquea el
+// flujo normal.
+async function probeRoomEndpoints(hotelId) {
+  const apiKey = process.env.RAPIDAPI_KEY;
+  if (!apiKey || !hotelId) return;
+  const candidates = [
+    `v1/hotels/room-list?hotel_id=${hotelId}&checkin_date=2026-10-20&checkout_date=2026-10-22&adults_number_by_rooms=2&locale=en-gb`,
+    `v1/hotels/roomAvailability?hotel_id=${hotelId}&checkin_date=2026-10-20&checkout_date=2026-10-22&locale=en-gb`,
+    `v1/hotels/description?hotel_id=${hotelId}&locale=en-gb`,
+  ];
+  for (const path of candidates) {
+    try {
+      const res = await fetch(`https://${RAPIDAPI_HOST}/${path}`, {
+        headers: { 'x-rapidapi-key': apiKey, 'x-rapidapi-host': RAPIDAPI_HOST },
+      });
+      const text = await res.text();
+      console.log('[rapidapi][DEBUG-PROBE]', path.split('?')[0], res.status, text.slice(0, 400));
+    } catch (err) {
+      console.log('[rapidapi][DEBUG-PROBE-ERR]', path.split('?')[0], err?.message);
+    }
+  }
+}
+
 // Convierte un property_card crudo de RapidAPI en el formato enriquecido que
 // ya sabe pintar el widget (mismo shape se use para un hotel concreto o
 // como uno de varios resultados de una busqueda general).
 function parseHotelCard(hotel, { checkin, checkout, adults, rooms }) {
   const breakdown = hotel.composite_price_breakdown;
   if (!breakdown) return null;
-  // TEMPORAL: buscando el nombre legible del tipo de habitacion.
-  console.log('[rapidapi][DEBUG-UNITS-FULL]', JSON.stringify(hotel.matching_units_configuration ?? null));
-  console.log('[rapidapi][DEBUG-ROOMNAME]', JSON.stringify({
-    unit_configuration_label: hotel.unit_configuration_label,
-    room_name: hotel.room_name,
-    rooms: hotel.rooms,
-    block: hotel.block,
-  }));
+  // TEMPORAL: probando endpoints candidatos para el nombre de la habitacion.
+  probeRoomEndpoints(hotel.hotel_id).catch(() => {});
   const photo = hotel.max_photo_url ?? hotel.main_photo_url ?? null;
   const discount = extractDiscount(breakdown);
 
