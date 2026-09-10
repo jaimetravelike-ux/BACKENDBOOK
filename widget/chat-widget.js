@@ -331,8 +331,18 @@
       }
     }
 
+    // En iOS Safari, "overflow:hidden" en el body NO evita el scroll/rebote
+    // de fondo (es un bug conocido) - hay que fijar el body con position:fixed
+    // y compensar con top:-scrollY, que es la tecnica que de verdad funciona
+    // ahi. La clase chat-locked se deja tambien para el resto de navegadores.
     function focusChatMode() {
       if (heroWrapper) heroWrapper.classList.add('chat-focused');
+      const scrollY = window.scrollY || window.pageYOffset || 0;
+      document.body.dataset.lockedScrollY = String(scrollY);
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
       document.body.classList.add('chat-locked');
       document.documentElement.classList.add('chat-locked');
     }
