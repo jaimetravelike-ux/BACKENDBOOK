@@ -81,6 +81,7 @@ app.post('/api/chat', async (req, res) => {
     }
 
     const reply = await converse(session, message);
+    console.log('[DEBUG-SLOTS]', JSON.stringify(session.slots));
 
     const key = searchKey(session.slots);
     const readyForSearch = slotsComplete(session.slots) && key !== session.lastSearchedKey && !session.pendingSearch;
