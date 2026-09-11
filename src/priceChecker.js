@@ -52,8 +52,10 @@ function orderCandidatesForQuerying(nearest, pricePreference) {
   const sorted = [...withRef];
   if (pricePreference === 'barato') {
     sorted.sort((a, b) => (a.ref ?? Infinity) - (b.ref ?? Infinity) || a.i - b.i);
+  } else if (pricePreference === 'caro') {
+    sorted.sort((a, b) => (b.ref ?? -Infinity) - (a.ref ?? -Infinity) || a.i - b.i);
   } else if (pricePreference === 'calidad') {
-    sorted.sort((a, b) => (b.h.reviewScore ?? 0) - (a.h.reviewScore ?? 0) || a.i - b.i);
+    sorted.sort((a, b) => (b.h.stars ?? 0) - (a.h.stars ?? 0) || (b.h.reviewScore ?? 0) - (a.h.reviewScore ?? 0) || a.i - b.i);
   } else if (pricePreference === 'calidad_precio') {
     sorted.sort((a, b) => {
       const ratioA = a.ref ? (a.h.reviewScore ?? 0) / a.ref : 0;

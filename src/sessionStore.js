@@ -14,8 +14,8 @@ const EMPTY_SLOTS = {
   // concreto (p.ej. tras una desambiguacion) y prefiere varias opciones de
   // la zona - ver preferArea en bookingAgent.js/priceChecker.js.
   noSpecificHotel: null,
-  // 'barato' | 'calidad' | 'calidad_precio' | null (sin preferencia clara,
-  // se trata como 'calidad_precio' al elegir entre varios hoteles de zona).
+  // 'barato' | 'caro' | 'calidad' | 'calidad_precio' | null (sin preferencia
+  // clara, se trata como 'calidad_precio' al elegir entre varios hoteles de zona).
   pricePreference: null,
 };
 

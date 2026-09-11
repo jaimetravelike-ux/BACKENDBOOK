@@ -36,9 +36,9 @@ const UPDATE_SLOTS_TOOL = {
       },
       pricePreference: {
         type: 'string',
-        enum: ['barato', 'calidad', 'calidad_precio'],
+        enum: ['barato', 'caro', 'calidad', 'calidad_precio'],
         description:
-          'SOLO cuando el cliente busca varios hoteles de una zona (noSpecificHotel:true) y su forma de pedirlo dice algo sobre que criterio usar para elegir entre ellos. "barato" si prioriza el precio mas bajo por encima de todo (p.ej. "el mas barato", "algo economico", "que no sea caro"). "calidad" si prioriza lo mejor valorado sin importar tanto el precio (p.ej. "el mejor valorado", "de lujo", "algo top", "5 estrellas"). "calidad_precio" si menciona explicitamente relacion calidad-precio, o simplemente no da ninguna pista de preferencia (este es el valor por defecto razonable). No lo actualices si el cliente busca un hotel concreto por su nombre.',
+          'SOLO cuando el cliente busca varios hoteles de una zona (noSpecificHotel:true) y su forma de pedirlo dice algo sobre que criterio usar para elegir entre ellos. "barato" si prioriza el precio mas bajo por encima de todo (p.ej. "el mas barato", "algo economico", "que no sea caro"). "caro" SOLO si pide literalmente el precio mas alto/caro (p.ej. "el mas caro", "el de mayor presupuesto") - distinto de "calidad": aqui manda el precio, no las estrellas. "calidad" si prioriza lo mejor valorado/estrellas sin importar tanto el precio (p.ej. "el mejor valorado", "de lujo", "algo top", "5 estrellas", "los mas exclusivos"). "calidad_precio" si menciona explicitamente relacion calidad-precio, o simplemente no da ninguna pista de preferencia (este es el valor por defecto razonable). No lo actualices si el cliente busca un hotel concreto por su nombre.',
       },
     },
   },

@@ -14,13 +14,18 @@ export function parsePriceNumber(priceText) {
 
 /**
  * @param {object[]} hotels - ya con found:true, totalPrice, reviewScore, stars
- * @param {'barato'|'calidad'|'calidad_precio'|null} pricePreference
+ * @param {'barato'|'caro'|'calidad'|'calidad_precio'|null} pricePreference
  */
 export function rankByPreference(hotels, pricePreference) {
   const withPrice = hotels.map((h) => ({ h, price: parsePriceNumber(h.totalPrice) }));
   const sorted = [...withPrice];
   if (pricePreference === 'barato') {
     sorted.sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity));
+  } else if (pricePreference === 'caro') {
+    // Distinto de 'calidad': aqui manda el precio en si (el mas caro/exclusivo
+    // por presupuesto), no las estrellas - un hotel de 4 estrellas muy caro
+    // puede ganarle a un 5 estrellas mas barato si eso es lo que se pidio.
+    sorted.sort((a, b) => (b.price ?? -Infinity) - (a.price ?? -Infinity));
   } else if (pricePreference === 'calidad') {
     // "Lujo"/"5 estrellas"/"exclusivo": las estrellas mandan (un 3 estrellas
     // con muy buena nota no es lo que se pide al pedir lujo), la nota de
