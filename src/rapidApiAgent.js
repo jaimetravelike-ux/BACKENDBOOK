@@ -178,10 +178,9 @@ async function fetchRoomDetails(hotelId, { checkin, checkout, adults }) {
 function formatDistanceToCenter(hotel) {
   // Confirmado con datos reales: distance_to_cc suele venir vacio/0 para
   // este proveedor, pero distance_to_cc_formatted (texto ya formateado por
-  // la propia Booking, en ingles) SI trae valor. Se usa ese directamente en
-  // vez de reformatear un numero que no llega.
+  // la propia Booking, ej. "2.8 km") SI trae valor.
   if (typeof hotel.distance_to_cc_formatted === 'string' && hotel.distance_to_cc_formatted.trim()) {
-    return hotel.distance_to_cc_formatted.trim();
+    return `A ${hotel.distance_to_cc_formatted.trim()} del centro`;
   }
   const km = hotel.distance_to_cc ?? hotel.distance;
   if (typeof km === 'number' && Number.isFinite(km) && km > 0) {
@@ -211,10 +210,6 @@ function parseHotelCard(hotel, { checkin, checkout, adults, rooms }) {
     city: hotel.city_name_en ?? hotel.city ?? null,
     neighborhood: extractNeighborhood(hotel),
     distanceToCenter: formatDistanceToCenter(hotel),
-    // DIAGNOSTICO TEMPORAL - quitar en cuanto se confirmen los campos de
-    // zona/distancia reales. Permite verificarlos desde el propio cliente
-    // sin necesitar acceso a los logs del servidor.
-    _debugRawKeys: Object.keys(hotel),
     stars: hotel.class ?? null,
     reviewScore: hotel.review_score ?? null,
     reviewScoreWord: hotel.review_score_word ?? null,
