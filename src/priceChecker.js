@@ -24,6 +24,7 @@
 
 import { resolveHotelId, checkBookingPrice } from './bookingAgent.js';
 import { checkRapidApiPrice, searchMultipleHotels } from './rapidApiAgent.js';
+import { findNearestHotels } from './geo.js';
 
 /**
  * @param {{query:string, checkin:string, checkout:string, adults?:string, rooms?:string, breakfast?:boolean, headless?:boolean, areaOnly?:boolean}} params
@@ -84,6 +85,32 @@ export async function checkPrice({ query, checkin, checkout, adults = '2', rooms
     }
   } else {
     console.log('[priceChecker] sin destId resuelto - va directo a Playwright');
+  }
+
+  // Landmark/punto (p.ej. "Times Square"): RapidAPI no acepta destType
+  // latlong, asi que ni el hotel concreto ni searchMultipleHotels de arriba
+  // pudieron responder. Si Booking nos dio coordenadas reales del punto,
+  // buscamos los hoteles reales mas cercanos en el dataset local y pedimos
+  // su precio en vivo via RapidAPI (rapido) antes de caer al fallback lento
+  // de Playwright.
+  if (!breakfast && !resolved.wasSpecificHotel && typeof resolved.latitude === 'number' && typeof resolved.longitude === 'number') {
+    const nearest = findNearestHotels({ latitude: resolved.latitude, longitude: resolved.longitude, limit: 3 });
+    if (nearest.length > 0) {
+      console.log('[priceChecker] usando busqueda por cercania geografica sobre el dataset local', {
+        latitude: resolved.latitude,
+        longitude: resolved.longitude,
+        candidatos: nearest.map((h) => ({ name: h.name, distanceKm: h.distanceKm.toFixed(2) })),
+      });
+      const priced = await Promise.all(
+        nearest.map((h) => checkRapidApiPrice({ hotelId: h.hotelId, checkin, checkout, adults, rooms }))
+      );
+      const found = priced.filter((p) => p?.found);
+      if (found.length > 0) {
+        console.log('[priceChecker] busqueda por cercania: precios en vivo obtenidos', { count: found.length });
+        return { found: true, multiple: true, hotels: found, breakfastRequested: breakfast };
+      }
+      console.log('[priceChecker] busqueda por cercania: ningun hotel cercano tenia disponibilidad - va a Playwright');
+    }
   }
 
   // Fallback: zona/barrio sin destId, o RapidAPI no disponible/sin resultado

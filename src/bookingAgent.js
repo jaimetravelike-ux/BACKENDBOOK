@@ -160,13 +160,27 @@ async function selectBestDestination(page, destInput, query, { preferArea = fals
   const wasSpecificHotel = destType === 'HOTEL';
   const destId = best.r.destination?.destId ?? null;
   const hotelName = best.r.displayInfo?.title ?? null;
+
+  // Cuando Booking resuelve a un landmark/punto (destType tipicamente
+  // "LANDMARK" o similar, con destId no usable por RapidAPI), su propia
+  // respuesta de autocompletado trae las coordenadas del punto - las
+  // capturamos aqui (con varias rutas posibles, no confirmado aun con datos
+  // en vivo cual usa Booking) para poder hacer una busqueda por cercania
+  // geografica sobre el dataset local en vez de depender solo de Playwright.
+  const geo = best.r.destination?.location ?? best.r.destination?.geoLocation ?? best.r.destination ?? {};
+  const latitude = typeof geo.latitude === 'number' ? geo.latitude : (typeof geo.lat === 'number' ? geo.lat : null);
+  const longitude = typeof geo.longitude === 'number' ? geo.longitude : (typeof geo.lng === 'number' ? geo.lng : null);
+  if (!wasSpecificHotel && (latitude === null || longitude === null)) {
+    console.log('[bookingAgent] diagnostico geo - destType:', destType, 'claves destination:', Object.keys(best.r.destination ?? {}));
+  }
+
   const bestIndex = candidateIndexOf(best.r);
   for (let i = 0; i <= bestIndex; i++) {
     await destInput.press('ArrowDown');
     await page.waitForTimeout(150);
   }
   await destInput.press('Enter');
-  return { wasSpecificHotel, destId, destType, hotelName };
+  return { wasSpecificHotel, destId, destType, hotelName, latitude, longitude };
 }
 
 // Titi Hotels solo trabaja Nueva York; si el cliente da un nombre ambiguo sin
@@ -535,6 +549,11 @@ export async function resolveHotelId({ query, headless = true, preferArea = fals
       // para pedirle a RapidAPI varias opciones DENTRO de esa misma zona/
       // ciudad en vez de tener que adivinar por palabras clave.
       destType: destinationResult?.destType ?? null,
+      // Solo presentes cuando destType es un punto/landmark (no HOTEL/CITY/
+      // DISTRICT) - ver comentario en selectBestDestination. priceChecker.js
+      // las usa para el atajo de busqueda por cercania sobre el dataset local.
+      latitude: destinationResult?.latitude ?? null,
+      longitude: destinationResult?.longitude ?? null,
     };
   } finally {
     await browser.close();
