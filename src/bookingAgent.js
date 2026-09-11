@@ -381,6 +381,55 @@ async function extractBestCard(page, query, { requireNameMatch = false } = {}) {
   return { ...chosen, card };
 }
 
+// Variante de extractBestCard para cuando NO hay un hotel concreto que
+// buscar (preferArea) y RapidAPI no pudo dar varias opciones (p.ej. porque
+// Booking resolvio la zona como "latlong" - un punto de un landmark como
+// "Times Square" - y RapidAPI no acepta ese tipo de destino). En vez de
+// elegir un unico "mejor" resultado, devuelve las `limit` tarjetas mas
+// baratas tal cual, para que el cliente siga viendo varias opciones reales
+// de la zona en vez de una sola elegida al azar.
+async function extractTopCards(page, { limit = 3 } = {}) {
+  await page.waitForSelector('[data-testid="property-card"]', { timeout: 20000 });
+
+  const rawCards = await page.evaluate((max) => {
+    const cards = Array.from(document.querySelectorAll('[data-testid="property-card"]')).slice(0, max);
+    return cards.map((card) => {
+      const name = card.querySelector('[data-testid="title"]')?.innerText ?? null;
+      const priceText = card.querySelector('[data-testid="price-and-discounted-price"]')?.innerText ?? null;
+      const fullText = card.innerText ?? '';
+      return { name, priceText, fullText };
+    });
+  }, MAX_CARDS);
+
+  const entries = [];
+  rawCards.forEach((raw, i) => {
+    const { name, priceText, fullText } = raw;
+    if (!priceText || !name) return;
+    const numeric = Number(priceText.replace(/[^\d]/g, ''));
+    if (!Number.isFinite(numeric) || numeric <= 0) return;
+    const breakfastMentioned = /desayuno/i.test(fullText);
+    let extraChargesNotice = null;
+    const lines = fullText.split('\n');
+    const priceLineIdx = lines.findIndex((l) => /^Precio /.test(l));
+    const feeLine = lines.slice(priceLineIdx + 1, priceLineIdx + 3).find((l) => /impuesto|cargo|tasa/i.test(l));
+    if (feeLine && !/^Incluye impuestos y cargos$/i.test(feeLine.trim())) {
+      extraChargesNotice = feeLine.trim();
+    }
+    entries.push({ name, priceText, numeric, breakfastMentioned, extraChargesNotice, cardIndex: i });
+  });
+
+  entries.sort((a, b) => a.numeric - b.numeric);
+  const top = entries.slice(0, limit);
+
+  const withPolicies = [];
+  for (const entry of top) {
+    const card = page.locator('[data-testid="property-card"]').nth(entry.cardIndex);
+    const cancellationPolicy = await extractCancellationPolicy(card);
+    withPolicies.push({ ...entry, cancellationPolicy });
+  }
+  return withPolicies;
+}
+
 async function extractCancellationPolicy(cardLocator) {
   try {
     const el = cardLocator.locator('text=/Cancelaci[oó]n gratuita|No reembolsable/i').first();
@@ -531,6 +580,36 @@ export async function checkBookingPrice({ query, checkin, checkout, adults = '2'
     if (breakfast) {
       await applyBreakfastFilter(page);
       await dismissOverlays(page);
+    }
+
+    // preferArea sin hotel concreto resuelto: en vez de elegir un unico
+    // "mejor" resultado (que seria arbitrario, no hay nombre con el que
+    // comparar), se devuelven varias opciones reales de la zona - mismo
+    // shape que usa el multiple:true de RapidAPI, para que el widget las
+    // pinte igual sin cambios.
+    if (preferArea && !searchOutcome?.wasSpecificHotel) {
+      const topCards = await extractTopCards(page, { limit: 3 });
+      if (topCards.length === 0) {
+        return { found: false, reason: 'Sin resultados con disponibilidad para esos criterios', sourceUrl: page.url() };
+      }
+      return {
+        found: true,
+        multiple: true,
+        breakfastRequested: breakfast,
+        hotels: topCards.map((c) => ({
+          found: true,
+          hotel: c.name,
+          totalPrice: c.priceText,
+          breakfastMentionedOnCard: c.breakfastMentioned,
+          extraChargesNotice: c.extraChargesNotice,
+          cancellationPolicy: c.cancellationPolicy,
+          checkin,
+          checkout,
+          adults,
+          rooms,
+        })),
+        sourceUrl: page.url(),
+      };
     }
 
     const best = await extractBestCard(page, nameForMatching, { requireNameMatch: searchOutcome?.wasSpecificHotel });
