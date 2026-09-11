@@ -176,43 +176,27 @@ async function fetchRoomDetails(hotelId, { checkin, checkout, adults }) {
 // de RapidAPI - es el mismo dato que usa la propia Booking para su "a X km
 // del centro". Se formatea aqui para no repetir el redondeo en el widget.
 function formatDistanceToCenter(hotel) {
-  const km = hotel.distance_to_cc ?? hotel.distance ?? hotel.distance_to_cc_formatted;
-  if (typeof km === 'number' && Number.isFinite(km) && km >= 0) {
+  // Confirmado con datos reales: distance_to_cc suele venir vacio/0 para
+  // este proveedor, pero distance_to_cc_formatted (texto ya formateado por
+  // la propia Booking, en ingles) SI trae valor. Se usa ese directamente en
+  // vez de reformatear un numero que no llega.
+  if (typeof hotel.distance_to_cc_formatted === 'string' && hotel.distance_to_cc_formatted.trim()) {
+    return hotel.distance_to_cc_formatted.trim();
+  }
+  const km = hotel.distance_to_cc ?? hotel.distance;
+  if (typeof km === 'number' && Number.isFinite(km) && km > 0) {
     const rounded = km < 10 ? Math.round(km * 10) / 10 : Math.round(km);
     const text = String(rounded).replace('.', ',');
     return `A ${text} km del centro`;
-  }
-  // Diagnostico temporal: distance_to_cc vino null en una busqueda de hotel
-  // concreto (dest_type=hotel) - puede que solo lo traigan las busquedas por
-  // zona/ciudad. Este log ayuda a confirmarlo con datos reales, quitar en
-  // cuanto se verifique.
-  const distanceKeys = Object.keys(hotel).filter((k) => /distance/i.test(k));
-  if (distanceKeys.length > 0) {
-    console.log('[rapidapi] campos de distancia disponibles (diagnostico):', JSON.stringify(distanceKeys.map((k) => [k, hotel[k]])));
   }
   return null;
 }
 
 // Barrio/zona (Times Square, Chelsea, Brooklyn...) para un badge compacto en
-// la card, en vez de un mapa. Nombre de campo NO confirmado con datos reales
-// todavia - se prueban varias rutas plausibles y se deja un log de
-// diagnostico con todo lo que pueda parecer una zona, para confirmarlo.
+// la card. Confirmado con datos reales: hotel.district trae directamente el
+// nombre del barrio (ej. "Chelsea").
 function extractNeighborhood(hotel) {
-  const candidates = [
-    hotel.district,
-    hotel.zone_name,
-    hotel.neighbourhood,
-    hotel.neighborhood,
-    hotel.address_trans,
-  ];
-  const found = candidates.find((v) => typeof v === 'string' && v.trim());
-  if (found) return found.trim();
-
-  const zoneKeys = Object.keys(hotel).filter((k) => /district|zone|neigh|area|address/i.test(k));
-  if (zoneKeys.length > 0) {
-    console.log('[rapidapi] campos de zona/barrio disponibles (diagnostico):', JSON.stringify(zoneKeys.map((k) => [k, hotel[k]])));
-  }
-  return null;
+  return typeof hotel.district === 'string' && hotel.district.trim() ? hotel.district.trim() : null;
 }
 
 function parseHotelCard(hotel, { checkin, checkout, adults, rooms }) {
