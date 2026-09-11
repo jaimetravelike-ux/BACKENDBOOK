@@ -16,9 +16,37 @@ const USER_AGENT = 'BedCopilot/1.0 (contact@bedcopilot.com)';
  * @param {string} query - texto libre, p.ej. "Times Square" o "Chelsea"
  * @returns {Promise<{latitude:number, longitude:number, displayName:string}|null>}
  */
+// Nominatim busca nombres de sitio, no frases en lenguaje natural - a
+// diferencia del autocompletado de Booking (que si hace matching difuso),
+// "muy cerca de times square" le da 0 resultados pero "times square" si.
+// Quitamos las muletillas tipicas que Claude deja al extraer la zona de la
+// conversacion (confirmado con datos reales: "muy cerca de X", "cerca de X",
+// "junto a/al X" fallaban, el nombre limpio si funcionaba).
+function stripFillerWords(text) {
+  let cleaned = text.trim();
+  const fillerPatterns = [
+    /^muy\s+/i,
+    /^(cerca|junto)\s+(de|al?)\s+/i,
+    /^al\s+lado\s+de\s+/i,
+    /^en\s+(la\s+zona\s+de\s+)?/i,
+  ];
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (const re of fillerPatterns) {
+      if (re.test(cleaned)) {
+        cleaned = cleaned.replace(re, '').trim();
+        changed = true;
+      }
+    }
+  }
+  return cleaned || text;
+}
+
 export async function geocodePlace(query) {
   if (!query) return null;
-  const scoped = /new york|nueva york|\bnyc\b/i.test(query) ? query : `${query}, New York`;
+  const cleanedQuery = stripFillerWords(query);
+  const scoped = /new york|nueva york|\bnyc\b/i.test(cleanedQuery) ? cleanedQuery : `${cleanedQuery}, New York`;
 
   const url = new URL(NOMINATIM_URL);
   url.searchParams.set('q', scoped);
