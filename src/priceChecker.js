@@ -26,6 +26,7 @@ import { resolveHotelId, checkBookingPrice } from './bookingAgent.js';
 import { checkRapidApiPrice, searchMultipleHotels } from './rapidApiAgent.js';
 import { findNearestHotels } from './geo.js';
 import { geocodePlace } from './geocode.js';
+import { rankByPreference } from './ranking.js';
 
 // Cuantos hoteles cercanos se piden como candidatos a RapidAPI para la
 // busqueda por cercania geografica - mas de los 3 que se devuelven al
@@ -38,35 +39,6 @@ const GEO_RESULTS_WANTED = 3;
 // poder elegir los 3 segun la preferencia del cliente (barato/calidad/
 // calidad-precio) en vez de simplemente los 3 primeros por cercania.
 const GEO_RANKING_POOL = 5;
-
-// Extrae el numero de un precio formateado tipo "2.067 €" - se asume
-// formato es-ES (punto de miles), coherente con currency.js.
-function parsePriceNumber(priceText) {
-  if (!priceText) return null;
-  const digits = String(priceText).replace(/[^\d]/g, '');
-  return digits ? Number(digits) : null;
-}
-
-// Ordena los hoteles ya con precio en vivo segun lo que pida el cliente.
-// 'barato': precio mas bajo primero. 'calidad': mejor nota primero. Por
-// defecto (o 'calidad_precio'): mejor relacion nota/precio primero - el
-// caso mas comun cuando no hay una preferencia clara.
-function rankByPreference(hotels, pricePreference) {
-  const withPrice = hotels.map((h) => ({ h, price: parsePriceNumber(h.totalPrice) }));
-  const sorted = [...withPrice];
-  if (pricePreference === 'barato') {
-    sorted.sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity));
-  } else if (pricePreference === 'calidad') {
-    sorted.sort((a, b) => (b.h.reviewScore ?? 0) - (a.h.reviewScore ?? 0));
-  } else {
-    sorted.sort((a, b) => {
-      const ratioA = a.price ? (a.h.reviewScore ?? 0) / a.price : 0;
-      const ratioB = b.price ? (b.h.reviewScore ?? 0) / b.price : 0;
-      return ratioB - ratioA;
-    });
-  }
-  return sorted.map((x) => x.h);
-}
 
 // Antes de gastar llamadas reales a RapidAPI, reordena los candidatos del
 // dataset local (ya filtrados por cercania) usando su referencePricePerNight
@@ -160,6 +132,7 @@ export async function checkPrice({ query, checkin, checkout, adults = '2', rooms
       adults,
       rooms,
       limit: 3,
+      pricePreference,
     });
     if (multi?.length) {
       console.log('[priceChecker] usando RapidAPI (multiples opciones)', { count: multi.length });

@@ -32,6 +32,8 @@
 // gross_amount), ademas de items[] con el desglose linea a linea (kind:
 // charge/discount, inclusion_type: included/excluded).
 
+import { rankByPreference } from './ranking.js';
+
 const RAPIDAPI_HOST = 'booking-com.p.rapidapi.com';
 const TIMEOUT_MS = 4000;
 const MAX_ATTEMPTS = 2;
@@ -371,13 +373,18 @@ export async function checkRapidApiPrice({ hotelId, checkin, checkout, adults = 
 }
 
 /**
- * Varias opciones reales (las mas baratas) dentro de una zona/ciudad, para
- * cuando la busqueda NO resuelve a un hotel concreto - en vez de que
- * Playwright elija uno solo en silencio entre los primeros resultados.
- * @param {{destId:string|number, destType?:string, checkin:string, checkout:string, adults?:string, rooms?:string, limit?:number}} params
+ * Varias opciones reales dentro de una zona/ciudad, para cuando la busqueda
+ * NO resuelve a un hotel concreto - en vez de que Playwright elija uno solo
+ * en silencio entre los primeros resultados. Pide un pool mas amplio que
+ * `limit` (orderBy 'popularity', variado) y elige los `limit` finales segun
+ * pricePreference - antes siempre pedia orderBy:'price' y se quedaba con los
+ * mas baratos sin mas, lo que ignoraba por completo si el cliente pedia
+ * "los hoteles mas lujosos" (confirmado en produccion: devolvia justo lo
+ * contrario de lo pedido).
+ * @param {{destId:string|number, destType?:string, checkin:string, checkout:string, adults?:string, rooms?:string, limit?:number, pricePreference?:string|null}} params
  * @returns {Promise<object[]|null>} array de resultados con found:true (hasta `limit`), o null si no se pudo usar RapidAPI.
  */
-export async function searchMultipleHotels({ destId, destType, checkin, checkout, adults = '2', rooms = '1', limit = 3 }) {
+export async function searchMultipleHotels({ destId, destType, checkin, checkout, adults = '2', rooms = '1', limit = 3, pricePreference = null }) {
   const apiKey = process.env.RAPIDAPI_KEY;
   if (!apiKey || !destId || !checkin || !checkout) {
     console.warn('[rapidapi] searchMultipleHotels: faltan parametros o RAPIDAPI_KEY', { destId, checkin, checkout });
@@ -391,7 +398,7 @@ export async function searchMultipleHotels({ destId, destType, checkin, checkout
     checkout,
     adults,
     rooms,
-    orderBy: 'price',
+    orderBy: 'popularity',
     apiKey,
   });
   if (!cards || cards.length === 0) {
@@ -399,12 +406,13 @@ export async function searchMultipleHotels({ destId, destType, checkin, checkout
     return null;
   }
 
-  const parsed = cards
-    .slice(0, limit)
+  const parsedAll = cards
     .map((c) => parseHotelCard(c, { checkin, checkout, adults, rooms }))
     .filter(Boolean);
-  if (parsed.length === 0) return null;
+  if (parsedAll.length === 0) return null;
 
-  console.log('[rapidapi] searchMultipleHotels OK', { destId, destType, count: parsed.length });
+  const parsed = rankByPreference(parsedAll, pricePreference).slice(0, limit);
+
+  console.log('[rapidapi] searchMultipleHotels OK', { destId, destType, pricePreference, poolSize: parsedAll.length, count: parsed.length });
   return parsed;
 }
