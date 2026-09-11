@@ -153,9 +153,6 @@ async function fetchRoomDetails(hotelId, { checkin, checkout, adults }) {
     const offers = Array.isArray(json) ? json : [];
     const block = offers[0]?.block?.[0];
     const name = block?.name_without_policy ?? null;
-    // Log temporal para confirmar con datos reales el nombre exacto del campo
-    // de regimen (ver buildMealPlanText) - quitar en cuanto se verifique.
-    if (block) console.log('[rapidapi] room-list block.mealplan (diagnostico regimen):', JSON.stringify(block.mealplan));
     return {
       roomName: typeof name === 'string' && name.trim() ? name.trim() : null,
       cancellationPolicy: buildCancellationPolicy(block),
