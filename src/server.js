@@ -78,6 +78,22 @@ app.post('/api/chat', async (req, res) => {
   }
 });
 
+// checkPrice() encadena varias esperas de Playwright que, cada una por
+// separado, tiene su propio timeout razonable - pero si Booking se comporta
+// mal en varios pasos seguidos (caso degradado, no el habitual), esas esperas
+// se suman y el cliente puede quedarse literalmente minutos sin respuesta ni
+// error, con la pantalla en blanco. Un limite duro aqui garantiza que el
+// widget SIEMPRE recibe una respuesta a tiempo, buena o mala.
+const PRICE_CHECK_TIMEOUT_MS = 55000;
+
+function withTimeout(promise, ms, label) {
+  let timer;
+  const timeout = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`${label} supero los ${ms}ms de limite`)), ms);
+  });
+  return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+}
+
 // El widget llama aqui justo despues de recibir pendingSearch:true. Puede tardar
 // (el agente "navega" Booking de verdad), por eso va en su propia llamada: el
 // widget ya mostro el "dame un momento" del turno anterior mientras espera esto.
@@ -90,14 +106,18 @@ app.post('/api/chat/resolve', async (req, res) => {
     }
 
     const { slots } = session;
-    const result = await checkPrice({
-      query: slots.hotelQuery,
-      checkin: slots.checkin,
-      checkout: slots.checkout,
-      adults: slots.adults || '2',
-      rooms: slots.rooms || '1',
-      breakfast: Boolean(slots.breakfast),
-    });
+    const result = await withTimeout(
+      checkPrice({
+        query: slots.hotelQuery,
+        checkin: slots.checkin,
+        checkout: slots.checkout,
+        adults: slots.adults || '2',
+        rooms: slots.rooms || '1',
+        breakfast: Boolean(slots.breakfast),
+      }),
+      PRICE_CHECK_TIMEOUT_MS,
+      'checkPrice'
+    );
 
     session.lastSearchedKey = searchKey(slots);
     session.pendingSearch = false;
@@ -112,7 +132,7 @@ app.post('/api/chat/resolve', async (req, res) => {
     const { sessionId } = req.body ?? {};
     const session = getSession(sessionId);
     session.pendingSearch = false;
-    res.status(500).json({ error: 'No se pudo comprobar el precio ahora mismo' });
+    res.status(504).json({ error: 'No se pudo comprobar el precio ahora mismo, tardo demasiado. Intentalo de nuevo en un momento.' });
   }
 });
 

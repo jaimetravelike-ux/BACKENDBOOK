@@ -13,14 +13,24 @@
     return id;
   }
 
-  async function postJSON(path, body) {
-    const res = await fetch(`${API_URL}${path}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return res.json();
+  // Sin esto, si el servidor (o la red) se queda colgado, el fetch nunca se
+  // resuelve ni rechaza por si solo - el cliente se queda esperando para
+  // siempre con la pantalla en blanco, sin ningun mensaje de error visible.
+  async function postJSON(path, body, timeoutMs = 30000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const res = await fetch(`${API_URL}${path}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      return await res.json();
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   // Comprobar el precio de verdad tarda 15-40s (el agente navega Booking como
@@ -96,7 +106,11 @@
           const checkingEl = renderMessage('typing', 'Comprobando el mejor precio...');
           const stopFacts = startFactRotation(checkingEl);
           try {
-            const resolved = await postJSON('/api/chat/resolve', { sessionId });
+            // El servidor tiene su propio limite de 55s para esta busqueda -
+            // el del cliente va un poco por encima, para que sea siempre el
+            // servidor quien de el mensaje de error real, no un timeout ciego
+            // del navegador cortando la respuesta justo antes de llegar.
+            const resolved = await postJSON('/api/chat/resolve', { sessionId }, 65000);
             stopFacts();
             checkingEl.remove();
             renderMessage('bot', resolved.reply);
