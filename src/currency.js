@@ -82,7 +82,9 @@ export async function getConverter(targetCurrency) {
 
   let formatter;
   try {
-    formatter = new Intl.NumberFormat('es-ES', { style: 'currency', currency: targetCurrency, maximumFractionDigits: 0 });
+    // useGrouping:true explicito - sin esto, Node no separaba los miles
+    // (salia "1722 €" en vez de "1.722 €"), confirmado en pruebas locales.
+    formatter = new Intl.NumberFormat('es-ES', { style: 'currency', currency: targetCurrency, maximumFractionDigits: 0, useGrouping: true });
   } catch {
     return null; // codigo de moneda no valido para Intl - no debería pasar con el mapeo de arriba, pero por si acaso
   }
@@ -125,6 +127,12 @@ export function convertResultCurrency(result, convert) {
       pricePerNight: convertUsdAmountsInText(h.pricePerNight, convert),
       includedTaxesAmount: convertUsdAmountsInText(h.includedTaxesAmount, convert),
       extraChargesNotice: convertUsdAmountsInText(h.extraChargesNotice, convert),
+      // mealPlanText viene de una llamada distinta (room-list) con su propio
+      // texto suelto ("American breakfast costs US$45...") - se detecto en
+      // una prueba real que se quedaba sin convertir mientras el resto de la
+      // card ya estaba en la moneda local, inconsistencia real de cara al
+      // cliente.
+      mealPlanText: convertUsdAmountsInText(h.mealPlanText, convert),
     };
     if (h.discount) {
       next.discount = { ...h.discount, originalPrice: convertUsdAmountsInText(h.discount.originalPrice, convert) };
