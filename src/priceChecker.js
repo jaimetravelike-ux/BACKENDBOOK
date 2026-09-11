@@ -67,6 +67,32 @@ function rankByPreference(hotels, pricePreference) {
   }
   return sorted.map((x) => x.h);
 }
+
+// Antes de gastar llamadas reales a RapidAPI, reordena los candidatos del
+// dataset local (ya filtrados por cercania) usando su referencePricePerNight
+// orientativo - asi, si el cliente quiere "el mas barato", se pregunta antes
+// a los candidatos que probablemente sean baratos en vez de ir a ciegas por
+// cercania y arriesgarse a que los primeros con hueco sean los mas caros de
+// la zona. Es solo el ORDEN en que se preguntan, no cambia cuales son
+// candidatos validos (siguen siendo los mismos hoteles cercanos de siempre).
+function orderCandidatesForQuerying(nearest, pricePreference) {
+  const withRef = nearest.map((h, i) => ({ h, i, ref: h.referencePricePerNight }));
+  const sorted = [...withRef];
+  if (pricePreference === 'barato') {
+    sorted.sort((a, b) => (a.ref ?? Infinity) - (b.ref ?? Infinity) || a.i - b.i);
+  } else if (pricePreference === 'calidad') {
+    sorted.sort((a, b) => (b.h.reviewScore ?? 0) - (a.h.reviewScore ?? 0) || a.i - b.i);
+  } else if (pricePreference === 'calidad_precio') {
+    sorted.sort((a, b) => {
+      const ratioA = a.ref ? (a.h.reviewScore ?? 0) / a.ref : 0;
+      const ratioB = b.ref ? (b.h.reviewScore ?? 0) / b.ref : 0;
+      return ratioB - ratioA || a.i - b.i;
+    });
+  }
+  // Sin preferencia: se deja el orden por cercania tal cual (el que ya
+  // traia findNearestHotels).
+  return sorted.map((x) => x.h);
+}
 // Consultarlos TODOS en paralelo satura el limite de peticiones por segundo
 // del plan de RapidAPI (confirmado en produccion: "429 You have exceeded the
 // rate limit per second for your plan, BASIC" - por eso a veces solo
@@ -170,13 +196,15 @@ export async function checkPrice({ query, checkin, checkout, adults = '2', rooms
     if (coords) {
       const nearest = findNearestHotels({ latitude: coords.latitude, longitude: coords.longitude, limit: GEO_CANDIDATE_POOL });
       if (nearest.length > 0) {
+        const queryOrder = orderCandidatesForQuerying(nearest, pricePreference);
         console.log('[priceChecker] usando busqueda por cercania geografica sobre el dataset local', {
           ...coords,
-          candidatos: nearest.map((h) => ({ name: h.name, distanceKm: h.distanceKm.toFixed(2) })),
+          pricePreference,
+          ordenConsulta: queryOrder.map((h) => ({ name: h.name, distanceKm: h.distanceKm.toFixed(2), referencePricePerNight: h.referencePricePerNight })),
         });
         const found = [];
-        for (let i = 0; i < nearest.length && found.length < GEO_RANKING_POOL; i += GEO_BATCH_SIZE) {
-          const batch = nearest.slice(i, i + GEO_BATCH_SIZE);
+        for (let i = 0; i < queryOrder.length && found.length < GEO_RANKING_POOL; i += GEO_BATCH_SIZE) {
+          const batch = queryOrder.slice(i, i + GEO_BATCH_SIZE);
           const results = await Promise.all(
             batch.map((h) => checkRapidApiPrice({ hotelId: h.hotelId, checkin, checkout, adults, rooms }))
           );
@@ -184,7 +212,7 @@ export async function checkPrice({ query, checkin, checkout, adults = '2', rooms
             if (r?.found) found.push(r);
           }
           if (found.length >= GEO_RANKING_POOL) break;
-          if (i + GEO_BATCH_SIZE < nearest.length) await sleep(GEO_BATCH_DELAY_MS);
+          if (i + GEO_BATCH_SIZE < queryOrder.length) await sleep(GEO_BATCH_DELAY_MS);
         }
         if (found.length > 0) {
           const ranked = rankByPreference(found, pricePreference).slice(0, GEO_RESULTS_WANTED);

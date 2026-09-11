@@ -88,6 +88,7 @@ async function main() {
     for (const c of cards) {
       if (!c.hotel_id || byId.has(c.hotel_id)) continue;
       if (typeof c.latitude !== 'number' || typeof c.longitude !== 'number') continue;
+      const perNight = c.composite_price_breakdown?.gross_amount_per_night?.value ?? null;
       byId.set(c.hotel_id, {
         hotelId: c.hotel_id,
         name: c.hotel_name ?? null,
@@ -97,6 +98,14 @@ async function main() {
         reviewScore: c.review_score ?? null,
         reviewCount: c.review_nr ?? null,
         district: typeof c.district === 'string' && c.district.trim() ? c.district.trim() : null,
+        // Precio ORIENTATIVO por noche en USD, solo para decidir en que
+        // orden merece la pena preguntar a RapidAPI el precio en vivo -
+        // nunca se le muestra al cliente (eso siempre viene de la consulta
+        // en vivo). Se desactualiza con el tiempo (temporada, eventos...),
+        // por eso conviene refrescar el dataset periodicamente
+        // (semanal/mensual) para que la relacion barato/caro entre hoteles
+        // siga siendo representativa.
+        referencePricePerNight: typeof perNight === 'number' ? Math.round(perNight) : null,
       });
     }
     console.log(`[build-dataset] pagina ${page}: ${cards.length} tarjetas, ${byId.size} hoteles unicos acumulados`);
