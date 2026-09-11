@@ -33,6 +33,20 @@ import { geocodePlace } from './geocode.js';
 // Con 8 candidatos casi siempre hay al menos 3 con hueco.
 const GEO_CANDIDATE_POOL = 8;
 const GEO_RESULTS_WANTED = 3;
+// Consultarlos TODOS en paralelo satura el limite de peticiones por segundo
+// del plan de RapidAPI (confirmado en produccion: "429 You have exceeded the
+// rate limit per second for your plan, BASIC" - por eso a veces solo
+// llegaban 2 de 3 en vez de los 3 pedidos). Se piden de uno en uno (cada uno
+// ya hace 3 peticiones internas en paralelo: precio, fotos y detalle de
+// habitacion), con una pausa entre hoteles, parando en cuanto se consiguen
+// los 3 que hacen falta - prioriza que SIEMPRE lleguen 3 por encima de la
+// velocidad maxima posible.
+const GEO_BATCH_SIZE = 1;
+const GEO_BATCH_DELAY_MS = 500;
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 /**
  * @param {{query:string, checkin:string, checkout:string, adults?:string, rooms?:string, breakfast?:boolean, headless?:boolean, areaOnly?:boolean}} params
@@ -126,10 +140,18 @@ export async function checkPrice({ query, checkin, checkout, adults = '2', rooms
           ...coords,
           candidatos: nearest.map((h) => ({ name: h.name, distanceKm: h.distanceKm.toFixed(2) })),
         });
-        const priced = await Promise.all(
-          nearest.map((h) => checkRapidApiPrice({ hotelId: h.hotelId, checkin, checkout, adults, rooms }))
-        );
-        const found = priced.filter((p) => p?.found).slice(0, GEO_RESULTS_WANTED);
+        const found = [];
+        for (let i = 0; i < nearest.length && found.length < GEO_RESULTS_WANTED; i += GEO_BATCH_SIZE) {
+          const batch = nearest.slice(i, i + GEO_BATCH_SIZE);
+          const results = await Promise.all(
+            batch.map((h) => checkRapidApiPrice({ hotelId: h.hotelId, checkin, checkout, adults, rooms }))
+          );
+          for (const r of results) {
+            if (r?.found && found.length < GEO_RESULTS_WANTED) found.push(r);
+          }
+          if (found.length >= GEO_RESULTS_WANTED) break;
+          if (i + GEO_BATCH_SIZE < nearest.length) await sleep(GEO_BATCH_DELAY_MS);
+        }
         if (found.length > 0) {
           console.log('[priceChecker] busqueda por cercania: precios en vivo obtenidos', { count: found.length });
           return { found: true, multiple: true, hotels: found, breakfastRequested: breakfast };
