@@ -22,7 +22,7 @@ const UPDATE_SLOTS_TOOL = {
     properties: {
       hotelQuery: {
         type: 'string',
-        description: 'Nombre del hotel o zona/barrio que busca el cliente, tal cual lo menciona (p.ej. "Row NYC", "algo en Times Square").',
+        description: 'Nombre del hotel o zona/barrio que busca el cliente, tal cual lo menciona (p.ej. "Row NYC", "algo en Times Square"). OBLIGATORIO rellenarlo SIEMPRE que noSpecificHotel sea true, incluso cuando el cliente no da ninguna zona concreta y pide en general "de Nueva York" (p.ej. "el hotel mas caro de Nueva York", "los hoteles mas lujosos de la ciudad") - en ese caso pon literalmente "Nueva York" como valor. Nunca lo dejes vacio o sin poner cuando noSpecificHotel es true, aunque no haya zona - la busqueda no puede lanzarse sin esto.',
       },
       checkin: { type: 'string', description: 'Fecha de entrada, formato YYYY-MM-DD.' },
       checkout: { type: 'string', description: 'Fecha de salida, formato YYYY-MM-DD.' },
