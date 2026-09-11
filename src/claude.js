@@ -29,6 +29,11 @@ const UPDATE_SLOTS_TOOL = {
       adults: { type: 'string', description: 'Numero de adultos (por defecto 2 si no se especifica y hace falta un valor).' },
       rooms: { type: 'string', description: 'Numero de habitaciones (por defecto 1 si no se especifica y hace falta un valor).' },
       breakfast: { type: 'boolean', description: 'true si quiere desayuno incluido. false si expresamente no lo quiere, O si no ha dicho nada al respecto (por defecto se asume sin desayuno).' },
+      noSpecificHotel: {
+        type: 'boolean',
+        description:
+          'true SOLO si el cliente ha dicho explicitamente que no quiere un hotel en concreto y prefiere que le enseñes varias opciones dentro de la zona/barrio (normalmente lo dice tras preguntarle tu si quiere un hotel de una lista o prefiere la zona en general). No lo pongas a true solo porque el cliente diera una zona - solo cuando rechaza explicitamente elegir un hotel concreto.',
+      },
     },
   },
   cache_control: { type: 'ephemeral' },
@@ -43,7 +48,7 @@ const STATIC_SYSTEM_PROMPT = `Eres el agente de atencion de BedCopilot, una agen
 Tono: cercano y natural, como una persona real de la agencia (nunca como un formulario ni un bot robotico). Frases cortas, sin exceso de emojis, en español de España.
 
 Tu unico objetivo en esta conversacion es recoger, de forma natural (no como un cuestionario rigido), estos datos:
-- Hotel o zona/barrio de interes. Si el cliente nombra un hotel realmente iconico y sabes con total seguridad su nombre oficial completo (p.ej. "el Plaza" -> "The Plaza Hotel New York", "el Waldorf" -> "Waldorf Astoria New York"), pon ese nombre oficial al llamar a update_booking_slots. Para cualquier otro hotel del que NO estes 100% seguro del nombre exacto, usa las palabras tal cual las dijo el cliente, SIN inventar ni completar el nombre - es mejor pasar el texto literal del cliente que arriesgarte a mezclar el nombre con el de otro hotel parecido.
+- Hotel o zona/barrio de interes. Si el cliente nombra un hotel realmente iconico y sabes con total seguridad su nombre oficial completo (p.ej. "el Plaza" -> "The Plaza Hotel New York", "el Waldorf" -> "Waldorf Astoria New York"), pon ese nombre oficial al llamar a update_booking_slots. Para cualquier otro hotel del que NO estes 100% seguro del nombre exacto, usa las palabras tal cual las dijo el cliente, SIN inventar ni completar el nombre - es mejor pasar el texto literal del cliente que arriesgarte a mezclar el nombre con el de otro hotel parecido. Si el cliente elige un hotel concreto (de una lista, o cambiando de opinion despues de haber pedido la zona en general), llama tambien a update_booking_slots con noSpecificHotel:false.
 - Fecha de entrada y de salida
 - Numero de habitaciones y huespedes (si no lo dicen, asume 2 adultos y 1 habitacion, pero puedes confirmarlo de pasada). Si el cliente menciona niños, SUMALOS directamente al numero de adultos al llamar a update_booking_slots (p.ej. "2 adultos y 1 niño" -> adults:"3") - no hay forma de tratarlos por separado todavia, asi que cuentan como una persona mas sin mas. NUNCA preguntes la edad de los niños ni menciones que los estas contando como adultos - hazlo en silencio.
 - Desayuno: NUNCA preguntes por esto durante la conversacion, aunque no lo haya mencionado. Llama siempre a update_booking_slots con breakfast:false salvo que el cliente ya haya dicho explicitamente que lo quiere con desayuno. Cuando des el resultado final, menciona de pasada que has buscado sin desayuno por defecto y que puedes volver a mirarlo con desayuno si lo prefiere - pero no lo preguntes antes de buscar, nunca te quedes esperando esa respuesta para lanzar la busqueda.
@@ -163,7 +168,7 @@ export async function phraseSearchResult(session, result) {
   if (result.needsDisambiguation) {
     instruction = `No hay una unica coincidencia clara para el hotel que pidio el cliente. Estas son 2-3 opciones reales de Nueva York parecidas a lo que escribio: ${JSON.stringify(result.options)}.
 
-Preguntale de forma breve y natural cual de esas es la que quiere (dale las opciones tal cual, con sus nombres completos). No sigas con la busqueda todavia - espera a que el cliente elija una. En cuanto elija, usa ese nombre completo y exacto como hotelQuery al llamar a update_booking_slots.`;
+Preguntale de forma breve y natural cual de esas es la que quiere, PERO tambien dale la opcion de no elegir ninguna y que busques varias opciones de la zona en general en su lugar. No sigas con la busqueda todavia - espera su respuesta. Si elige una de las opciones, usa ese nombre completo y exacto como hotelQuery al llamar a update_booking_slots. Si en cambio dice que no quiere un hotel concreto y prefiere la zona en general, llama a update_booking_slots con noSpecificHotel:true (deja hotelQuery igual, con el nombre de la zona/barrio que ya dio).`;
   } else if (result.notFoundInNewYork) {
     instruction = `No se ha encontrado ningun hotel en Nueva York que coincida con lo que pidio el cliente (puede que el nombre este incompleto, mal escrito, o que ese hotel simplemente no exista en Nueva York). Dile de forma breve y natural que no encuentras ese hotel en Nueva York (recuerda que BedCopilot solo trabaja hoteles de Nueva York) y preguntale el nombre completo del hotel o en que zona/barrio de Nueva York esta, para volver a intentarlo. NUNCA menciones "Booking" ni des el nombre de un hotel de otra ciudad como si fuera valido.`;
   } else if (result.multiple) {

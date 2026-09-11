@@ -10,6 +10,10 @@ const EMPTY_SLOTS = {
   adults: null,
   rooms: null,
   breakfast: null, // true | false | null (sin preferencia)
+  // true si el cliente ha dicho explicitamente que no quiere un hotel
+  // concreto (p.ej. tras una desambiguacion) y prefiere varias opciones de
+  // la zona - ver preferArea en bookingAgent.js/priceChecker.js.
+  noSpecificHotel: null,
 };
 
 export function hasSession(sessionId) {
@@ -33,5 +37,5 @@ export function slotsComplete(slots) {
 }
 
 export function searchKey(slots) {
-  return JSON.stringify([slots.hotelQuery, slots.checkin, slots.checkout, slots.adults, slots.rooms, slots.breakfast]);
+  return JSON.stringify([slots.hotelQuery, slots.checkin, slots.checkout, slots.adults, slots.rooms, slots.breakfast, slots.noSpecificHotel]);
 }

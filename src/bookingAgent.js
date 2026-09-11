@@ -70,7 +70,7 @@ async function captureAutocomplete(page, destInput, query) {
   }
 }
 
-async function selectBestDestination(page, destInput, query) {
+async function selectBestDestination(page, destInput, query, { preferArea = false } = {}) {
   const fallback = async () => {
     await destInput.press('ArrowDown');
     await destInput.press('Enter');
@@ -106,7 +106,19 @@ async function selectBestDestination(page, destInput, query) {
     return { notFoundInNewYork: true };
   }
 
-  const candidates = nyResults;
+  // Si el cliente ha dicho explicitamente que no quiere un hotel concreto
+  // (preferArea), se descartan las sugerencias de tipo HOTEL antes de
+  // puntuar. Sin esto, una zona como "Brooklyn" o "Chelsea" casi siempre
+  // "pierde" contra un hotel real que coincide por nombre (p.ej. "Sheraton
+  // Brooklyn", "Renaissance ... Chelsea Hotel"), y el cliente nunca consigue
+  // la busqueda por zona que pidio. Si tras filtrar no queda ningun
+  // candidato de zona, se sigue con la lista completa - mejor encontrar
+  // algo que no encontrar nada.
+  let candidates = nyResults;
+  if (preferArea) {
+    const areaCandidates = nyResults.filter((r) => r.destination?.destType !== 'HOTEL');
+    if (areaCandidates.length > 0) candidates = areaCandidates;
+  }
   const candidateIndexOf = (r) => results.indexOf(r);
 
   const effectiveQueryWords = computeEffectiveWords(
@@ -170,7 +182,7 @@ function scopeToNewYork(query) {
 // reutilizarlo en resolveHotelId, que solo necesita identificar el hotel
 // (para RapidAPI) sin llegar a elegir fechas ni pulsar Buscar - mucho mas
 // rapido que una busqueda completa.
-async function openAndSelectDestination(page, query) {
+async function openAndSelectDestination(page, query, { preferArea = false } = {}) {
   await page.goto('https://www.booking.com/index.es.html', { waitUntil: 'domcontentloaded', timeout: 30000 });
   await page.waitForTimeout(2000);
   await dismissOverlays(page);
@@ -200,12 +212,12 @@ async function openAndSelectDestination(page, query) {
     await destInput.click({ timeout: 8000, force: true });
   }
   await destInput.fill('');
-  const destinationResult = await selectBestDestination(page, destInput, query);
+  const destinationResult = await selectBestDestination(page, destInput, query, { preferArea });
   return destinationResult;
 }
 
-async function runRealSearch(page, { query, checkin, checkout }) {
-  const destinationResult = await openAndSelectDestination(page, query);
+async function runRealSearch(page, { query, checkin, checkout, preferArea = false }) {
+  const destinationResult = await openAndSelectDestination(page, query, { preferArea });
   if (destinationResult?.needsDisambiguation || destinationResult?.notFoundInNewYork) {
     return destinationResult;
   }
@@ -451,14 +463,14 @@ async function launchContext(headless) {
  * con el hotel_id que usa RapidAPI para hoteles) sin llegar a elegir fechas
  * ni pulsar Buscar. Mucho mas rapida que checkBookingPrice completo - se usa
  * para poder consultar despues el precio via RapidAPI en vez de scrapear.
- * @param {{query:string, headless?:boolean}} params
+ * @param {{query:string, headless?:boolean, preferArea?:boolean}} params
  */
-export async function resolveHotelId({ query, headless = true }) {
+export async function resolveHotelId({ query, headless = true, preferArea = false }) {
   const scopedQuery = scopeToNewYork(query);
   const { browser, context } = await launchContext(headless);
   const page = await context.newPage();
   try {
-    const destinationResult = await openAndSelectDestination(page, scopedQuery);
+    const destinationResult = await openAndSelectDestination(page, scopedQuery, { preferArea });
     if (destinationResult?.needsDisambiguation) {
       return { needsDisambiguation: true, options: destinationResult.options };
     }
@@ -482,9 +494,9 @@ export async function resolveHotelId({ query, headless = true }) {
 
 /**
  * Consulta Booking.com y devuelve el precio mas barato que cumple los criterios.
- * @param {{query:string, checkin:string, checkout:string, adults?:string, rooms?:string, breakfast?:boolean, headless?:boolean}} params
+ * @param {{query:string, checkin:string, checkout:string, adults?:string, rooms?:string, breakfast?:boolean, headless?:boolean, preferArea?:boolean}} params
  */
-export async function checkBookingPrice({ query, checkin, checkout, adults = '2', rooms = '1', breakfast = false, headless = true }) {
+export async function checkBookingPrice({ query, checkin, checkout, adults = '2', rooms = '1', breakfast = false, headless = true, preferArea = false }) {
   if (!query || !checkin || !checkout) {
     throw new Error('query, checkin y checkout son obligatorios');
   }
@@ -500,7 +512,7 @@ export async function checkBookingPrice({ query, checkin, checkout, adults = '2'
   const page = await context.newPage();
 
   try {
-    const searchOutcome = await runRealSearch(page, { query, checkin, checkout });
+    const searchOutcome = await runRealSearch(page, { query, checkin, checkout, preferArea });
     if (searchOutcome?.needsDisambiguation) {
       return { found: false, needsDisambiguation: true, options: searchOutcome.options };
     }

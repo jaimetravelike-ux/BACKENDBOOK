@@ -26,14 +26,20 @@ import { resolveHotelId, checkBookingPrice } from './bookingAgent.js';
 import { checkRapidApiPrice, searchMultipleHotels } from './rapidApiAgent.js';
 
 /**
- * @param {{query:string, checkin:string, checkout:string, adults?:string, rooms?:string, breakfast?:boolean, headless?:boolean}} params
+ * @param {{query:string, checkin:string, checkout:string, adults?:string, rooms?:string, breakfast?:boolean, headless?:boolean, areaOnly?:boolean}} params
  */
-export async function checkPrice({ query, checkin, checkout, adults = '2', rooms = '1', breakfast = false, headless = true }) {
+export async function checkPrice({ query, checkin, checkout, adults = '2', rooms = '1', breakfast = false, headless = true, areaOnly = false }) {
   if (!query || !checkin || !checkout) {
     throw new Error('query, checkin y checkout son obligatorios');
   }
 
-  const resolved = await resolveHotelId({ query, headless });
+  // areaOnly: el cliente ha dicho explicitamente que no quiere un hotel
+  // concreto (normalmente tras una desambiguacion) - se le pide a Booking
+  // que ignore sus sugerencias de tipo HOTEL y resuelva a la zona/distrito,
+  // para que el flujo de varias opciones (searchMultipleHotels, mas abajo)
+  // se dispare de verdad en vez de acabar siempre en un unico hotel cuyo
+  // nombre coincidia por casualidad con la zona pedida.
+  const resolved = await resolveHotelId({ query, headless, preferArea: areaOnly });
   console.log('[priceChecker] resolveHotelId ->', resolved);
 
   if (resolved.needsDisambiguation) {
@@ -84,5 +90,5 @@ export async function checkPrice({ query, checkin, checkout, adults = '2', rooms
   // para estas fechas - reutilizamos la busqueda completa de Playwright tal
   // cual, que ya resuelve el destino por su cuenta y elige una sola opcion.
   console.log('[priceChecker] usando fallback de Playwright');
-  return checkBookingPrice({ query, checkin, checkout, adults, rooms, breakfast, headless });
+  return checkBookingPrice({ query, checkin, checkout, adults, rooms, breakfast, headless, preferArea: areaOnly });
 }

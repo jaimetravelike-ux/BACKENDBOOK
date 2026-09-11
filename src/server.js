@@ -131,6 +131,7 @@ app.post('/api/chat/resolve', async (req, res) => {
         adults: slots.adults || '2',
         rooms: slots.rooms || '1',
         breakfast: Boolean(slots.breakfast),
+        areaOnly: Boolean(slots.noSpecificHotel),
       }),
       PRICE_CHECK_TIMEOUT_MS,
       'checkPrice'
