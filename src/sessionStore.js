@@ -14,6 +14,9 @@ const EMPTY_SLOTS = {
   // concreto (p.ej. tras una desambiguacion) y prefiere varias opciones de
   // la zona - ver preferArea en bookingAgent.js/priceChecker.js.
   noSpecificHotel: null,
+  // 'barato' | 'calidad' | 'calidad_precio' | null (sin preferencia clara,
+  // se trata como 'calidad_precio' al elegir entre varios hoteles de zona).
+  pricePreference: null,
 };
 
 export function hasSession(sessionId) {
@@ -37,5 +40,5 @@ export function slotsComplete(slots) {
 }
 
 export function searchKey(slots) {
-  return JSON.stringify([slots.hotelQuery, slots.checkin, slots.checkout, slots.adults, slots.rooms, slots.breakfast, slots.noSpecificHotel]);
+  return JSON.stringify([slots.hotelQuery, slots.checkin, slots.checkout, slots.adults, slots.rooms, slots.breakfast, slots.noSpecificHotel, slots.pricePreference]);
 }

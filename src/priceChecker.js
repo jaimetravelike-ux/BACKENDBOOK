@@ -33,6 +33,40 @@ import { geocodePlace } from './geocode.js';
 // Con 8 candidatos casi siempre hay al menos 3 con hueco.
 const GEO_CANDIDATE_POOL = 8;
 const GEO_RESULTS_WANTED = 3;
+// Antes de quedarnos con los 3 finales, reunimos al menos este numero de
+// candidatos con disponibilidad real (si el dataset da para ello) para
+// poder elegir los 3 segun la preferencia del cliente (barato/calidad/
+// calidad-precio) en vez de simplemente los 3 primeros por cercania.
+const GEO_RANKING_POOL = 5;
+
+// Extrae el numero de un precio formateado tipo "2.067 €" - se asume
+// formato es-ES (punto de miles), coherente con currency.js.
+function parsePriceNumber(priceText) {
+  if (!priceText) return null;
+  const digits = String(priceText).replace(/[^\d]/g, '');
+  return digits ? Number(digits) : null;
+}
+
+// Ordena los hoteles ya con precio en vivo segun lo que pida el cliente.
+// 'barato': precio mas bajo primero. 'calidad': mejor nota primero. Por
+// defecto (o 'calidad_precio'): mejor relacion nota/precio primero - el
+// caso mas comun cuando no hay una preferencia clara.
+function rankByPreference(hotels, pricePreference) {
+  const withPrice = hotels.map((h) => ({ h, price: parsePriceNumber(h.totalPrice) }));
+  const sorted = [...withPrice];
+  if (pricePreference === 'barato') {
+    sorted.sort((a, b) => (a.price ?? Infinity) - (b.price ?? Infinity));
+  } else if (pricePreference === 'calidad') {
+    sorted.sort((a, b) => (b.h.reviewScore ?? 0) - (a.h.reviewScore ?? 0));
+  } else {
+    sorted.sort((a, b) => {
+      const ratioA = a.price ? (a.h.reviewScore ?? 0) / a.price : 0;
+      const ratioB = b.price ? (b.h.reviewScore ?? 0) / b.price : 0;
+      return ratioB - ratioA;
+    });
+  }
+  return sorted.map((x) => x.h);
+}
 // Consultarlos TODOS en paralelo satura el limite de peticiones por segundo
 // del plan de RapidAPI (confirmado en produccion: "429 You have exceeded the
 // rate limit per second for your plan, BASIC" - por eso a veces solo
@@ -51,7 +85,7 @@ function sleep(ms) {
 /**
  * @param {{query:string, checkin:string, checkout:string, adults?:string, rooms?:string, breakfast?:boolean, headless?:boolean, areaOnly?:boolean}} params
  */
-export async function checkPrice({ query, checkin, checkout, adults = '2', rooms = '1', breakfast = false, headless = true, areaOnly = false }) {
+export async function checkPrice({ query, checkin, checkout, adults = '2', rooms = '1', breakfast = false, headless = true, areaOnly = false, pricePreference = null }) {
   if (!query || !checkin || !checkout) {
     throw new Error('query, checkin y checkout son obligatorios');
   }
@@ -141,20 +175,25 @@ export async function checkPrice({ query, checkin, checkout, adults = '2', rooms
           candidatos: nearest.map((h) => ({ name: h.name, distanceKm: h.distanceKm.toFixed(2) })),
         });
         const found = [];
-        for (let i = 0; i < nearest.length && found.length < GEO_RESULTS_WANTED; i += GEO_BATCH_SIZE) {
+        for (let i = 0; i < nearest.length && found.length < GEO_RANKING_POOL; i += GEO_BATCH_SIZE) {
           const batch = nearest.slice(i, i + GEO_BATCH_SIZE);
           const results = await Promise.all(
             batch.map((h) => checkRapidApiPrice({ hotelId: h.hotelId, checkin, checkout, adults, rooms }))
           );
           for (const r of results) {
-            if (r?.found && found.length < GEO_RESULTS_WANTED) found.push(r);
+            if (r?.found) found.push(r);
           }
-          if (found.length >= GEO_RESULTS_WANTED) break;
+          if (found.length >= GEO_RANKING_POOL) break;
           if (i + GEO_BATCH_SIZE < nearest.length) await sleep(GEO_BATCH_DELAY_MS);
         }
         if (found.length > 0) {
-          console.log('[priceChecker] busqueda por cercania: precios en vivo obtenidos', { count: found.length });
-          return { found: true, multiple: true, hotels: found, breakfastRequested: breakfast };
+          const ranked = rankByPreference(found, pricePreference).slice(0, GEO_RESULTS_WANTED);
+          console.log('[priceChecker] busqueda por cercania: precios en vivo obtenidos', {
+            reunidos: found.length,
+            devueltos: ranked.length,
+            pricePreference,
+          });
+          return { found: true, multiple: true, hotels: ranked, breakfastRequested: breakfast };
         }
         console.log('[priceChecker] busqueda por cercania: ningun hotel cercano tenia disponibilidad - va a Playwright');
       }
