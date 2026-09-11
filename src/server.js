@@ -136,7 +136,17 @@ app.post('/api/chat/resolve', async (req, res) => {
       'checkPrice'
     );
 
-    session.lastSearchedKey = searchKey(slots);
+    // Solo se marca la busqueda como "ya hecha" si de verdad se resolvio algo
+    // (se encontro precio, o se confirmo que no hay disponibilidad). Una
+    // desambiguacion o un "no encontrado en Nueva York" NO es una respuesta
+    // real todavia - si se marcara igual, el cliente podria quedarse sin
+    // poder volver a buscar dentro de la misma conversacion en cuanto el
+    // texto de hotel/zona no cambiara literalmente (p.ej. tras elegir "sin
+    // hotel concreto, busca en la zona" despues de una desambiguacion).
+    const isRealResolution = !result?.needsDisambiguation && !result?.notFoundInNewYork;
+    if (isRealResolution) {
+      session.lastSearchedKey = searchKey(slots);
+    }
     session.pendingSearch = false;
 
     const reply = await phraseSearchResult(session, result);
