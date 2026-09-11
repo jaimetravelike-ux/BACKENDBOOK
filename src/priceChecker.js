@@ -25,6 +25,14 @@
 import { resolveHotelId, checkBookingPrice } from './bookingAgent.js';
 import { checkRapidApiPrice, searchMultipleHotels } from './rapidApiAgent.js';
 import { findNearestHotels } from './geo.js';
+import { geocodePlace } from './geocode.js';
+
+// Cuantos hoteles cercanos se piden como candidatos a RapidAPI para la
+// busqueda por cercania geografica - mas de los 3 que se devuelven al
+// cliente, porque no todos tendran disponibilidad para esas fechas exactas.
+// Con 8 candidatos casi siempre hay al menos 3 con hueco.
+const GEO_CANDIDATE_POOL = 8;
+const GEO_RESULTS_WANTED = 3;
 
 /**
  * @param {{query:string, checkin:string, checkout:string, adults?:string, rooms?:string, breakfast?:boolean, headless?:boolean, areaOnly?:boolean}} params
@@ -87,29 +95,47 @@ export async function checkPrice({ query, checkin, checkout, adults = '2', rooms
     console.log('[priceChecker] sin destId resuelto - va directo a Playwright');
   }
 
-  // Landmark/punto (p.ej. "Times Square"): RapidAPI no acepta destType
-  // latlong, asi que ni el hotel concreto ni searchMultipleHotels de arriba
-  // pudieron responder. Si Booking nos dio coordenadas reales del punto,
-  // buscamos los hoteles reales mas cercanos en el dataset local y pedimos
-  // su precio en vivo via RapidAPI (rapido) antes de caer al fallback lento
-  // de Playwright.
-  if (!breakfast && !resolved.wasSpecificHotel && typeof resolved.latitude === 'number' && typeof resolved.longitude === 'number') {
-    const nearest = findNearestHotels({ latitude: resolved.latitude, longitude: resolved.longitude, limit: 3 });
-    if (nearest.length > 0) {
-      console.log('[priceChecker] usando busqueda por cercania geografica sobre el dataset local', {
-        latitude: resolved.latitude,
-        longitude: resolved.longitude,
-        candidatos: nearest.map((h) => ({ name: h.name, distanceKm: h.distanceKm.toFixed(2) })),
-      });
-      const priced = await Promise.all(
-        nearest.map((h) => checkRapidApiPrice({ hotelId: h.hotelId, checkin, checkout, adults, rooms }))
-      );
-      const found = priced.filter((p) => p?.found);
-      if (found.length > 0) {
-        console.log('[priceChecker] busqueda por cercania: precios en vivo obtenidos', { count: found.length });
-        return { found: true, multiple: true, hotels: found, breakfastRequested: breakfast };
+  // Landmark/zona (p.ej. "Times Square", "Chelsea"): ni el hotel concreto ni
+  // searchMultipleHotels de arriba pudieron responder (o directamente no
+  // habia destId). En vez de depender del autocompletado de Booking para
+  // saber donde esta ese sitio - se demostro poco fiable para landmarks en
+  // el paso rapido de resolveHotelId, fallaba incluso tras reintentar - lo
+  // geocodificamos nosotros mismos con Nominatim (gratis, instantaneo, sin
+  // depender de Playwright en absoluto). Con esas coordenadas, buscamos los
+  // hoteles reales mas cercanos en el dataset local y pedimos su precio en
+  // vivo en paralelo via RapidAPI, antes de caer al fallback lento de
+  // Playwright.
+  if (!breakfast && !resolved.wasSpecificHotel) {
+    let coords =
+      typeof resolved.latitude === 'number' && typeof resolved.longitude === 'number'
+        ? { latitude: resolved.latitude, longitude: resolved.longitude }
+        : null;
+
+    if (!coords) {
+      const geocoded = await geocodePlace(query);
+      if (geocoded) {
+        console.log('[priceChecker] geocodificado con Nominatim ->', geocoded);
+        coords = geocoded;
       }
-      console.log('[priceChecker] busqueda por cercania: ningun hotel cercano tenia disponibilidad - va a Playwright');
+    }
+
+    if (coords) {
+      const nearest = findNearestHotels({ latitude: coords.latitude, longitude: coords.longitude, limit: GEO_CANDIDATE_POOL });
+      if (nearest.length > 0) {
+        console.log('[priceChecker] usando busqueda por cercania geografica sobre el dataset local', {
+          ...coords,
+          candidatos: nearest.map((h) => ({ name: h.name, distanceKm: h.distanceKm.toFixed(2) })),
+        });
+        const priced = await Promise.all(
+          nearest.map((h) => checkRapidApiPrice({ hotelId: h.hotelId, checkin, checkout, adults, rooms }))
+        );
+        const found = priced.filter((p) => p?.found).slice(0, GEO_RESULTS_WANTED);
+        if (found.length > 0) {
+          console.log('[priceChecker] busqueda por cercania: precios en vivo obtenidos', { count: found.length });
+          return { found: true, multiple: true, hotels: found, breakfastRequested: breakfast };
+        }
+        console.log('[priceChecker] busqueda por cercania: ningun hotel cercano tenia disponibilidad - va a Playwright');
+      }
     }
   }
 
