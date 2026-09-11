@@ -5,7 +5,12 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+// El SDK instalado (0.32.x) todavia trata el prompt caching como beta y
+// necesita esta cabecera para activarlo con el cliente normal de mensajes.
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+  defaultHeaders: { 'anthropic-beta': 'prompt-caching-2024-07-31' },
+});
 const MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-5';
 
 const UPDATE_SLOTS_TOOL = {
@@ -26,11 +31,14 @@ const UPDATE_SLOTS_TOOL = {
       breakfast: { type: 'boolean', description: 'true si quiere desayuno incluido. false si expresamente no lo quiere, O si no ha dicho nada al respecto (por defecto se asume sin desayuno).' },
     },
   },
+  cache_control: { type: 'ephemeral' },
 };
 
-function systemPrompt(slots) {
-  const today = new Date().toISOString().slice(0, 10);
-  return `Eres el agente de atencion de BedCopilot, una agencia especializada solo en hoteles de Nueva York. Hablas por el chat de la web.
+// Parte fija del prompt: no depende de la fecha ni de los datos de la
+// conversacion, asi que es identica en todas las llamadas y se puede
+// cachear (cache_control ephemeral) para no pagar precio completo por ella
+// en cada turno.
+const STATIC_SYSTEM_PROMPT = `Eres el agente de atencion de BedCopilot, una agencia especializada solo en hoteles de Nueva York. Hablas por el chat de la web.
 
 Tono: cercano y natural, como una persona real de la agencia (nunca como un formulario ni un bot robotico). Frases cortas, sin exceso de emojis, en español de España.
 
@@ -40,15 +48,28 @@ Tu unico objetivo en esta conversacion es recoger, de forma natural (no como un 
 - Numero de habitaciones y huespedes (si no lo dicen, asume 2 adultos y 1 habitacion, pero puedes confirmarlo de pasada). Si el cliente menciona niños, SUMALOS directamente al numero de adultos al llamar a update_booking_slots (p.ej. "2 adultos y 1 niño" -> adults:"3") - no hay forma de tratarlos por separado todavia, asi que cuentan como una persona mas sin mas. NUNCA preguntes la edad de los niños ni menciones que los estas contando como adultos - hazlo en silencio.
 - Desayuno: NUNCA preguntes por esto durante la conversacion, aunque no lo haya mencionado. Llama siempre a update_booking_slots con breakfast:false salvo que el cliente ya haya dicho explicitamente que lo quiere con desayuno. Cuando des el resultado final, menciona de pasada que has buscado sin desayuno por defecto y que puedes volver a mirarlo con desayuno si lo prefiere - pero no lo preguntes antes de buscar, nunca te quedes esperando esa respuesta para lanzar la busqueda.
 
-Hoy es ${today}. Si el cliente da fechas relativas ("el finde que viene", "en dos semanas"), calculalas tu y usa siempre formato YYYY-MM-DD al llamar a la herramienta.
+Si el cliente da fechas relativas ("el finde que viene", "en dos semanas"), calculalas usando la fecha actual indicada mas abajo, y usa siempre formato YYYY-MM-DD al llamar a la herramienta.
 
 Llama a la herramienta update_booking_slots cada vez que el cliente aporte o confirme un dato nuevo, aunque sea parcial.
-
-Datos que ya tienes de turnos anteriores: ${JSON.stringify(slots)}
 
 Cuando tengas ya hotel/zona + fecha de entrada + fecha de salida (los demas datos pueden quedar en su valor por defecto), NO sigas preguntando mas cosas: dile al cliente de forma natural que vas a comprobar el mejor precio ahora mismo y que le puede llevar un momento. No inventes ningun precio ni disponibilidad tu mismo - eso lo compruebas aparte. NUNCA menciones "Booking" ni ninguna web externa por su nombre - de cara al cliente, el precio lo comprueba BedCopilot.
 
 Si el cliente pregunta algo que no tiene que ver con reservar un hotel en Nueva York, respondele brevemente y con amabilidad, y reconduce la conversacion hacia recoger esos datos.`;
+
+// Parte dinamica: cambia en cada turno (fecha, datos ya recogidos), asi que
+// va aparte y no se cachea.
+function dynamicSystemSuffix(slots) {
+  const today = new Date().toISOString().slice(0, 10);
+  return `Fecha actual: ${today}.
+
+Datos que ya tienes de turnos anteriores: ${JSON.stringify(slots)}`;
+}
+
+function systemPrompt(slots) {
+  return [
+    { type: 'text', text: STATIC_SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } },
+    { type: 'text', text: dynamicSystemSuffix(slots) },
+  ];
 }
 
 async function runTurn(messages, slots) {
