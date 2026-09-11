@@ -72,6 +72,26 @@ function systemPrompt(slots) {
   ];
 }
 
+// Marca el ultimo bloque del ultimo mensaje como punto de corte de cache
+// (sin mutar los mensajes originales, que se siguen guardando tal cual en
+// session.history). En una conversacion de varios turnos, el historial va
+// creciendo pero su principio es siempre el mismo texto ya enviado antes -
+// con esto, Anthropic reutiliza en cache todo ese principio identico y solo
+// cobra precio completo por lo nuevo de este turno, en vez de repetir el
+// precio completo de toda la conversacion cada vez que crece.
+function withCacheBreakpoint(messages) {
+  if (messages.length === 0) return messages;
+  const lastIndex = messages.length - 1;
+  const last = messages[lastIndex];
+  const blocks =
+    typeof last.content === 'string'
+      ? [{ type: 'text', text: last.content }]
+      : last.content.map((b) => ({ ...b }));
+  const lastBlockIndex = blocks.length - 1;
+  blocks[lastBlockIndex] = { ...blocks[lastBlockIndex], cache_control: { type: 'ephemeral' } };
+  return [...messages.slice(0, lastIndex), { ...last, content: blocks }];
+}
+
 async function runTurn(messages, slots) {
   let currentMessages = [...messages];
   let finalText = '';
@@ -83,7 +103,7 @@ async function runTurn(messages, slots) {
       max_tokens: 700,
       system: systemPrompt({ ...slots, ...slotUpdates }),
       tools: [UPDATE_SLOTS_TOOL],
-      messages: currentMessages,
+      messages: withCacheBreakpoint(currentMessages),
     });
 
     const toolUses = response.content.filter((b) => b.type === 'tool_use');
