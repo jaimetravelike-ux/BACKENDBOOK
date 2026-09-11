@@ -176,11 +176,21 @@ async function fetchRoomDetails(hotelId, { checkin, checkout, adults }) {
 // de RapidAPI - es el mismo dato que usa la propia Booking para su "a X km
 // del centro". Se formatea aqui para no repetir el redondeo en el widget.
 function formatDistanceToCenter(hotel) {
-  const km = hotel.distance_to_cc;
-  if (typeof km !== 'number' || !Number.isFinite(km) || km < 0) return null;
-  const rounded = km < 10 ? Math.round(km * 10) / 10 : Math.round(km);
-  const text = String(rounded).replace('.', ',');
-  return `A ${text} km del centro`;
+  const km = hotel.distance_to_cc ?? hotel.distance ?? hotel.distance_to_cc_formatted;
+  if (typeof km === 'number' && Number.isFinite(km) && km >= 0) {
+    const rounded = km < 10 ? Math.round(km * 10) / 10 : Math.round(km);
+    const text = String(rounded).replace('.', ',');
+    return `A ${text} km del centro`;
+  }
+  // Diagnostico temporal: distance_to_cc vino null en una busqueda de hotel
+  // concreto (dest_type=hotel) - puede que solo lo traigan las busquedas por
+  // zona/ciudad. Este log ayuda a confirmarlo con datos reales, quitar en
+  // cuanto se verifique.
+  const distanceKeys = Object.keys(hotel).filter((k) => /distance/i.test(k));
+  if (distanceKeys.length > 0) {
+    console.log('[rapidapi] campos de distancia disponibles (diagnostico):', JSON.stringify(distanceKeys.map((k) => [k, hotel[k]])));
+  }
+  return null;
 }
 
 function parseHotelCard(hotel, { checkin, checkout, adults, rooms }) {
