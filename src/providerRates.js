@@ -14,6 +14,13 @@ const pool = process.env.DATABASE_URL
   ? new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } })
   : null;
 
+// Ver el mismo comentario en conversationLog.js: sin esto, un error de un
+// cliente inactivo del pool tumba el proceso de Node entero, no solo esta
+// consulta.
+pool?.on('error', (err) => {
+  console.error('[providerRates] error inesperado del pool de Postgres (no tumba el proceso):', err?.message);
+});
+
 let ready = null;
 
 function init() {

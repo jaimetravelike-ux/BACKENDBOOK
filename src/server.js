@@ -1,3 +1,8 @@
+// Debe ser el primer import: cualquier modulo importado despues de este ya
+// puede leer sus variables de entorno desde .env en local. En Railway no
+// hace nada (ya inyecta las variables reales directamente), pero deja el
+// proyecto listo para correr igual en un portatil que en produccion.
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { randomUUID } from 'node:crypto';
@@ -10,6 +15,18 @@ import { logTurn, logResolved, listConversations, logLead, listLeads, logContact
 import { upsertProviderRate, listProviderRates } from './providerRates.js';
 import { sendContactNotification } from './mailer.js';
 import { lookupGeo, computeTrafficSource, parseUtmParams } from './geoip.js';
+
+// Red de seguridad a nivel de proceso: con todas las rutas ya protegidas por
+// su propio try/catch (mas abajo) y con el listener de error del pool de
+// Postgres (conversationLog.js / providerRates.js), no deberia llegar nunca
+// una excepcion hasta aqui - pero si algo se escapa igualmente, queremos un
+// log claro en vez de que Railway solo vea "el proceso murio" sin motivo.
+process.on('unhandledRejection', (reason) => {
+  console.error('[proceso] promesa rechazada sin capturar (revisar):', reason);
+});
+process.on('uncaughtException', (err) => {
+  console.error('[proceso] excepcion sin capturar:', err);
+});
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -140,6 +157,28 @@ function isValidEmail(value) {
   return typeof value === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
+// Control de doble clic / reintento: si llega una peticion con los mismos
+// datos en menos de DEDUPE_WINDOW_MS, se trata como la misma solicitud (se
+// responde ok sin volver a guardar en BD ni reenviar el email). Basta con
+// esto porque ambos formularios son de un solo paso, sin estado que pueda
+// "ya estar procesandose" de verdad - el riesgo real es solo el duplicado
+// por impaciencia o por un reintento automatico del navegador.
+const DEDUPE_WINDOW_MS = 15000;
+const recentSubmissions = new Map();
+
+function isDuplicateSubmission(key) {
+  const now = Date.now();
+  if (recentSubmissions.size > 500) {
+    for (const [k, t] of recentSubmissions) {
+      if (now - t > DEDUPE_WINDOW_MS) recentSubmissions.delete(k);
+    }
+  }
+  const last = recentSubmissions.get(key);
+  if (last && now - last < DEDUPE_WINDOW_MS) return true;
+  recentSubmissions.set(key, now);
+  return false;
+}
+
 // Datos de contacto que el cliente deja directamente en la card del hotel
 // (nombre + email), en vez de escribirlos por chat.
 app.post('/api/lead', async (req, res) => {
@@ -151,6 +190,11 @@ app.post('/api/lead', async (req, res) => {
     }
     if (!isValidEmail(email)) {
       return res.status(400).json({ error: 'Email invalido' });
+    }
+
+    const dedupeKey = `lead:${sessionId || ''}:${email.trim().toLowerCase()}:${hotel || ''}:${checkin || ''}:${checkout || ''}`;
+    if (isDuplicateSubmission(dedupeKey)) {
+      return res.status(200).json({ ok: true });
     }
 
     await logLead({
@@ -184,6 +228,11 @@ app.post('/api/contact', async (req, res) => {
     }
     if (email && !isValidEmail(email)) {
       return res.status(400).json({ error: 'Email invalido' });
+    }
+
+    const dedupeKey = `contact:${(email || '').trim().toLowerCase()}:${name.trim().toLowerCase()}:${phone || ''}:${message || ''}`;
+    if (isDuplicateSubmission(dedupeKey)) {
+      return res.status(200).json({ ok: true });
     }
 
     await logContact({

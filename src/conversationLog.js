@@ -12,6 +12,16 @@ const pool = process.env.DATABASE_URL
   ? new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } })
   : null;
 
+// Sin este listener, un error de un cliente inactivo del pool (red caida,
+// Postgres reiniciandose, conexion cortada por el proveedor...) se propaga
+// como un evento 'error' sin manejar y TUMBA TODO EL PROCESO de Node, no solo
+// esa consulta - pasaria a llevarse por delante el chat entero, no solo el
+// registro. Con esto, se queda solo en un log y el pool sigue funcionando
+// (reconecta solo en la siguiente consulta).
+pool?.on('error', (err) => {
+  console.error('[conversationLog] error inesperado del pool de Postgres (no tumba el proceso):', err?.message);
+});
+
 let ready = null;
 
 function init() {
