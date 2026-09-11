@@ -7,7 +7,8 @@
     "stars": 5,
     "reviewScore": 9.4,
     "reviewCount": 1116,
-    "district": "Upper West Side"
+    "district": "Upper West Side",
+    "referencePricePerNight": 668
   },
   {
     "hotelId": 55831,
@@ -17,7 +18,8 @@
     "stars": 4,
     "reviewScore": 9.3,
     "reviewCount": 1465,
-    "district": "NoMad"
+    "district": "NoMad",
+    "referencePricePerNight": 617
   },
   {
     "hotelId": 7307545,
@@ -27,7 +29,8 @@
     "stars": 3,
     "reviewScore": 9.3,
     "reviewCount": 1260,
-    "district": "Midtown East"
+    "district": "Midtown East",
+    "referencePricePerNight": 1140
   },
   {
     "hotelId": 8015286,
@@ -37,7 +40,8 @@
     "stars": 4,
     "reviewScore": 9.3,
     "reviewCount": 657,
-    "district": "Chelsea"
+    "district": "Chelsea",
+    "referencePricePerNight": 1031
   },
   {
     "hotelId": 2883256,
@@ -46,8 +50,9 @@
     "longitude": -74.0086147,
     "stars": 4,
     "reviewScore": 9.2,
-    "reviewCount": 1464,
-    "district": "Manhattan"
+    "reviewCount": 1465,
+    "district": "Manhattan",
+    "referencePricePerNight": 556
   },
   {
     "hotelId": 7058236,
@@ -57,7 +62,8 @@
     "stars": 5,
     "reviewScore": 9.2,
     "reviewCount": 522,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 1183
   },
   {
     "hotelId": 16589827,
@@ -67,7 +73,8 @@
     "stars": 0,
     "reviewScore": 9.2,
     "reviewCount": 13,
-    "district": "NoMad"
+    "district": "NoMad",
+    "referencePricePerNight": 526
   },
   {
     "hotelId": 16289273,
@@ -77,7 +84,8 @@
     "stars": 0,
     "reviewScore": 9.2,
     "reviewCount": 8,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 857
   },
   {
     "hotelId": 55915,
@@ -87,7 +95,8 @@
     "stars": 4,
     "reviewScore": 9.1,
     "reviewCount": 4311,
-    "district": "Midtown East"
+    "district": "Midtown East",
+    "referencePricePerNight": 631
   },
   {
     "hotelId": 56175,
@@ -97,7 +106,8 @@
     "stars": 4,
     "reviewScore": 9.1,
     "reviewCount": 813,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 899
   },
   {
     "hotelId": 1469127,
@@ -107,7 +117,8 @@
     "stars": 4,
     "reviewScore": 9.1,
     "reviewCount": 841,
-    "district": "Little Italy"
+    "district": "Little Italy",
+    "referencePricePerNight": 590
   },
   {
     "hotelId": 2031539,
@@ -117,7 +128,8 @@
     "stars": 4,
     "reviewScore": 9.1,
     "reviewCount": 3019,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 587
   },
   {
     "hotelId": 1498024,
@@ -127,7 +139,8 @@
     "stars": 4,
     "reviewScore": 9.1,
     "reviewCount": 1333,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 810
   },
   {
     "hotelId": 8453934,
@@ -137,7 +150,8 @@
     "stars": 4,
     "reviewScore": 9,
     "reviewCount": 1866,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 575
   },
   {
     "hotelId": 16590487,
@@ -147,7 +161,8 @@
     "stars": 0,
     "reviewScore": 9,
     "reviewCount": 9,
-    "district": "NoMad"
+    "district": "NoMad",
+    "referencePricePerNight": 862
   },
   {
     "hotelId": 16087069,
@@ -157,7 +172,8 @@
     "stars": 0,
     "reviewScore": 9,
     "reviewCount": 10,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 245
   },
   {
     "hotelId": 6966158,
@@ -166,8 +182,9 @@
     "longitude": -73.983386,
     "stars": 4,
     "reviewScore": 8.9,
-    "reviewCount": 9093,
-    "district": "Manhattan"
+    "reviewCount": 9082,
+    "district": "Manhattan",
+    "referencePricePerNight": 796
   },
   {
     "hotelId": 56510,
@@ -177,7 +194,8 @@
     "stars": 4,
     "reviewScore": 8.9,
     "reviewCount": 1771,
-    "district": "Murray Hill"
+    "district": "Murray Hill",
+    "referencePricePerNight": 718
   },
   {
     "hotelId": 9832750,
@@ -187,7 +205,8 @@
     "stars": 4,
     "reviewScore": 8.9,
     "reviewCount": 2280,
-    "district": "Lower East Side"
+    "district": "Lower East Side",
+    "referencePricePerNight": 484
   },
   {
     "hotelId": 906253,
@@ -197,7 +216,8 @@
     "stars": 4,
     "reviewScore": 8.9,
     "reviewCount": 3213,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 529
   },
   {
     "hotelId": 2190252,
@@ -207,7 +227,8 @@
     "stars": 4,
     "reviewScore": 8.9,
     "reviewCount": 2268,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 703
   },
   {
     "hotelId": 7695414,
@@ -217,7 +238,8 @@
     "stars": 4,
     "reviewScore": 8.8,
     "reviewCount": 8113,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 455
   },
   {
     "hotelId": 7421557,
@@ -227,7 +249,8 @@
     "stars": 4,
     "reviewScore": 8.8,
     "reviewCount": 2479,
-    "district": "Chelsea"
+    "district": "Chelsea",
+    "referencePricePerNight": 643
   },
   {
     "hotelId": 367632,
@@ -237,7 +260,8 @@
     "stars": 3,
     "reviewScore": 8.8,
     "reviewCount": 4431,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 523
   },
   {
     "hotelId": 1549663,
@@ -247,7 +271,8 @@
     "stars": 4,
     "reviewScore": 8.8,
     "reviewCount": 1287,
-    "district": "Chelsea"
+    "district": "Chelsea",
+    "referencePricePerNight": 562
   },
   {
     "hotelId": 1498530,
@@ -257,7 +282,8 @@
     "stars": 4,
     "reviewScore": 8.8,
     "reviewCount": 1692,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 2504
   },
   {
     "hotelId": 1910127,
@@ -267,7 +293,8 @@
     "stars": 4,
     "reviewScore": 8.8,
     "reviewCount": 1550,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 553
   },
   {
     "hotelId": 6940278,
@@ -276,8 +303,9 @@
     "longitude": -73.993859,
     "stars": 4,
     "reviewScore": 8.8,
-    "reviewCount": 5178,
-    "district": "Hell's Kitchen"
+    "reviewCount": 5180,
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 520
   },
   {
     "hotelId": 7686514,
@@ -287,7 +315,8 @@
     "stars": 4,
     "reviewScore": 8.8,
     "reviewCount": 3072,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 492
   },
   {
     "hotelId": 13709503,
@@ -297,7 +326,8 @@
     "stars": 3,
     "reviewScore": 8.8,
     "reviewCount": 178,
-    "district": null
+    "district": null,
+    "referencePricePerNight": 344
   },
   {
     "hotelId": 14007260,
@@ -307,7 +337,8 @@
     "stars": 0,
     "reviewScore": 8.8,
     "reviewCount": 290,
-    "district": "Chelsea"
+    "district": "Chelsea",
+    "referencePricePerNight": 468
   },
   {
     "hotelId": 16590477,
@@ -317,7 +348,8 @@
     "stars": 0,
     "reviewScore": 8.8,
     "reviewCount": 4,
-    "district": "NoMad"
+    "district": "NoMad",
+    "referencePricePerNight": 601
   },
   {
     "hotelId": 10027699,
@@ -327,7 +359,8 @@
     "stars": 4,
     "reviewScore": 8.7,
     "reviewCount": 5419,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 550
   },
   {
     "hotelId": 1338472,
@@ -337,7 +370,8 @@
     "stars": 3,
     "reviewScore": 8.7,
     "reviewCount": 382,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 404
   },
   {
     "hotelId": 15396491,
@@ -347,7 +381,8 @@
     "stars": 0,
     "reviewScore": 8.7,
     "reviewCount": 71,
-    "district": "Manhattan"
+    "district": "New York Central Park",
+    "referencePricePerNight": 284
   },
   {
     "hotelId": 5579202,
@@ -356,8 +391,9 @@
     "longitude": -74.0058924,
     "stars": 4,
     "reviewScore": 8.7,
-    "reviewCount": 139,
-    "district": "Manhattan"
+    "reviewCount": 140,
+    "district": "Manhattan",
+    "referencePricePerNight": 533
   },
   {
     "hotelId": 247713,
@@ -367,7 +403,8 @@
     "stars": 4,
     "reviewScore": 8.7,
     "reviewCount": 3668,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 527
   },
   {
     "hotelId": 9535786,
@@ -377,7 +414,8 @@
     "stars": 4,
     "reviewScore": 8.7,
     "reviewCount": 2017,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 629
   },
   {
     "hotelId": 28898,
@@ -386,8 +424,9 @@
     "longitude": -73.9692118763924,
     "stars": 4,
     "reviewScore": 8.7,
-    "reviewCount": 1576,
-    "district": "Midtown East"
+    "reviewCount": 1577,
+    "district": "Midtown East",
+    "referencePricePerNight": 445
   },
   {
     "hotelId": 28633,
@@ -397,7 +436,8 @@
     "stars": 3,
     "reviewScore": 8.7,
     "reviewCount": 564,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 879
   },
   {
     "hotelId": 7185135,
@@ -407,7 +447,8 @@
     "stars": 4,
     "reviewScore": 8.7,
     "reviewCount": 4249,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 577
   },
   {
     "hotelId": 181008,
@@ -417,7 +458,8 @@
     "stars": 2,
     "reviewScore": 8.6,
     "reviewCount": 5795,
-    "district": "Upper West Side"
+    "district": "Upper West Side",
+    "referencePricePerNight": 283
   },
   {
     "hotelId": 76684,
@@ -427,7 +469,8 @@
     "stars": 4,
     "reviewScore": 8.6,
     "reviewCount": 2070,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 624
   },
   {
     "hotelId": 667881,
@@ -437,7 +480,8 @@
     "stars": 4,
     "reviewScore": 8.6,
     "reviewCount": 898,
-    "district": "Greenwich Village"
+    "district": "Greenwich Village",
+    "referencePricePerNight": 754
   },
   {
     "hotelId": 543546,
@@ -447,7 +491,8 @@
     "stars": 3,
     "reviewScore": 8.6,
     "reviewCount": 2742,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 508
   },
   {
     "hotelId": 1397916,
@@ -457,7 +502,8 @@
     "stars": 4,
     "reviewScore": 8.6,
     "reviewCount": 6998,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 441
   },
   {
     "hotelId": 7219858,
@@ -467,7 +513,8 @@
     "stars": 4,
     "reviewScore": 8.6,
     "reviewCount": 2595,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 559
   },
   {
     "hotelId": 1968984,
@@ -477,7 +524,8 @@
     "stars": 3,
     "reviewScore": 8.6,
     "reviewCount": 1713,
-    "district": "Chelsea"
+    "district": "Chelsea",
+    "referencePricePerNight": 680
   },
   {
     "hotelId": 2377260,
@@ -487,7 +535,8 @@
     "stars": 3,
     "reviewScore": 8.6,
     "reviewCount": 17007,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 285
   },
   {
     "hotelId": 56055,
@@ -497,7 +546,8 @@
     "stars": 4,
     "reviewScore": 8.6,
     "reviewCount": 2432,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 472
   },
   {
     "hotelId": 27752,
@@ -507,7 +557,8 @@
     "stars": 4,
     "reviewScore": 8.6,
     "reviewCount": 899,
-    "district": "Greenwich Village"
+    "district": "Greenwich Village",
+    "referencePricePerNight": 524
   },
   {
     "hotelId": 45869,
@@ -517,7 +568,8 @@
     "stars": 4,
     "reviewScore": 8.6,
     "reviewCount": 507,
-    "district": "Chelsea"
+    "district": "Chelsea",
+    "referencePricePerNight": 831
   },
   {
     "hotelId": 2508842,
@@ -527,7 +579,8 @@
     "stars": 4,
     "reviewScore": 8.6,
     "reviewCount": 976,
-    "district": "NoMad"
+    "district": "NoMad",
+    "referencePricePerNight": 657
   },
   {
     "hotelId": 617927,
@@ -537,7 +590,8 @@
     "stars": 3,
     "reviewScore": 8.6,
     "reviewCount": 3474,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 473
   },
   {
     "hotelId": 3110493,
@@ -547,7 +601,8 @@
     "stars": 4,
     "reviewScore": 8.6,
     "reviewCount": 1341,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 627
   },
   {
     "hotelId": 12544014,
@@ -557,7 +612,8 @@
     "stars": 0,
     "reviewScore": 8.6,
     "reviewCount": 23,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 341
   },
   {
     "hotelId": 56568,
@@ -567,7 +623,8 @@
     "stars": 4,
     "reviewScore": 8.5,
     "reviewCount": 1170,
-    "district": "SoHo"
+    "district": "SoHo",
+    "referencePricePerNight": 966
   },
   {
     "hotelId": 25294,
@@ -577,7 +634,8 @@
     "stars": 5,
     "reviewScore": 8.5,
     "reviewCount": 2992,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 817
   },
   {
     "hotelId": 7535947,
@@ -587,7 +645,8 @@
     "stars": 3,
     "reviewScore": 8.5,
     "reviewCount": 1137,
-    "district": "NoMad"
+    "district": "NoMad",
+    "referencePricePerNight": 438
   },
   {
     "hotelId": 7066178,
@@ -596,8 +655,9 @@
     "longitude": -73.9924209999999,
     "stars": 4,
     "reviewScore": 8.5,
-    "reviewCount": 10165,
-    "district": "Chelsea"
+    "reviewCount": 10166,
+    "district": "Chelsea",
+    "referencePricePerNight": 493
   },
   {
     "hotelId": 57487,
@@ -607,7 +667,8 @@
     "stars": 4,
     "reviewScore": 8.5,
     "reviewCount": 719,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 1051
   },
   {
     "hotelId": 183564,
@@ -617,7 +678,8 @@
     "stars": 4,
     "reviewScore": 8.5,
     "reviewCount": 3304,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 492
   },
   {
     "hotelId": 522337,
@@ -627,7 +689,8 @@
     "stars": 3,
     "reviewScore": 8.5,
     "reviewCount": 9714,
-    "district": "Murray Hill"
+    "district": "Murray Hill",
+    "referencePricePerNight": 399
   },
   {
     "hotelId": 4746602,
@@ -637,7 +700,8 @@
     "stars": 3,
     "reviewScore": 8.5,
     "reviewCount": 1921,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 478
   },
   {
     "hotelId": 56034,
@@ -647,7 +711,8 @@
     "stars": 4,
     "reviewScore": 8.5,
     "reviewCount": 2428,
-    "district": "Murray Hill"
+    "district": "Murray Hill",
+    "referencePricePerNight": 435
   },
   {
     "hotelId": 1078432,
@@ -656,8 +721,9 @@
     "longitude": -73.9848648,
     "stars": 4,
     "reviewScore": 8.4,
-    "reviewCount": 331,
-    "district": "Manhattan"
+    "reviewCount": 333,
+    "district": "Manhattan",
+    "referencePricePerNight": 565
   },
   {
     "hotelId": 7078644,
@@ -667,7 +733,8 @@
     "stars": 3,
     "reviewScore": 8.4,
     "reviewCount": 6997,
-    "district": "Chelsea"
+    "district": "Chelsea",
+    "referencePricePerNight": 456
   },
   {
     "hotelId": 56113,
@@ -677,7 +744,8 @@
     "stars": 3,
     "reviewScore": 8.4,
     "reviewCount": 832,
-    "district": "Midtown East"
+    "district": "Midtown East",
+    "referencePricePerNight": 823
   },
   {
     "hotelId": 15654982,
@@ -687,7 +755,8 @@
     "stars": 4,
     "reviewScore": 8.4,
     "reviewCount": 455,
-    "district": "Times Square"
+    "district": "Times Square",
+    "referencePricePerNight": 557
   },
   {
     "hotelId": 187699,
@@ -697,7 +766,8 @@
     "stars": 3,
     "reviewScore": 8.4,
     "reviewCount": 6514,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 462
   },
   {
     "hotelId": 4063342,
@@ -707,7 +777,8 @@
     "stars": 5,
     "reviewScore": 8.4,
     "reviewCount": 690,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 1129
   },
   {
     "hotelId": 242447,
@@ -717,7 +788,8 @@
     "stars": 4,
     "reviewScore": 8.4,
     "reviewCount": 391,
-    "district": "Midtown East"
+    "district": "Midtown East",
+    "referencePricePerNight": 690
   },
   {
     "hotelId": 397451,
@@ -727,7 +799,8 @@
     "stars": 5,
     "reviewScore": 8.4,
     "reviewCount": 526,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 844
   },
   {
     "hotelId": 1803065,
@@ -737,7 +810,8 @@
     "stars": 4,
     "reviewScore": 8.4,
     "reviewCount": 1698,
-    "district": "NoMad"
+    "district": "NoMad",
+    "referencePricePerNight": 551
   },
   {
     "hotelId": 28040,
@@ -746,8 +820,9 @@
     "longitude": -73.9785969257355,
     "stars": 4,
     "reviewScore": 8.4,
-    "reviewCount": 1664,
-    "district": "Upper West Side"
+    "reviewCount": 1661,
+    "district": "Upper West Side",
+    "referencePricePerNight": 418
   },
   {
     "hotelId": 55903,
@@ -757,7 +832,8 @@
     "stars": 4,
     "reviewScore": 8.4,
     "reviewCount": 7742,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 514
   },
   {
     "hotelId": 186118,
@@ -766,8 +842,9 @@
     "longitude": -73.9859206974506,
     "stars": 4,
     "reviewScore": 8.4,
-    "reviewCount": 4510,
-    "district": "Manhattan"
+    "reviewCount": 4512,
+    "district": "Manhattan",
+    "referencePricePerNight": 359
   },
   {
     "hotelId": 56021,
@@ -777,7 +854,8 @@
     "stars": 4,
     "reviewScore": 8.4,
     "reviewCount": 2666,
-    "district": "Murray Hill"
+    "district": "Murray Hill",
+    "referencePricePerNight": 576
   },
   {
     "hotelId": 182478,
@@ -787,7 +865,8 @@
     "stars": 3,
     "reviewScore": 8.4,
     "reviewCount": 2657,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 304
   },
   {
     "hotelId": 8534118,
@@ -797,7 +876,8 @@
     "stars": 4,
     "reviewScore": 8.4,
     "reviewCount": 1384,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 997
   },
   {
     "hotelId": 57473,
@@ -806,8 +886,9 @@
     "longitude": -73.9836555719375,
     "stars": 4,
     "reviewScore": 8.3,
-    "reviewCount": 12570,
-    "district": "Manhattan"
+    "reviewCount": 12571,
+    "district": "Manhattan",
+    "referencePricePerNight": 577
   },
   {
     "hotelId": 4125132,
@@ -817,7 +898,8 @@
     "stars": 4,
     "reviewScore": 8.3,
     "reviewCount": 7415,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 565
   },
   {
     "hotelId": 242842,
@@ -827,7 +909,8 @@
     "stars": 4,
     "reviewScore": 8.3,
     "reviewCount": 478,
-    "district": "Midtown East"
+    "district": "Midtown East",
+    "referencePricePerNight": 506
   },
   {
     "hotelId": 57685,
@@ -837,7 +920,8 @@
     "stars": 4,
     "reviewScore": 8.3,
     "reviewCount": 581,
-    "district": "Midtown East"
+    "district": "Midtown East",
+    "referencePricePerNight": 634
   },
   {
     "hotelId": 283518,
@@ -847,7 +931,8 @@
     "stars": 4,
     "reviewScore": 8.3,
     "reviewCount": 1730,
-    "district": "Chelsea"
+    "district": "Chelsea",
+    "referencePricePerNight": 614
   },
   {
     "hotelId": 11704081,
@@ -857,7 +942,8 @@
     "stars": 3,
     "reviewScore": 8.3,
     "reviewCount": 589,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 427
   },
   {
     "hotelId": 23156,
@@ -867,7 +953,8 @@
     "stars": 4,
     "reviewScore": 8.3,
     "reviewCount": 2058,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 617
   },
   {
     "hotelId": 5122464,
@@ -877,7 +964,8 @@
     "stars": 3,
     "reviewScore": 8.3,
     "reviewCount": 1499,
-    "district": "East Village"
+    "district": "East Village",
+    "referencePricePerNight": 517
   },
   {
     "hotelId": 4925569,
@@ -887,7 +975,8 @@
     "stars": 3,
     "reviewScore": 8.3,
     "reviewCount": 3354,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 405
   },
   {
     "hotelId": 56029,
@@ -897,7 +986,8 @@
     "stars": 5,
     "reviewScore": 8.3,
     "reviewCount": 953,
-    "district": "Midtown East"
+    "district": "Midtown East",
+    "referencePricePerNight": 730
   },
   {
     "hotelId": 4561710,
@@ -907,7 +997,8 @@
     "stars": 4,
     "reviewScore": 8.3,
     "reviewCount": 1637,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 453
   },
   {
     "hotelId": 606889,
@@ -916,8 +1007,9 @@
     "longitude": -74.006408,
     "stars": 3,
     "reviewScore": 8.3,
-    "reviewCount": 2664,
-    "district": "Manhattan"
+    "reviewCount": 2663,
+    "district": "Manhattan",
+    "referencePricePerNight": 427
   },
   {
     "hotelId": 278666,
@@ -927,7 +1019,8 @@
     "stars": 4,
     "reviewScore": 8.3,
     "reviewCount": 1082,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 472
   },
   {
     "hotelId": 15380450,
@@ -937,7 +1030,8 @@
     "stars": 0,
     "reviewScore": 8.3,
     "reviewCount": 19,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 318
   },
   {
     "hotelId": 4918055,
@@ -947,7 +1041,8 @@
     "stars": 4,
     "reviewScore": 8.3,
     "reviewCount": 1689,
-    "district": "Midtown East"
+    "district": "Midtown East",
+    "referencePricePerNight": 574
   },
   {
     "hotelId": 75911,
@@ -957,7 +1052,8 @@
     "stars": 4,
     "reviewScore": 8.3,
     "reviewCount": 275,
-    "district": "East Village"
+    "district": "East Village",
+    "referencePricePerNight": 720
   },
   {
     "hotelId": 587439,
@@ -967,7 +1063,8 @@
     "stars": 4,
     "reviewScore": 8.3,
     "reviewCount": 2312,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 653
   },
   {
     "hotelId": 10599290,
@@ -977,7 +1074,8 @@
     "stars": 4,
     "reviewScore": 8.2,
     "reviewCount": 948,
-    "district": "Midtown East"
+    "district": "Midtown East",
+    "referencePricePerNight": 408
   },
   {
     "hotelId": 56721,
@@ -987,7 +1085,8 @@
     "stars": 3,
     "reviewScore": 8.2,
     "reviewCount": 1605,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 483
   },
   {
     "hotelId": 3838991,
@@ -997,7 +1096,8 @@
     "stars": 3,
     "reviewScore": 8.2,
     "reviewCount": 2862,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 702
   },
   {
     "hotelId": 16664773,
@@ -1007,7 +1107,8 @@
     "stars": 4,
     "reviewScore": 8.2,
     "reviewCount": 64,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 455
   },
   {
     "hotelId": 360589,
@@ -1017,7 +1118,8 @@
     "stars": 4,
     "reviewScore": 8.2,
     "reviewCount": 4326,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 457
   },
   {
     "hotelId": 6939714,
@@ -1027,7 +1129,8 @@
     "stars": 4,
     "reviewScore": 8.2,
     "reviewCount": 13665,
-    "district": "Chelsea"
+    "district": "Chelsea",
+    "referencePricePerNight": 588
   },
   {
     "hotelId": 48003,
@@ -1037,7 +1140,8 @@
     "stars": 5,
     "reviewScore": 8.2,
     "reviewCount": 812,
-    "district": "Greenwich Village"
+    "district": "Greenwich Village",
+    "referencePricePerNight": 1011
   },
   {
     "hotelId": 442501,
@@ -1047,7 +1151,8 @@
     "stars": 4,
     "reviewScore": 8.2,
     "reviewCount": 758,
-    "district": "Greenwich Village"
+    "district": "Greenwich Village",
+    "referencePricePerNight": 774
   },
   {
     "hotelId": 3390635,
@@ -1057,7 +1162,8 @@
     "stars": 3,
     "reviewScore": 8.2,
     "reviewCount": 2463,
-    "district": "Chelsea"
+    "district": "Chelsea",
+    "referencePricePerNight": 603
   },
   {
     "hotelId": 2210104,
@@ -1067,7 +1173,8 @@
     "stars": 3,
     "reviewScore": 8.2,
     "reviewCount": 2479,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 462
   },
   {
     "hotelId": 183147,
@@ -1077,7 +1184,8 @@
     "stars": 3,
     "reviewScore": 8.2,
     "reviewCount": 9622,
-    "district": "Midtown East"
+    "district": "Midtown East",
+    "referencePricePerNight": 342
   },
   {
     "hotelId": 237838,
@@ -1087,7 +1195,8 @@
     "stars": 5,
     "reviewScore": 8.2,
     "reviewCount": 1031,
-    "district": "SoHo"
+    "district": "SoHo",
+    "referencePricePerNight": 1658
   },
   {
     "hotelId": 265391,
@@ -1097,7 +1206,8 @@
     "stars": 4,
     "reviewScore": 8.2,
     "reviewCount": 4758,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 565
   },
   {
     "hotelId": 543128,
@@ -1107,7 +1217,8 @@
     "stars": 3,
     "reviewScore": 8.2,
     "reviewCount": 1833,
-    "district": "Chinatown"
+    "district": "Chinatown",
+    "referencePricePerNight": 410
   },
   {
     "hotelId": 7851310,
@@ -1116,8 +1227,9 @@
     "longitude": -74.001287,
     "stars": 3,
     "reviewScore": 8.2,
-    "reviewCount": 1546,
-    "district": "Chinatown"
+    "reviewCount": 1547,
+    "district": "Chinatown",
+    "referencePricePerNight": 456
   },
   {
     "hotelId": 1357899,
@@ -1127,7 +1239,8 @@
     "stars": 4,
     "reviewScore": 8.2,
     "reviewCount": 1638,
-    "district": "SoHo"
+    "district": "SoHo",
+    "referencePricePerNight": 588
   },
   {
     "hotelId": 2345317,
@@ -1137,7 +1250,8 @@
     "stars": 4,
     "reviewScore": 8.2,
     "reviewCount": 442,
-    "district": "NoMad"
+    "district": "NoMad",
+    "referencePricePerNight": 604
   },
   {
     "hotelId": 257313,
@@ -1147,7 +1261,8 @@
     "stars": 4,
     "reviewScore": 8.1,
     "reviewCount": 7057,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 428
   },
   {
     "hotelId": 42828,
@@ -1157,7 +1272,8 @@
     "stars": 2,
     "reviewScore": 8.1,
     "reviewCount": 3097,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 384
   },
   {
     "hotelId": 2769928,
@@ -1167,7 +1283,8 @@
     "stars": 4,
     "reviewScore": 8.1,
     "reviewCount": 2577,
-    "district": "Gramercy"
+    "district": "Gramercy",
+    "referencePricePerNight": 425
   },
   {
     "hotelId": 3174621,
@@ -1177,7 +1294,8 @@
     "stars": 4,
     "reviewScore": 8.1,
     "reviewCount": 6306,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 491
   },
   {
     "hotelId": 59304,
@@ -1187,7 +1305,8 @@
     "stars": 5,
     "reviewScore": 8.1,
     "reviewCount": 1119,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 622
   },
   {
     "hotelId": 41653,
@@ -1197,7 +1316,8 @@
     "stars": 5,
     "reviewScore": 8.1,
     "reviewCount": 2891,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 547
   },
   {
     "hotelId": 56209,
@@ -1207,7 +1327,8 @@
     "stars": 3,
     "reviewScore": 8.1,
     "reviewCount": 4262,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 427
   },
   {
     "hotelId": 1169919,
@@ -1217,7 +1338,8 @@
     "stars": 4,
     "reviewScore": 8.1,
     "reviewCount": 12534,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 423
   },
   {
     "hotelId": 42879,
@@ -1227,7 +1349,8 @@
     "stars": 4,
     "reviewScore": 8.1,
     "reviewCount": 1518,
-    "district": "NoMad"
+    "district": "NoMad",
+    "referencePricePerNight": 659
   },
   {
     "hotelId": 55758,
@@ -1237,7 +1360,8 @@
     "stars": 4,
     "reviewScore": 8.1,
     "reviewCount": 1845,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 496
   },
   {
     "hotelId": 330730,
@@ -1247,7 +1371,8 @@
     "stars": 4,
     "reviewScore": 8.1,
     "reviewCount": 394,
-    "district": "Midtown East"
+    "district": "Midtown East",
+    "referencePricePerNight": 785
   },
   {
     "hotelId": 254830,
@@ -1257,7 +1382,8 @@
     "stars": 5,
     "reviewScore": 8.1,
     "reviewCount": 1008,
-    "district": "SoHo"
+    "district": "SoHo",
+    "referencePricePerNight": 866
   },
   {
     "hotelId": 4323829,
@@ -1267,7 +1393,8 @@
     "stars": 4,
     "reviewScore": 8.1,
     "reviewCount": 1440,
-    "district": "Chelsea"
+    "district": "Chelsea",
+    "referencePricePerNight": 719
   },
   {
     "hotelId": 56025,
@@ -1277,7 +1404,8 @@
     "stars": 4,
     "reviewScore": 8.1,
     "reviewCount": 2415,
-    "district": "Midtown East"
+    "district": "Midtown East",
+    "referencePricePerNight": 607
   },
   {
     "hotelId": 500155,
@@ -1287,7 +1415,8 @@
     "stars": 5,
     "reviewScore": 8.1,
     "reviewCount": 523,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 1545
   },
   {
     "hotelId": 16326850,
@@ -1297,7 +1426,8 @@
     "stars": 0,
     "reviewScore": 8.1,
     "reviewCount": 29,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 218
   },
   {
     "hotelId": 466941,
@@ -1306,8 +1436,9 @@
     "longitude": -73.9857704937458,
     "stars": 4,
     "reviewScore": 8.1,
-    "reviewCount": 4010,
-    "district": "Manhattan"
+    "reviewCount": 4009,
+    "district": "Manhattan",
+    "referencePricePerNight": 538
   },
   {
     "hotelId": 56941,
@@ -1317,7 +1448,8 @@
     "stars": 3,
     "reviewScore": 8.1,
     "reviewCount": 3420,
-    "district": "Chelsea"
+    "district": "Chelsea",
+    "referencePricePerNight": 501
   },
   {
     "hotelId": 56506,
@@ -1327,7 +1459,8 @@
     "stars": 3,
     "reviewScore": 8,
     "reviewCount": 3254,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 408
   },
   {
     "hotelId": 7366978,
@@ -1337,7 +1470,8 @@
     "stars": 1,
     "reviewScore": 8,
     "reviewCount": 5209,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 536
   },
   {
     "hotelId": 509390,
@@ -1347,7 +1481,8 @@
     "stars": 3,
     "reviewScore": 8,
     "reviewCount": 2672,
-    "district": "Chelsea"
+    "district": "Chelsea",
+    "referencePricePerNight": 231
   },
   {
     "hotelId": 171155,
@@ -1357,7 +1492,8 @@
     "stars": 4,
     "reviewScore": 8,
     "reviewCount": 1260,
-    "district": "Greenwich Village"
+    "district": "Greenwich Village",
+    "referencePricePerNight": 938
   },
   {
     "hotelId": 55830,
@@ -1367,7 +1503,8 @@
     "stars": 4,
     "reviewScore": 8,
     "reviewCount": 1247,
-    "district": "NoMad"
+    "district": "NoMad",
+    "referencePricePerNight": 685
   },
   {
     "hotelId": 6162805,
@@ -1377,7 +1514,8 @@
     "stars": 4,
     "reviewScore": 8,
     "reviewCount": 6712,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 489
   },
   {
     "hotelId": 599534,
@@ -1387,7 +1525,8 @@
     "stars": 3,
     "reviewScore": 8,
     "reviewCount": 3126,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 398
   },
   {
     "hotelId": 56095,
@@ -1397,7 +1536,8 @@
     "stars": 4,
     "reviewScore": 8,
     "reviewCount": 4893,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 408
   },
   {
     "hotelId": 5779480,
@@ -1406,8 +1546,9 @@
     "longitude": -73.99265,
     "stars": 4,
     "reviewScore": 8,
-    "reviewCount": 6208,
-    "district": "Hell's Kitchen"
+    "reviewCount": 6209,
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 481
   },
   {
     "hotelId": 29953,
@@ -1417,7 +1558,8 @@
     "stars": 4,
     "reviewScore": 8,
     "reviewCount": 3975,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 472
   },
   {
     "hotelId": 1225214,
@@ -1427,7 +1569,8 @@
     "stars": 5,
     "reviewScore": 8,
     "reviewCount": 440,
-    "district": "New York Central Park"
+    "district": "New York Central Park",
+    "referencePricePerNight": 1149
   },
   {
     "hotelId": 357419,
@@ -1437,7 +1580,8 @@
     "stars": 5,
     "reviewScore": 8,
     "reviewCount": 474,
-    "district": "Midtown East"
+    "district": "Midtown East",
+    "referencePricePerNight": 1049
   },
   {
     "hotelId": 9076007,
@@ -1447,7 +1591,8 @@
     "stars": 4,
     "reviewScore": 7.9,
     "reviewCount": 1801,
-    "district": "NoMad"
+    "district": "NoMad",
+    "referencePricePerNight": 744
   },
   {
     "hotelId": 15788973,
@@ -1457,7 +1602,8 @@
     "stars": 4,
     "reviewScore": 7.9,
     "reviewCount": 68,
-    "district": "Lower East Side"
+    "district": "Lower East Side",
+    "referencePricePerNight": 636
   },
   {
     "hotelId": 239080,
@@ -1467,17 +1613,8 @@
     "stars": 4,
     "reviewScore": 7.9,
     "reviewCount": 1477,
-    "district": "SoHo"
-  },
-  {
-    "hotelId": 49526,
-    "name": "Americana Inn",
-    "latitude": 40.752232205684,
-    "longitude": -73.9855130016805,
-    "stars": 2,
-    "reviewScore": 7.9,
-    "reviewCount": 316,
-    "district": "Manhattan"
+    "district": "SoHo",
+    "referencePricePerNight": 421
   },
   {
     "hotelId": 16132708,
@@ -1487,7 +1624,8 @@
     "stars": 4,
     "reviewScore": 7.9,
     "reviewCount": 60,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 414
   },
   {
     "hotelId": 14242954,
@@ -1497,7 +1635,8 @@
     "stars": 4,
     "reviewScore": 7.9,
     "reviewCount": 543,
-    "district": "Lower East Side"
+    "district": "Lower East Side",
+    "referencePricePerNight": 318
   },
   {
     "hotelId": 5708046,
@@ -1507,7 +1646,8 @@
     "stars": 3,
     "reviewScore": 7.9,
     "reviewCount": 2352,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 396
   },
   {
     "hotelId": 22296,
@@ -1517,7 +1657,8 @@
     "stars": 4,
     "reviewScore": 7.9,
     "reviewCount": 946,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 601
   },
   {
     "hotelId": 7704454,
@@ -1527,7 +1668,8 @@
     "stars": 2,
     "reviewScore": 7.9,
     "reviewCount": 1772,
-    "district": "Chelsea"
+    "district": "Chelsea",
+    "referencePricePerNight": 259
   },
   {
     "hotelId": 9057624,
@@ -1537,7 +1679,8 @@
     "stars": 4,
     "reviewScore": 7.9,
     "reviewCount": 1374,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 491
   },
   {
     "hotelId": 617917,
@@ -1547,7 +1690,8 @@
     "stars": 4,
     "reviewScore": 7.9,
     "reviewCount": 1337,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 462
   },
   {
     "hotelId": 255384,
@@ -1556,8 +1700,9 @@
     "longitude": -74.0000193938614,
     "stars": 4,
     "reviewScore": 7.9,
-    "reviewCount": 1756,
-    "district": "SoHo"
+    "reviewCount": 1758,
+    "district": "SoHo",
+    "referencePricePerNight": 588
   },
   {
     "hotelId": 5218600,
@@ -1566,8 +1711,9 @@
     "longitude": -73.993703,
     "stars": 4,
     "reviewScore": 7.8,
-    "reviewCount": 16991,
-    "district": "Hell's Kitchen"
+    "reviewCount": 16995,
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 477
   },
   {
     "hotelId": 5759128,
@@ -1577,7 +1723,8 @@
     "stars": 3,
     "reviewScore": 7.8,
     "reviewCount": 959,
-    "district": "Little Italy"
+    "district": "Little Italy",
+    "referencePricePerNight": 334
   },
   {
     "hotelId": 484808,
@@ -1587,7 +1734,8 @@
     "stars": 3,
     "reviewScore": 7.8,
     "reviewCount": 1336,
-    "district": "Manhattan"
+    "district": "New York Central Park",
+    "referencePricePerNight": 302
   },
   {
     "hotelId": 187692,
@@ -1597,7 +1745,19 @@
     "stars": 3,
     "reviewScore": 7.8,
     "reviewCount": 1017,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 396
+  },
+  {
+    "hotelId": 49526,
+    "name": "Americana Inn",
+    "latitude": 40.752232205684,
+    "longitude": -73.9855130016805,
+    "stars": 2,
+    "reviewScore": 7.8,
+    "reviewCount": 317,
+    "district": "Manhattan",
+    "referencePricePerNight": 306
   },
   {
     "hotelId": 9722159,
@@ -1607,7 +1767,8 @@
     "stars": 3,
     "reviewScore": 7.8,
     "reviewCount": 5152,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 435
   },
   {
     "hotelId": 14718497,
@@ -1617,7 +1778,8 @@
     "stars": 4,
     "reviewScore": 7.8,
     "reviewCount": 182,
-    "district": "Harlem"
+    "district": "Harlem",
+    "referencePricePerNight": 355
   },
   {
     "hotelId": 14142501,
@@ -1626,8 +1788,9 @@
     "longitude": -73.9838434,
     "stars": 3,
     "reviewScore": 7.8,
-    "reviewCount": 708,
-    "district": "Manhattan"
+    "reviewCount": 709,
+    "district": "Manhattan",
+    "referencePricePerNight": 461
   },
   {
     "hotelId": 55948,
@@ -1637,7 +1800,8 @@
     "stars": 4,
     "reviewScore": 7.7,
     "reviewCount": 12435,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 486
   },
   {
     "hotelId": 57009,
@@ -1647,7 +1811,8 @@
     "stars": 5,
     "reviewScore": 7.7,
     "reviewCount": 5048,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 850
   },
   {
     "hotelId": 9747758,
@@ -1657,7 +1822,8 @@
     "stars": 4,
     "reviewScore": 7.7,
     "reviewCount": 1940,
-    "district": "Harlem"
+    "district": "Harlem",
+    "referencePricePerNight": 405
   },
   {
     "hotelId": 804817,
@@ -1667,7 +1833,8 @@
     "stars": 4,
     "reviewScore": 7.7,
     "reviewCount": 1381,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 460
   },
   {
     "hotelId": 181844,
@@ -1676,8 +1843,9 @@
     "longitude": -73.9801412075758,
     "stars": 3,
     "reviewScore": 7.7,
-    "reviewCount": 2460,
-    "district": "Manhattan"
+    "reviewCount": 2462,
+    "district": "Manhattan",
+    "referencePricePerNight": 404
   },
   {
     "hotelId": 56276,
@@ -1687,7 +1855,8 @@
     "stars": 4,
     "reviewScore": 7.7,
     "reviewCount": 14949,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 430
   },
   {
     "hotelId": 57811,
@@ -1697,7 +1866,8 @@
     "stars": 4,
     "reviewScore": 7.7,
     "reviewCount": 2106,
-    "district": "Chelsea"
+    "district": "Chelsea",
+    "referencePricePerNight": 423
   },
   {
     "hotelId": 617923,
@@ -1707,7 +1877,8 @@
     "stars": 3,
     "reviewScore": 7.7,
     "reviewCount": 6611,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 473
   },
   {
     "hotelId": 8693977,
@@ -1717,7 +1888,8 @@
     "stars": 3,
     "reviewScore": 7.7,
     "reviewCount": 2469,
-    "district": "Flatiron District"
+    "district": "Flatiron District",
+    "referencePricePerNight": 335
   },
   {
     "hotelId": 180614,
@@ -1727,7 +1899,8 @@
     "stars": 3,
     "reviewScore": 7.6,
     "reviewCount": 424,
-    "district": "Tribeca"
+    "district": "Tribeca",
+    "referencePricePerNight": 437
   },
   {
     "hotelId": 14082271,
@@ -1737,7 +1910,8 @@
     "stars": 0,
     "reviewScore": 7.6,
     "reviewCount": 143,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 249
   },
   {
     "hotelId": 180769,
@@ -1747,7 +1921,8 @@
     "stars": 4,
     "reviewScore": 7.5,
     "reviewCount": 2204,
-    "district": "Midtown East"
+    "district": "Midtown East",
+    "referencePricePerNight": 516
   },
   {
     "hotelId": 2380425,
@@ -1757,7 +1932,8 @@
     "stars": 4,
     "reviewScore": 7.5,
     "reviewCount": 7576,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 400
   },
   {
     "hotelId": 1336211,
@@ -1767,7 +1943,8 @@
     "stars": 3,
     "reviewScore": 7.5,
     "reviewCount": 786,
-    "district": "Lower East Side"
+    "district": "Lower East Side",
+    "referencePricePerNight": 330
   },
   {
     "hotelId": 1732194,
@@ -1776,8 +1953,9 @@
     "longitude": -73.9900456269837,
     "stars": 3,
     "reviewScore": 7.5,
-    "reviewCount": 3034,
-    "district": "Flatiron District"
+    "reviewCount": 3035,
+    "district": "Flatiron District",
+    "referencePricePerNight": 281
   },
   {
     "hotelId": 56800,
@@ -1787,7 +1965,8 @@
     "stars": 4,
     "reviewScore": 7.4,
     "reviewCount": 1122,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 375
   },
   {
     "hotelId": 11457350,
@@ -1797,7 +1976,8 @@
     "stars": 3,
     "reviewScore": 7.3,
     "reviewCount": 441,
-    "district": "Lower East Side"
+    "district": "Lower East Side",
+    "referencePricePerNight": 347
   },
   {
     "hotelId": 4374958,
@@ -1807,7 +1987,8 @@
     "stars": 3,
     "reviewScore": 7.2,
     "reviewCount": 76,
-    "district": "Midtown East"
+    "district": "Midtown East",
+    "referencePricePerNight": 393
   },
   {
     "hotelId": 182326,
@@ -1817,7 +1998,8 @@
     "stars": 3,
     "reviewScore": 7.2,
     "reviewCount": 2194,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 411
   },
   {
     "hotelId": 1466863,
@@ -1827,7 +2009,8 @@
     "stars": 1,
     "reviewScore": 7.2,
     "reviewCount": 2358,
-    "district": "Chinatown"
+    "district": "Chinatown",
+    "referencePricePerNight": 152
   },
   {
     "hotelId": 58194,
@@ -1837,7 +2020,8 @@
     "stars": 4,
     "reviewScore": 7.2,
     "reviewCount": 2452,
-    "district": "Manhattan"
+    "district": "Manhattan",
+    "referencePricePerNight": 460
   },
   {
     "hotelId": 491010,
@@ -1847,7 +2031,8 @@
     "stars": 0,
     "reviewScore": 7.2,
     "reviewCount": 792,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 395
   },
   {
     "hotelId": 2012829,
@@ -1857,7 +2042,8 @@
     "stars": 4,
     "reviewScore": 7.1,
     "reviewCount": 9748,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 435
   },
   {
     "hotelId": 55956,
@@ -1867,7 +2053,8 @@
     "stars": 3,
     "reviewScore": 7.1,
     "reviewCount": 3068,
-    "district": "Upper West Side"
+    "district": "Upper West Side",
+    "referencePricePerNight": 304
   },
   {
     "hotelId": 329667,
@@ -1877,7 +2064,8 @@
     "stars": 4,
     "reviewScore": 7,
     "reviewCount": 199,
-    "district": "Chelsea"
+    "district": "Chelsea",
+    "referencePricePerNight": 491
   },
   {
     "hotelId": 443305,
@@ -1887,7 +2075,8 @@
     "stars": 3,
     "reviewScore": 7,
     "reviewCount": 1937,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 384
   },
   {
     "hotelId": 4463237,
@@ -1897,7 +2086,8 @@
     "stars": 4,
     "reviewScore": 7,
     "reviewCount": 159,
-    "district": "Flatiron District"
+    "district": "Flatiron District",
+    "referencePricePerNight": 421
   },
   {
     "hotelId": 57397,
@@ -1907,7 +2097,8 @@
     "stars": 4,
     "reviewScore": 6.8,
     "reviewCount": 3361,
-    "district": "Upper West Side"
+    "district": "Upper West Side",
+    "referencePricePerNight": 371
   },
   {
     "hotelId": 12587914,
@@ -1917,7 +2108,8 @@
     "stars": 3,
     "reviewScore": 6.8,
     "reviewCount": 1188,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 365
   },
   {
     "hotelId": 8222382,
@@ -1927,7 +2119,8 @@
     "stars": 2,
     "reviewScore": 6.6,
     "reviewCount": 964,
-    "district": "Chinatown"
+    "district": "Chinatown",
+    "referencePricePerNight": 168
   },
   {
     "hotelId": 55952,
@@ -1936,8 +2129,9 @@
     "longitude": -73.9862586557865,
     "stars": 4,
     "reviewScore": 6.5,
-    "reviewCount": 2595,
-    "district": "Manhattan"
+    "reviewCount": 2596,
+    "district": "Manhattan",
+    "referencePricePerNight": 360
   },
   {
     "hotelId": 56700,
@@ -1946,8 +2140,9 @@
     "longitude": -73.9818906784058,
     "stars": 4,
     "reviewScore": 6.5,
-    "reviewCount": 2903,
-    "district": "Manhattan"
+    "reviewCount": 2904,
+    "district": "Manhattan",
+    "referencePricePerNight": 368
   },
   {
     "hotelId": 56939,
@@ -1957,7 +2152,8 @@
     "stars": 4,
     "reviewScore": 6.2,
     "reviewCount": 292,
-    "district": "Tribeca"
+    "district": "Tribeca",
+    "referencePricePerNight": 391
   },
   {
     "hotelId": 1064865,
@@ -1967,7 +2163,8 @@
     "stars": 3,
     "reviewScore": 5.9,
     "reviewCount": 1679,
-    "district": "Hell's Kitchen"
+    "district": "Hell's Kitchen",
+    "referencePricePerNight": 231
   },
   {
     "hotelId": 182507,
@@ -1976,8 +2173,9 @@
     "longitude": -73.9776836335659,
     "stars": 3,
     "reviewScore": 5.8,
-    "reviewCount": 3500,
-    "district": "Upper West Side"
+    "reviewCount": 3495,
+    "district": "Upper West Side",
+    "referencePricePerNight": 313
   },
   {
     "hotelId": 11359622,
@@ -1987,7 +2185,8 @@
     "stars": 3,
     "reviewScore": 5.2,
     "reviewCount": 835,
-    "district": "Washington Heights"
+    "district": "Washington Heights",
+    "referencePricePerNight": 175
   },
   {
     "hotelId": 16876694,
@@ -1997,6 +2196,7 @@
     "stars": 0,
     "reviewScore": 4.8,
     "reviewCount": 73,
-    "district": "Lower East Side"
+    "district": "Lower East Side",
+    "referencePricePerNight": 209
   }
 ]
