@@ -291,6 +291,7 @@
             <div class="hotel-card-titles">
               <div class="hotel-card-name">${escapeHtml(result.hotel || '')}</div>
               ${result.city ? `<div class="hotel-card-city">${escapeHtml(result.city)}</div>` : ''}
+              ${result.distanceToCenter ? `<div class="hotel-card-meta">${escapeHtml(result.distanceToCenter)}</div>` : ''}
               ${result.roomName ? `<div class="hotel-card-room">${escapeHtml(result.roomName)}</div>` : ''}
             </div>
             ${
@@ -310,6 +311,7 @@
                    <div class="hotel-card-price-total">${escapeHtml(result.totalPrice)}</div>
                    ${stayLine ? `<div class="hotel-card-price-stay">${stayLine}</div>` : ''}
                    ${result.pricePerNight ? `<div class="hotel-card-price-night">${escapeHtml(result.pricePerNight)} por noche</div>` : ''}
+                   ${result.mealPlanText ? `<div class="hotel-card-price-taxes">${escapeHtml(result.mealPlanText)}</div>` : ''}
                    ${taxesLine ? `<div class="hotel-card-price-taxes">${taxesLine}</div>` : ''}
                  </div>`
               : ''

@@ -106,9 +106,29 @@ function buildCancellationPolicy(block) {
 // Devuelve los datos de la primera oferta (la que se corresponde con el
 // precio ya mostrado) o valores null si falla/tarda - nunca bloquea ni rompe
 // el flujo de precio.
+// Regimen real de la tarifa (desayuno incluido, solo alojamiento...). El
+// nombre exacto del campo en block.mealplan no esta confirmado todavia con
+// datos reales (a diferencia de name_without_policy y paymentterms.cancellation,
+// que ya se verificaron en su momento) - se prueban varias rutas plausibles
+// y, si ninguna trae texto, se queda en null sin romper nada (igual que
+// roomName/cancellationPolicy cuando fallan).
+function buildMealPlanText(block) {
+  const mp = block?.mealplan;
+  const candidates = [
+    typeof mp === 'string' ? mp : null,
+    mp?.included_name,
+    mp?.name,
+    mp?.text,
+    block?.mealplan_included_name,
+    block?.block_text?.mealplan_included_name,
+  ];
+  const found = candidates.find((v) => typeof v === 'string' && v.trim());
+  return found ? found.trim() : null;
+}
+
 async function fetchRoomDetails(hotelId, { checkin, checkout, adults }) {
   const apiKey = process.env.RAPIDAPI_KEY;
-  if (!apiKey || !hotelId) return { roomName: null, cancellationPolicy: null };
+  if (!apiKey || !hotelId) return { roomName: null, cancellationPolicy: null, mealPlanText: null };
 
   const url = new URL(`https://${RAPIDAPI_HOST}/v1/hotels/room-list`);
   url.searchParams.set('hotel_id', String(hotelId));
@@ -128,18 +148,22 @@ async function fetchRoomDetails(hotelId, { checkin, checkout, adults }) {
       signal: controller.signal,
       headers: { 'x-rapidapi-key': apiKey, 'x-rapidapi-host': RAPIDAPI_HOST },
     });
-    if (!res.ok) return { roomName: null, cancellationPolicy: null };
+    if (!res.ok) return { roomName: null, cancellationPolicy: null, mealPlanText: null };
     const json = await res.json();
     const offers = Array.isArray(json) ? json : [];
     const block = offers[0]?.block?.[0];
     const name = block?.name_without_policy ?? null;
+    // Log temporal para confirmar con datos reales el nombre exacto del campo
+    // de regimen (ver buildMealPlanText) - quitar en cuanto se verifique.
+    if (block) console.log('[rapidapi] room-list block.mealplan (diagnostico regimen):', JSON.stringify(block.mealplan));
     return {
       roomName: typeof name === 'string' && name.trim() ? name.trim() : null,
       cancellationPolicy: buildCancellationPolicy(block),
+      mealPlanText: buildMealPlanText(block),
     };
   } catch (err) {
     console.warn('[rapidapi] detalles de habitacion: excepcion (se omite)', err?.name, err?.message);
-    return { roomName: null, cancellationPolicy: null };
+    return { roomName: null, cancellationPolicy: null, mealPlanText: null };
   } finally {
     clearTimeout(timer);
   }
@@ -148,6 +172,17 @@ async function fetchRoomDetails(hotelId, { checkin, checkout, adults }) {
 // Convierte un property_card crudo de RapidAPI en el formato enriquecido que
 // ya sabe pintar el widget (mismo shape se use para un hotel concreto o
 // como uno de varios resultados de una busqueda general).
+// distance_to_cc viene en km (numero decimal) directamente del property_card
+// de RapidAPI - es el mismo dato que usa la propia Booking para su "a X km
+// del centro". Se formatea aqui para no repetir el redondeo en el widget.
+function formatDistanceToCenter(hotel) {
+  const km = hotel.distance_to_cc;
+  if (typeof km !== 'number' || !Number.isFinite(km) || km < 0) return null;
+  const rounded = km < 10 ? Math.round(km * 10) / 10 : Math.round(km);
+  const text = String(rounded).replace('.', ',');
+  return `A ${text} km del centro`;
+}
+
 function parseHotelCard(hotel, { checkin, checkout, adults, rooms }) {
   const breakdown = hotel.composite_price_breakdown;
   if (!breakdown) return null;
@@ -158,6 +193,7 @@ function parseHotelCard(hotel, { checkin, checkout, adults, rooms }) {
     found: true,
     hotel: hotel.hotel_name ?? null,
     city: hotel.city_name_en ?? hotel.city ?? null,
+    distanceToCenter: formatDistanceToCenter(hotel),
     stars: hotel.class ?? null,
     reviewScore: hotel.review_score ?? null,
     reviewScoreWord: hotel.review_score_word ?? null,
@@ -170,9 +206,10 @@ function parseHotelCard(hotel, { checkin, checkout, adults, rooms }) {
     breakfastMentionedOnCard: Boolean(hotel.hotel_include_breakfast),
     extraChargesNotice: buildExtraChargesSummary(breakdown),
     cancellationPolicy: hotel.is_free_cancellable ? 'Cancelación gratuita' : 'No reembolsable',
-    // Se rellena aparte (fetchRoomName) solo para hotel concreto - null hasta
-    // entonces, y se queda null si esa llamada falla o tarda demasiado.
+    // Se rellenan aparte (fetchRoomDetails) solo para hotel concreto - null
+    // hasta entonces, y se quedan null si esa llamada falla o tarda demasiado.
     roomName: null,
+    mealPlanText: null,
     // Solo una foto real por ahora (max_photo_url/main_photo_url) - a
     // diferencia del fallback generico de NYC, esta SI es del hotel
     // correcto porque la busqueda fue por su hotel_id/zona exacta.
@@ -308,7 +345,8 @@ export async function checkRapidApiPrice({ hotelId, checkin, checkout, adults = 
       // disponible - si esta llamada fallo/tardo, se queda el valor ya
       // puesto por parseHotelCard a partir de is_free_cancellable.
       if (roomDetails.cancellationPolicy) parsed.cancellationPolicy = roomDetails.cancellationPolicy;
-      console.log('[rapidapi] OK', { hotelId, hotel: parsed.hotel, price: parsed.totalPrice, photos: parsed.photos.length, roomName: roomDetails.roomName, cancellationPolicy: parsed.cancellationPolicy });
+      parsed.mealPlanText = roomDetails.mealPlanText;
+      console.log('[rapidapi] OK', { hotelId, hotel: parsed.hotel, price: parsed.totalPrice, photos: parsed.photos.length, roomName: roomDetails.roomName, cancellationPolicy: parsed.cancellationPolicy, mealPlanText: parsed.mealPlanText, distanceToCenter: parsed.distanceToCenter });
       return parsed;
     }
     console.warn('[rapidapi] sin resultado con precio para este hotel_id', { hotelId, attempt });
