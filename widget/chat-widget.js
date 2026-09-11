@@ -292,6 +292,7 @@
               <div class="hotel-card-name">${escapeHtml(result.hotel || '')}</div>
               ${result.city ? `<div class="hotel-card-city">${escapeHtml(result.city)}</div>` : ''}
               ${result.distanceToCenter ? `<div class="hotel-card-meta">${escapeHtml(result.distanceToCenter)}</div>` : ''}
+              ${result.neighborhood ? `<span class="hotel-card-neighborhood">📍 ${escapeHtml(result.neighborhood)}</span>` : ''}
               ${result.roomName ? `<div class="hotel-card-room">${escapeHtml(result.roomName)}</div>` : ''}
             </div>
             ${

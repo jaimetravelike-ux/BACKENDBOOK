@@ -193,6 +193,28 @@ function formatDistanceToCenter(hotel) {
   return null;
 }
 
+// Barrio/zona (Times Square, Chelsea, Brooklyn...) para un badge compacto en
+// la card, en vez de un mapa. Nombre de campo NO confirmado con datos reales
+// todavia - se prueban varias rutas plausibles y se deja un log de
+// diagnostico con todo lo que pueda parecer una zona, para confirmarlo.
+function extractNeighborhood(hotel) {
+  const candidates = [
+    hotel.district,
+    hotel.zone_name,
+    hotel.neighbourhood,
+    hotel.neighborhood,
+    hotel.address_trans,
+  ];
+  const found = candidates.find((v) => typeof v === 'string' && v.trim());
+  if (found) return found.trim();
+
+  const zoneKeys = Object.keys(hotel).filter((k) => /district|zone|neigh|area|address/i.test(k));
+  if (zoneKeys.length > 0) {
+    console.log('[rapidapi] campos de zona/barrio disponibles (diagnostico):', JSON.stringify(zoneKeys.map((k) => [k, hotel[k]])));
+  }
+  return null;
+}
+
 function parseHotelCard(hotel, { checkin, checkout, adults, rooms }) {
   const breakdown = hotel.composite_price_breakdown;
   if (!breakdown) return null;
@@ -203,7 +225,12 @@ function parseHotelCard(hotel, { checkin, checkout, adults, rooms }) {
     found: true,
     hotel: hotel.hotel_name ?? null,
     city: hotel.city_name_en ?? hotel.city ?? null,
+    neighborhood: extractNeighborhood(hotel),
     distanceToCenter: formatDistanceToCenter(hotel),
+    // DIAGNOSTICO TEMPORAL - quitar en cuanto se confirmen los campos de
+    // zona/distancia reales. Permite verificarlos desde el propio cliente
+    // sin necesitar acceso a los logs del servidor.
+    _debugRawKeys: Object.keys(hotel),
     stars: hotel.class ?? null,
     reviewScore: hotel.review_score ?? null,
     reviewScoreWord: hotel.review_score_word ?? null,
