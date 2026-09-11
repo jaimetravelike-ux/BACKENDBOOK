@@ -1,0 +1,2002 @@
+[
+  {
+    "hotelId": 7461745,
+    "name": "The Wallace Hotel",
+    "latitude": 40.7819136904427,
+    "longitude": -73.9817929576416,
+    "stars": 5,
+    "reviewScore": 9.4,
+    "reviewCount": 1116,
+    "district": "Upper West Side"
+  },
+  {
+    "hotelId": 55831,
+    "name": "Broadway Plaza Hotel",
+    "latitude": 40.7444252666939,
+    "longitude": -73.9890038967132,
+    "stars": 4,
+    "reviewScore": 9.3,
+    "reviewCount": 1465,
+    "district": "NoMad"
+  },
+  {
+    "hotelId": 7307545,
+    "name": "Hilton Club The Central at 5th New York",
+    "latitude": 40.756755,
+    "longitude": -73.97733,
+    "stars": 3,
+    "reviewScore": 9.3,
+    "reviewCount": 1260,
+    "district": "Midtown East"
+  },
+  {
+    "hotelId": 8015286,
+    "name": "The Hotel Chelsea",
+    "latitude": 40.744334,
+    "longitude": -73.996873,
+    "stars": 4,
+    "reviewScore": 9.3,
+    "reviewCount": 657,
+    "district": "Chelsea"
+  },
+  {
+    "hotelId": 2883256,
+    "name": "Artezen Hotel",
+    "latitude": 40.7096726,
+    "longitude": -74.0086147,
+    "stars": 4,
+    "reviewScore": 9.2,
+    "reviewCount": 1464,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 7058236,
+    "name": "The Wall Street Hotel New York City",
+    "latitude": 40.705275,
+    "longitude": -74.007506,
+    "stars": 5,
+    "reviewScore": 9.2,
+    "reviewCount": 522,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 16589827,
+    "name": "Flatiron Studio Near Madison Square Park",
+    "latitude": 40.7440401,
+    "longitude": -73.9892295,
+    "stars": 0,
+    "reviewScore": 9.2,
+    "reviewCount": 13,
+    "district": "NoMad"
+  },
+  {
+    "hotelId": 16289273,
+    "name": "Luxury Apartments in Downtown Manhattan Skyline Views",
+    "latitude": 40.7066266,
+    "longitude": -74.008349,
+    "stars": 0,
+    "reviewScore": 9.2,
+    "reviewCount": 8,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 55915,
+    "name": "San Carlos Hotel New York",
+    "latitude": 40.7561840937009,
+    "longitude": -73.9714676141738,
+    "stars": 4,
+    "reviewScore": 9.1,
+    "reviewCount": 4311,
+    "district": "Midtown East"
+  },
+  {
+    "hotelId": 56175,
+    "name": "Bryant Park Hotel",
+    "latitude": 40.7529332003877,
+    "longitude": -73.9838413149118,
+    "stars": 4,
+    "reviewScore": 9.1,
+    "reviewCount": 813,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 1469127,
+    "name": "NobleDEN Hotel",
+    "latitude": 40.7192461584192,
+    "longitude": -73.9968987460327,
+    "stars": 4,
+    "reviewScore": 9.1,
+    "reviewCount": 841,
+    "district": "Little Italy"
+  },
+  {
+    "hotelId": 2031539,
+    "name": "LUMA Hotel - Times Square",
+    "latitude": 40.7545457995103,
+    "longitude": -73.9857049558197,
+    "stars": 4,
+    "reviewScore": 9.1,
+    "reviewCount": 3019,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 1498024,
+    "name": "Mint House 70 Pine by Kasa",
+    "latitude": 40.7065047,
+    "longitude": -74.0077715,
+    "stars": 4,
+    "reviewScore": 9.1,
+    "reviewCount": 1333,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 8453934,
+    "name": "Hotel Indigo NYC Financial District by IHG",
+    "latitude": 40.7077441,
+    "longitude": -74.0131042,
+    "stars": 4,
+    "reviewScore": 9,
+    "reviewCount": 1866,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 16590487,
+    "name": "NoMad Hotel Near Broadway & 5th Ave",
+    "latitude": 40.7440401,
+    "longitude": -73.9892295,
+    "stars": 0,
+    "reviewScore": 9,
+    "reviewCount": 9,
+    "district": "NoMad"
+  },
+  {
+    "hotelId": 16087069,
+    "name": "The atlas - Shared apartment",
+    "latitude": 40.7612698,
+    "longitude": -73.9872525,
+    "stars": 0,
+    "reviewScore": 9,
+    "reviewCount": 10,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 6966158,
+    "name": "Riu Plaza Manhattan Times Square",
+    "latitude": 40.758951,
+    "longitude": -73.983386,
+    "stars": 4,
+    "reviewScore": 8.9,
+    "reviewCount": 9093,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 56510,
+    "name": "Eurostars The Chemists' Club Hotel",
+    "latitude": 40.7517614175624,
+    "longitude": -73.9790361374617,
+    "stars": 4,
+    "reviewScore": 8.9,
+    "reviewCount": 1771,
+    "district": "Murray Hill"
+  },
+  {
+    "hotelId": 9832750,
+    "name": "UNTITLED at 3 Freeman Alley",
+    "latitude": 40.721861,
+    "longitude": -73.992669,
+    "stars": 4,
+    "reviewScore": 8.9,
+    "reviewCount": 2280,
+    "district": "Lower East Side"
+  },
+  {
+    "hotelId": 906253,
+    "name": "citizenM New York Times Square",
+    "latitude": 40.7615731895647,
+    "longitude": -73.9850216441803,
+    "stars": 4,
+    "reviewScore": 8.9,
+    "reviewCount": 3213,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 2190252,
+    "name": "Park Terrace Hotel",
+    "latitude": 40.752494,
+    "longitude": -73.983108,
+    "stars": 4,
+    "reviewScore": 8.9,
+    "reviewCount": 2268,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 7695414,
+    "name": "The Cloud One New York-Downtown, part of the Motel One Group",
+    "latitude": 40.709386,
+    "longitude": -74.012706,
+    "stars": 4,
+    "reviewScore": 8.8,
+    "reviewCount": 8113,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 7421557,
+    "name": "Motto by Hilton New York City Chelsea",
+    "latitude": 40.744227,
+    "longitude": -73.992989,
+    "stars": 4,
+    "reviewScore": 8.8,
+    "reviewCount": 2479,
+    "district": "Chelsea"
+  },
+  {
+    "hotelId": 367632,
+    "name": "Radio City Apartments",
+    "latitude": 40.7598975368472,
+    "longitude": -73.9829595386982,
+    "stars": 3,
+    "reviewScore": 8.8,
+    "reviewCount": 4431,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 1549663,
+    "name": "INNSiDE by Meliá New York Nomad",
+    "latitude": 40.7459826677441,
+    "longitude": -73.9925691693115,
+    "stars": 4,
+    "reviewScore": 8.8,
+    "reviewCount": 1287,
+    "district": "Chelsea"
+  },
+  {
+    "hotelId": 1498530,
+    "name": "Renaissance New York Midtown Hotel",
+    "latitude": 40.751629,
+    "longitude": -73.991259,
+    "stars": 4,
+    "reviewScore": 8.8,
+    "reviewCount": 1692,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 1910127,
+    "name": "Carnegie Hotel",
+    "latitude": 40.7645825694967,
+    "longitude": -73.9800860165155,
+    "stars": 4,
+    "reviewScore": 8.8,
+    "reviewCount": 1550,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 6940278,
+    "name": "Arlo Midtown",
+    "latitude": 40.755763,
+    "longitude": -73.993859,
+    "stars": 4,
+    "reviewScore": 8.8,
+    "reviewCount": 5178,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 7686514,
+    "name": "Placemakr Wall Street",
+    "latitude": 40.7049028,
+    "longitude": -74.0064172,
+    "stars": 4,
+    "reviewScore": 8.8,
+    "reviewCount": 3072,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 13709503,
+    "name": "voco Astoria by IHG",
+    "latitude": 40.7662242,
+    "longitude": -73.9215644,
+    "stars": 3,
+    "reviewScore": 8.8,
+    "reviewCount": 178,
+    "district": null
+  },
+  {
+    "hotelId": 14007260,
+    "name": "Interfaith 21st Street",
+    "latitude": 40.7434573,
+    "longitude": -73.9985157,
+    "stars": 0,
+    "reviewScore": 8.8,
+    "reviewCount": 290,
+    "district": "Chelsea"
+  },
+  {
+    "hotelId": 16590477,
+    "name": "NoMad Studio at Return Policy Broadway",
+    "latitude": 40.7440401,
+    "longitude": -73.9892295,
+    "stars": 0,
+    "reviewScore": 8.8,
+    "reviewCount": 4,
+    "district": "NoMad"
+  },
+  {
+    "hotelId": 10027699,
+    "name": "Romer Hell's Kitchen",
+    "latitude": 40.76313,
+    "longitude": -73.985725,
+    "stars": 4,
+    "reviewScore": 8.7,
+    "reviewCount": 5419,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 1338472,
+    "name": "3 West Club",
+    "latitude": 40.7595554806024,
+    "longitude": -73.9775342608938,
+    "stars": 3,
+    "reviewScore": 8.7,
+    "reviewCount": 382,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 15396491,
+    "name": "The Broadway Escape - Private Room in Times Square",
+    "latitude": 40.7658203,
+    "longitude": -73.9831813,
+    "stars": 0,
+    "reviewScore": 8.7,
+    "reviewCount": 71,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 5579202,
+    "name": "Nester Finn Financial District",
+    "latitude": 40.7074594,
+    "longitude": -74.0058924,
+    "stars": 4,
+    "reviewScore": 8.7,
+    "reviewCount": 139,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 247713,
+    "name": "The Muse New York",
+    "latitude": 40.7578851618635,
+    "longitude": -73.983714915812,
+    "stars": 4,
+    "reviewScore": 8.7,
+    "reviewCount": 3668,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 9535786,
+    "name": "Tempo By Hilton New York Times Square",
+    "latitude": 40.758998,
+    "longitude": -73.984429,
+    "stars": 4,
+    "reviewScore": 8.7,
+    "reviewCount": 2017,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 28898,
+    "name": "The Historic Blue Angel Hotel Lexington Ave, an Ascend Collection",
+    "latitude": 40.7591834097402,
+    "longitude": -73.9692118763924,
+    "stars": 4,
+    "reviewScore": 8.7,
+    "reviewCount": 1576,
+    "district": "Midtown East"
+  },
+  {
+    "hotelId": 28633,
+    "name": "Hilton Club New York",
+    "latitude": 40.7623491794216,
+    "longitude": -73.9790113270283,
+    "stars": 3,
+    "reviewScore": 8.7,
+    "reviewCount": 564,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 7185135,
+    "name": "CIVILIAN Hotel",
+    "latitude": 40.76143,
+    "longitude": -73.987451,
+    "stars": 4,
+    "reviewScore": 8.7,
+    "reviewCount": 4249,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 181008,
+    "name": "Riverside Tower Hotel",
+    "latitude": 40.7855796788971,
+    "longitude": -73.9817461743951,
+    "stars": 2,
+    "reviewScore": 8.6,
+    "reviewCount": 5795,
+    "district": "Upper West Side"
+  },
+  {
+    "hotelId": 76684,
+    "name": "Hyatt Regency Times Square",
+    "latitude": 40.7606337,
+    "longitude": -73.9852587,
+    "stars": 4,
+    "reviewScore": 8.6,
+    "reviewCount": 2070,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 667881,
+    "name": "The Marlton Hotel",
+    "latitude": 40.7325453248319,
+    "longitude": -73.9968760014017,
+    "stars": 4,
+    "reviewScore": 8.6,
+    "reviewCount": 898,
+    "district": "Greenwich Village"
+  },
+  {
+    "hotelId": 543546,
+    "name": "Courtyard by Marriott Times Square West",
+    "latitude": 40.7544280215356,
+    "longitude": -73.9926168322563,
+    "stars": 3,
+    "reviewScore": 8.6,
+    "reviewCount": 2742,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 1397916,
+    "name": "Riu Plaza New York Times Square",
+    "latitude": 40.760248,
+    "longitude": -73.988439,
+    "stars": 4,
+    "reviewScore": 8.6,
+    "reviewCount": 6998,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 7219858,
+    "name": "Henn na Hotel New York",
+    "latitude": 40.752362,
+    "longitude": -73.991294,
+    "stars": 4,
+    "reviewScore": 8.6,
+    "reviewCount": 2595,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 1968984,
+    "name": "Hyatt House New York/Chelsea",
+    "latitude": 40.746288,
+    "longitude": -73.990701,
+    "stars": 3,
+    "reviewScore": 8.6,
+    "reviewCount": 1713,
+    "district": "Chelsea"
+  },
+  {
+    "hotelId": 2377260,
+    "name": "Pod Times Square",
+    "latitude": 40.7583945,
+    "longitude": -73.9930985,
+    "stars": 3,
+    "reviewScore": 8.6,
+    "reviewCount": 17007,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 56055,
+    "name": "Club Quarters Hotel Times Square - Midtown, New York",
+    "latitude": 40.7559804095846,
+    "longitude": -73.9810477942228,
+    "stars": 4,
+    "reviewScore": 8.6,
+    "reviewCount": 2432,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 27752,
+    "name": "Washington Square Hotel",
+    "latitude": 40.7323625367642,
+    "longitude": -73.9988073706627,
+    "stars": 4,
+    "reviewScore": 8.6,
+    "reviewCount": 899,
+    "district": "Greenwich Village"
+  },
+  {
+    "hotelId": 45869,
+    "name": "The Maritime Hotel",
+    "latitude": 40.7422081890331,
+    "longitude": -74.0039619058371,
+    "stars": 4,
+    "reviewScore": 8.6,
+    "reviewCount": 507,
+    "district": "Chelsea"
+  },
+  {
+    "hotelId": 2508842,
+    "name": "MADE Hotel",
+    "latitude": 40.7463097564851,
+    "longitude": -73.9894334521149,
+    "stars": 4,
+    "reviewScore": 8.6,
+    "reviewCount": 976,
+    "district": "NoMad"
+  },
+  {
+    "hotelId": 617927,
+    "name": "Homewood Suites Midtown Manhattan Times Square South",
+    "latitude": 40.75441122705,
+    "longitude": -73.9930578601189,
+    "stars": 3,
+    "reviewScore": 8.6,
+    "reviewCount": 3474,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 3110493,
+    "name": "AC Hotel by Marriott New York Downtown",
+    "latitude": 40.705967,
+    "longitude": -74.004644,
+    "stars": 4,
+    "reviewScore": 8.6,
+    "reviewCount": 1341,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 12544014,
+    "name": "Highly Recommended Studio Near Times Square",
+    "latitude": 40.7612729,
+    "longitude": -73.9918623,
+    "stars": 0,
+    "reviewScore": 8.6,
+    "reviewCount": 23,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 56568,
+    "name": "Soho Grand Hotel",
+    "latitude": 40.7219035556007,
+    "longitude": -74.0042562782764,
+    "stars": 4,
+    "reviewScore": 8.5,
+    "reviewCount": 1170,
+    "district": "SoHo"
+  },
+  {
+    "hotelId": 25294,
+    "name": "New York Marriott Marquis",
+    "latitude": 40.7583753092875,
+    "longitude": -73.9855585992336,
+    "stars": 5,
+    "reviewScore": 8.5,
+    "reviewCount": 2992,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 7535947,
+    "name": "Best Western Premier Empire State Hotel",
+    "latitude": 40.745411,
+    "longitude": -73.985489,
+    "stars": 3,
+    "reviewScore": 8.5,
+    "reviewCount": 1137,
+    "district": "NoMad"
+  },
+  {
+    "hotelId": 7066178,
+    "name": "SpringHill Suites by Marriott New York Manhattan Chelsea",
+    "latitude": 40.746782,
+    "longitude": -73.9924209999999,
+    "stars": 4,
+    "reviewScore": 8.5,
+    "reviewCount": 10165,
+    "district": "Chelsea"
+  },
+  {
+    "hotelId": 57487,
+    "name": "Sofitel New York",
+    "latitude": 40.7557025651579,
+    "longitude": -73.9819362759591,
+    "stars": 4,
+    "reviewScore": 8.5,
+    "reviewCount": 719,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 183564,
+    "name": "Club Quarters Hotel World Trade Center, New York",
+    "latitude": 40.709792012435,
+    "longitude": -74.0138411521912,
+    "stars": 4,
+    "reviewScore": 8.5,
+    "reviewCount": 3304,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 522337,
+    "name": "Pod 39",
+    "latitude": 40.7493091828859,
+    "longitude": -73.976638828207,
+    "stars": 3,
+    "reviewScore": 8.5,
+    "reviewCount": 9714,
+    "district": "Murray Hill"
+  },
+  {
+    "hotelId": 4746602,
+    "name": "Wingate by Wyndham New York Midtown South/5th Ave",
+    "latitude": 40.750776,
+    "longitude": -73.984208,
+    "stars": 3,
+    "reviewScore": 8.5,
+    "reviewCount": 1921,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 56034,
+    "name": "The Shelburne Sonesta New York",
+    "latitude": 40.7484319746091,
+    "longitude": -73.9777771756054,
+    "stars": 4,
+    "reviewScore": 8.5,
+    "reviewCount": 2428,
+    "district": "Murray Hill"
+  },
+  {
+    "hotelId": 1078432,
+    "name": "Millennium Premier Hotel New York Times Square",
+    "latitude": 40.7571164,
+    "longitude": -73.9848648,
+    "stars": 4,
+    "reviewScore": 8.4,
+    "reviewCount": 331,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 7078644,
+    "name": "TownePlace Suites by Marriott New York Manhattan/Chelsea",
+    "latitude": 40.74679,
+    "longitude": -73.99241,
+    "stars": 3,
+    "reviewScore": 8.4,
+    "reviewCount": 6997,
+    "district": "Chelsea"
+  },
+  {
+    "hotelId": 56113,
+    "name": "The Bayard",
+    "latitude": 40.7556817394777,
+    "longitude": -73.972110003233,
+    "stars": 3,
+    "reviewScore": 8.4,
+    "reviewCount": 832,
+    "district": "Midtown East"
+  },
+  {
+    "hotelId": 15654982,
+    "name": "Kimpton Era Midtown New York by IHG",
+    "latitude": 40.7577789,
+    "longitude": -73.9798407,
+    "stars": 4,
+    "reviewScore": 8.4,
+    "reviewCount": 455,
+    "district": "Times Square"
+  },
+  {
+    "hotelId": 187699,
+    "name": "Hampton Inn Manhattan-35th St Empire State Bldg",
+    "latitude": 40.7501830237152,
+    "longitude": -73.9864557981491,
+    "stars": 3,
+    "reviewScore": 8.4,
+    "reviewCount": 6514,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 4063342,
+    "name": "The Times Square EDITION New York",
+    "latitude": 40.759175,
+    "longitude": -73.984317,
+    "stars": 5,
+    "reviewScore": 8.4,
+    "reviewCount": 690,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 242447,
+    "name": "Fitzpatrick Manhattan",
+    "latitude": 40.7605552787111,
+    "longitude": -73.9692541211844,
+    "stars": 4,
+    "reviewScore": 8.4,
+    "reviewCount": 391,
+    "district": "Midtown East"
+  },
+  {
+    "hotelId": 397451,
+    "name": "Refinery Hotel - New York",
+    "latitude": 40.7521356913416,
+    "longitude": -73.9857007563114,
+    "stars": 5,
+    "reviewScore": 8.4,
+    "reviewCount": 526,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 1803065,
+    "name": "Arlo NoMad",
+    "latitude": 40.746229948106,
+    "longitude": -73.9849872331352,
+    "stars": 4,
+    "reviewScore": 8.4,
+    "reviewCount": 1698,
+    "district": "NoMad"
+  },
+  {
+    "hotelId": 28040,
+    "name": "Hotel Lucerne",
+    "latitude": 40.7833665123378,
+    "longitude": -73.9785969257355,
+    "stars": 4,
+    "reviewScore": 8.4,
+    "reviewCount": 1664,
+    "district": "Upper West Side"
+  },
+  {
+    "hotelId": 55903,
+    "name": "Warwick New York",
+    "latitude": 40.7623694951208,
+    "longitude": -73.9782663434744,
+    "stars": 4,
+    "reviewScore": 8.4,
+    "reviewCount": 7742,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 186118,
+    "name": "The Mayfair Hotel Times Square, an Ascend Collection",
+    "latitude": 40.7613110389328,
+    "longitude": -73.9859206974506,
+    "stars": 4,
+    "reviewScore": 8.4,
+    "reviewCount": 4510,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 56021,
+    "name": "The Renwick",
+    "latitude": 40.7503059560948,
+    "longitude": -73.9775139838457,
+    "stars": 4,
+    "reviewScore": 8.4,
+    "reviewCount": 2666,
+    "district": "Murray Hill"
+  },
+  {
+    "hotelId": 182478,
+    "name": "Candlewood Suites NYC -Times Square by IHG",
+    "latitude": 40.7561871413388,
+    "longitude": -73.9930352568626,
+    "stars": 3,
+    "reviewScore": 8.4,
+    "reviewCount": 2657,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 8534118,
+    "name": "Grayson Hotel",
+    "latitude": 40.752,
+    "longitude": -73.98387,
+    "stars": 4,
+    "reviewScore": 8.4,
+    "reviewCount": 1384,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 57473,
+    "name": "M Social Hotel New York Times Square",
+    "latitude": 40.76280018648,
+    "longitude": -73.9836555719375,
+    "stars": 4,
+    "reviewScore": 8.3,
+    "reviewCount": 12570,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 4125132,
+    "name": "SpringHill Suites by Marriott New York Manhattan/Times Square South",
+    "latitude": 40.754011,
+    "longitude": -73.993972,
+    "stars": 4,
+    "reviewScore": 8.3,
+    "reviewCount": 7415,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 242842,
+    "name": "Fitzpatrick Grand Central",
+    "latitude": 40.7525745764843,
+    "longitude": -73.9745514839888,
+    "stars": 4,
+    "reviewScore": 8.3,
+    "reviewCount": 478,
+    "district": "Midtown East"
+  },
+  {
+    "hotelId": 57685,
+    "name": "Lombardy Hotel",
+    "latitude": 40.7608391977053,
+    "longitude": -73.9705647155643,
+    "stars": 4,
+    "reviewScore": 8.3,
+    "reviewCount": 581,
+    "district": "Midtown East"
+  },
+  {
+    "hotelId": 283518,
+    "name": "Hilton New York Fashion District",
+    "latitude": 40.745621157369,
+    "longitude": -73.9936709403992,
+    "stars": 4,
+    "reviewScore": 8.3,
+    "reviewCount": 1730,
+    "district": "Chelsea"
+  },
+  {
+    "hotelId": 11704081,
+    "name": "SpringHill Suites by Marriott New York Manhattan Times Square",
+    "latitude": 40.75938,
+    "longitude": -73.98636,
+    "stars": 3,
+    "reviewScore": 8.3,
+    "reviewCount": 589,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 23156,
+    "name": "Renaissance New York Times Square by Marriott",
+    "latitude": 40.7597289100857,
+    "longitude": -73.9845239371061,
+    "stars": 4,
+    "reviewScore": 8.3,
+    "reviewCount": 2058,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 5122464,
+    "name": "Moxy NYC East Village",
+    "latitude": 40.731525,
+    "longitude": -73.9895,
+    "stars": 3,
+    "reviewScore": 8.3,
+    "reviewCount": 1499,
+    "district": "East Village"
+  },
+  {
+    "hotelId": 4925569,
+    "name": "La Quinta by Wyndham Time Square South",
+    "latitude": 40.75545,
+    "longitude": -73.99311,
+    "stars": 3,
+    "reviewScore": 8.3,
+    "reviewCount": 3354,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 56029,
+    "name": "The Benjamin Royal Sonesta New York",
+    "latitude": 40.7564903806111,
+    "longitude": -73.9720214903354,
+    "stars": 5,
+    "reviewScore": 8.3,
+    "reviewCount": 953,
+    "district": "Midtown East"
+  },
+  {
+    "hotelId": 4561710,
+    "name": "Hotel Hendricks",
+    "latitude": 40.751812,
+    "longitude": -73.984059,
+    "stars": 4,
+    "reviewScore": 8.3,
+    "reviewCount": 1637,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 606889,
+    "name": "Four Points by Sheraton New York Downtown",
+    "latitude": 40.707497,
+    "longitude": -74.006408,
+    "stars": 3,
+    "reviewScore": 8.3,
+    "reviewCount": 2664,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 278666,
+    "name": "Sanctuary Hotel New York",
+    "latitude": 40.7585038136619,
+    "longitude": -73.983276039362,
+    "stars": 4,
+    "reviewScore": 8.3,
+    "reviewCount": 1082,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 15380450,
+    "name": "Times Square Retreat with Private Bathroom and Kitchenette",
+    "latitude": 40.7584324,
+    "longitude": -73.9892192,
+    "stars": 0,
+    "reviewScore": 8.3,
+    "reviewCount": 19,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 4918055,
+    "name": "The Beekman Tower, Trademark Collection by Wyndham",
+    "latitude": 40.753401,
+    "longitude": -73.966174,
+    "stars": 4,
+    "reviewScore": 8.3,
+    "reviewCount": 1689,
+    "district": "Midtown East"
+  },
+  {
+    "hotelId": 75911,
+    "name": "The Standard - East Village",
+    "latitude": 40.7279122587602,
+    "longitude": -73.9908921718597,
+    "stars": 4,
+    "reviewScore": 8.3,
+    "reviewCount": 275,
+    "district": "East Village"
+  },
+  {
+    "hotelId": 587439,
+    "name": "Residence Inn by Marriott New York Manhattan/Central Park",
+    "latitude": 40.7640934641784,
+    "longitude": -73.9825881838532,
+    "stars": 4,
+    "reviewScore": 8.3,
+    "reviewCount": 2312,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 10599290,
+    "name": "Little Charlie Hotel",
+    "latitude": 40.751708,
+    "longitude": -73.9711853,
+    "stars": 4,
+    "reviewScore": 8.2,
+    "reviewCount": 948,
+    "district": "Midtown East"
+  },
+  {
+    "hotelId": 56721,
+    "name": "Hotel Stanford",
+    "latitude": 40.7481769586792,
+    "longitude": -73.987605124712,
+    "stars": 3,
+    "reviewScore": 8.2,
+    "reviewCount": 1605,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 3838991,
+    "name": "Moxy NYC Downtown",
+    "latitude": 40.710675,
+    "longitude": -74.007753,
+    "stars": 3,
+    "reviewScore": 8.2,
+    "reviewCount": 2862,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 16664773,
+    "name": "Little Something Hotel NYC",
+    "latitude": 40.7076188,
+    "longitude": -74.0061856,
+    "stars": 4,
+    "reviewScore": 8.2,
+    "reviewCount": 64,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 360589,
+    "name": "voco Times Square South New York by IHG",
+    "latitude": 40.75441,
+    "longitude": -73.994148,
+    "stars": 4,
+    "reviewScore": 8.2,
+    "reviewCount": 4326,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 6939714,
+    "name": "Hyatt Place New York Chelsea",
+    "latitude": 40.7453391792585,
+    "longitude": -73.9954437255859,
+    "stars": 4,
+    "reviewScore": 8.2,
+    "reviewCount": 13665,
+    "district": "Chelsea"
+  },
+  {
+    "hotelId": 48003,
+    "name": "Gansevoort Meatpacking",
+    "latitude": 40.7400255857682,
+    "longitude": -74.0056637674571,
+    "stars": 5,
+    "reviewScore": 8.2,
+    "reviewCount": 812,
+    "district": "Greenwich Village"
+  },
+  {
+    "hotelId": 442501,
+    "name": "Walker Hotel Greenwich Village",
+    "latitude": 40.7362804456219,
+    "longitude": -73.9965851604939,
+    "stars": 4,
+    "reviewScore": 8.2,
+    "reviewCount": 758,
+    "district": "Greenwich Village"
+  },
+  {
+    "hotelId": 3390635,
+    "name": "Moxy NYC Chelsea",
+    "latitude": 40.746336,
+    "longitude": -73.991064,
+    "stars": 3,
+    "reviewScore": 8.2,
+    "reviewCount": 2463,
+    "district": "Chelsea"
+  },
+  {
+    "hotelId": 2210104,
+    "name": "Hilton Garden Inn New York Times Square South",
+    "latitude": 40.7545626272,
+    "longitude": -73.9935441956,
+    "stars": 3,
+    "reviewScore": 8.2,
+    "reviewCount": 2479,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 183147,
+    "name": "Pod 51",
+    "latitude": 40.7559105,
+    "longitude": -73.969078,
+    "stars": 3,
+    "reviewScore": 8.2,
+    "reviewCount": 9622,
+    "district": "Midtown East"
+  },
+  {
+    "hotelId": 237838,
+    "name": "The Dominick Hotel",
+    "latitude": 40.7255299826281,
+    "longitude": -74.0056094527245,
+    "stars": 5,
+    "reviewScore": 8.2,
+    "reviewCount": 1031,
+    "district": "SoHo"
+  },
+  {
+    "hotelId": 265391,
+    "name": "Residence Inn by Marriott New York Manhattan/Times Square",
+    "latitude": 40.7528884994968,
+    "longitude": -73.9858053624629,
+    "stars": 4,
+    "reviewScore": 8.2,
+    "reviewCount": 4758,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 543128,
+    "name": "Fairfield Inn & Suites New York Manhattan/Downtown East",
+    "latitude": 40.7131858921931,
+    "longitude": -73.992893235582,
+    "stars": 3,
+    "reviewScore": 8.2,
+    "reviewCount": 1833,
+    "district": "Chinatown"
+  },
+  {
+    "hotelId": 7851310,
+    "name": "Best Western Plus Soho Hotel",
+    "latitude": 40.71817,
+    "longitude": -74.001287,
+    "stars": 3,
+    "reviewScore": 8.2,
+    "reviewCount": 1546,
+    "district": "Chinatown"
+  },
+  {
+    "hotelId": 1357899,
+    "name": "Arlo SoHo",
+    "latitude": 40.724398960614,
+    "longitude": -74.0079333214264,
+    "stars": 4,
+    "reviewScore": 8.2,
+    "reviewCount": 1638,
+    "district": "SoHo"
+  },
+  {
+    "hotelId": 2345317,
+    "name": "Hotel Park Ave NYC",
+    "latitude": 40.7448004454165,
+    "longitude": -73.9836611039937,
+    "stars": 4,
+    "reviewScore": 8.2,
+    "reviewCount": 442,
+    "district": "NoMad"
+  },
+  {
+    "hotelId": 257313,
+    "name": "Element by Marriott New York Times Square West",
+    "latitude": 40.7557157716835,
+    "longitude": -73.9918007701635,
+    "stars": 4,
+    "reviewScore": 8.1,
+    "reviewCount": 7057,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 42828,
+    "name": "Hotel St. James",
+    "latitude": 40.7570435220529,
+    "longitude": -73.9829870313407,
+    "stars": 2,
+    "reviewScore": 8.1,
+    "reviewCount": 3097,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 2769928,
+    "name": "Freehand New York",
+    "latitude": 40.7398336,
+    "longitude": -73.9842543,
+    "stars": 4,
+    "reviewScore": 8.1,
+    "reviewCount": 2577,
+    "district": "Gramercy"
+  },
+  {
+    "hotelId": 3174621,
+    "name": "Aliz Hotel Times Square",
+    "latitude": 40.756123,
+    "longitude": -73.991741,
+    "stars": 4,
+    "reviewScore": 8.1,
+    "reviewCount": 6306,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 59304,
+    "name": "The Westin New York at Times Square",
+    "latitude": 40.7577922112189,
+    "longitude": -73.9893753826619,
+    "stars": 5,
+    "reviewScore": 8.1,
+    "reviewCount": 1119,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 41653,
+    "name": "Kimpton Theta New York - Times Square by IHG",
+    "latitude": 40.76125,
+    "longitude": -73.98653,
+    "stars": 5,
+    "reviewScore": 8.1,
+    "reviewCount": 2891,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 56209,
+    "name": "The Hotel at Fifth Avenue",
+    "latitude": 40.7476816560211,
+    "longitude": -73.9866153895855,
+    "stars": 3,
+    "reviewScore": 8.1,
+    "reviewCount": 4262,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 1169919,
+    "name": "Hotel Edison Times Square",
+    "latitude": 40.7596825,
+    "longitude": -73.9863504,
+    "stars": 4,
+    "reviewScore": 8.1,
+    "reviewCount": 12534,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 42879,
+    "name": "Hotel Seville NoMad - The Unbound Collection by Hyatt",
+    "latitude": 40.744626,
+    "longitude": -73.985529,
+    "stars": 4,
+    "reviewScore": 8.1,
+    "reviewCount": 1518,
+    "district": "NoMad"
+  },
+  {
+    "hotelId": 55758,
+    "name": "HGU New York",
+    "latitude": 40.746064149646,
+    "longitude": -73.9831506460905,
+    "stars": 4,
+    "reviewScore": 8.1,
+    "reviewCount": 1845,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 330730,
+    "name": "Hotel 48LEX New York",
+    "latitude": 40.7551839529845,
+    "longitude": -73.9730098843574,
+    "stars": 4,
+    "reviewScore": 8.1,
+    "reviewCount": 394,
+    "district": "Midtown East"
+  },
+  {
+    "hotelId": 254830,
+    "name": "ModernHaus SoHo",
+    "latitude": 40.7227522466759,
+    "longitude": -74.0047886967659,
+    "stars": 5,
+    "reviewScore": 8.1,
+    "reviewCount": 1008,
+    "district": "SoHo"
+  },
+  {
+    "hotelId": 4323829,
+    "name": "Renaissance New York Chelsea Hotel",
+    "latitude": 40.744286,
+    "longitude": -73.992686,
+    "stars": 4,
+    "reviewScore": 8.1,
+    "reviewCount": 1440,
+    "district": "Chelsea"
+  },
+  {
+    "hotelId": 56025,
+    "name": "The Fifty Sonesta Hotel New York",
+    "latitude": 40.756066251595,
+    "longitude": -73.9710961282253,
+    "stars": 4,
+    "reviewScore": 8.1,
+    "reviewCount": 2415,
+    "district": "Midtown East"
+  },
+  {
+    "hotelId": 500155,
+    "name": "The London, a Luxury Collection Hotel, New York City",
+    "latitude": 40.7633860845745,
+    "longitude": -73.9807265996933,
+    "stars": 5,
+    "reviewScore": 8.1,
+    "reviewCount": 523,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 16326850,
+    "name": "The Revival Guest House near Times Square",
+    "latitude": 40.7616397,
+    "longitude": -73.9900589,
+    "stars": 0,
+    "reviewScore": 8.1,
+    "reviewCount": 29,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 466941,
+    "name": "Hyatt Place New York/Midtown-South",
+    "latitude": 40.7505101655785,
+    "longitude": -73.9857704937458,
+    "stars": 4,
+    "reviewScore": 8.1,
+    "reviewCount": 4010,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 56941,
+    "name": "Holiday Inn Express NYC Chelsea - NoMad Area by IHG",
+    "latitude": 40.7484233386275,
+    "longitude": -73.9945721626281,
+    "stars": 3,
+    "reviewScore": 8.1,
+    "reviewCount": 3420,
+    "district": "Chelsea"
+  },
+  {
+    "hotelId": 56506,
+    "name": "U Hotel Fifth Avenue, Empire State Building",
+    "latitude": 40.7491629809886,
+    "longitude": -73.9838768541813,
+    "stars": 3,
+    "reviewScore": 8,
+    "reviewCount": 3254,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 7366978,
+    "name": "Nap York Central Park Sleep Station",
+    "latitude": 40.765665,
+    "longitude": -73.983232,
+    "stars": 1,
+    "reviewScore": 8,
+    "reviewCount": 5209,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 509390,
+    "name": "Leo House",
+    "latitude": 40.7457037269316,
+    "longitude": -73.9997662761269,
+    "stars": 3,
+    "reviewScore": 8,
+    "reviewCount": 2672,
+    "district": "Chelsea"
+  },
+  {
+    "hotelId": 171155,
+    "name": "The Standard, High Line New York",
+    "latitude": 40.740679459763,
+    "longitude": -74.0078122168779,
+    "stars": 4,
+    "reviewScore": 8,
+    "reviewCount": 1260,
+    "district": "Greenwich Village"
+  },
+  {
+    "hotelId": 55830,
+    "name": "Hotel AKA NoMad",
+    "latitude": 40.7457349538319,
+    "longitude": -73.9843288064003,
+    "stars": 4,
+    "reviewScore": 8,
+    "reviewCount": 1247,
+    "district": "NoMad"
+  },
+  {
+    "hotelId": 6162805,
+    "name": "Delta Hotels by Marriott New York Times Square",
+    "latitude": 40.756511,
+    "longitude": -73.99269,
+    "stars": 4,
+    "reviewScore": 8,
+    "reviewCount": 6712,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 599534,
+    "name": "Fairfield Inn by Marriott New York Manhattan/Financial District",
+    "latitude": 40.70628,
+    "longitude": -74.00557,
+    "stars": 3,
+    "reviewScore": 8,
+    "reviewCount": 3126,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 56095,
+    "name": "Ameritania at Times Square",
+    "latitude": 40.7641430317166,
+    "longitude": -73.9826068282127,
+    "stars": 4,
+    "reviewScore": 8,
+    "reviewCount": 4893,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 5779480,
+    "name": "DoubleTree by Hilton New York Times Square South",
+    "latitude": 40.753764,
+    "longitude": -73.99265,
+    "stars": 4,
+    "reviewScore": 8,
+    "reviewCount": 6208,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 29953,
+    "name": "DoubleTree by Hilton New York Midtown Fifth Ave",
+    "latitude": 40.7599295352507,
+    "longitude": -73.9783528447151,
+    "stars": 4,
+    "reviewScore": 8,
+    "reviewCount": 3975,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 1225214,
+    "name": "1 Hotel Central Park",
+    "latitude": 40.7648321,
+    "longitude": -73.9768231,
+    "stars": 5,
+    "reviewScore": 8,
+    "reviewCount": 440,
+    "district": "New York Central Park"
+  },
+  {
+    "hotelId": 357419,
+    "name": "Lotte New York Palace",
+    "latitude": 40.757965922154,
+    "longitude": -73.9749189466238,
+    "stars": 5,
+    "reviewScore": 8,
+    "reviewCount": 474,
+    "district": "Midtown East"
+  },
+  {
+    "hotelId": 9076007,
+    "name": "Virgin Hotels New York City",
+    "latitude": 40.746606,
+    "longitude": -73.988791,
+    "stars": 4,
+    "reviewScore": 7.9,
+    "reviewCount": 1801,
+    "district": "NoMad"
+  },
+  {
+    "hotelId": 15788973,
+    "name": "Merchant LES Hotel",
+    "latitude": 40.720017,
+    "longitude": -73.989518,
+    "stars": 4,
+    "reviewScore": 7.9,
+    "reviewCount": 68,
+    "district": "Lower East Side"
+  },
+  {
+    "hotelId": 239080,
+    "name": "Nolitan Hotel SoHo - New York",
+    "latitude": 40.7205761200763,
+    "longitude": -73.9952873066068,
+    "stars": 4,
+    "reviewScore": 7.9,
+    "reviewCount": 1477,
+    "district": "SoHo"
+  },
+  {
+    "hotelId": 49526,
+    "name": "Americana Inn",
+    "latitude": 40.752232205684,
+    "longitude": -73.9855130016805,
+    "stars": 2,
+    "reviewScore": 7.9,
+    "reviewCount": 316,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 16132708,
+    "name": "Hotel 38 New York City, Tapestry Collection By Hilton",
+    "latitude": 40.7552526682834,
+    "longitude": -73.9926430466881,
+    "stars": 4,
+    "reviewScore": 7.9,
+    "reviewCount": 60,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 14242954,
+    "name": "CityNest New York",
+    "latitude": 40.7182649,
+    "longitude": -73.9947411,
+    "stars": 4,
+    "reviewScore": 7.9,
+    "reviewCount": 543,
+    "district": "Lower East Side"
+  },
+  {
+    "hotelId": 5708046,
+    "name": "Courtyard New York Downtown Manhattan/Financial District",
+    "latitude": 40.7072116827422,
+    "longitude": -74.0062691062317,
+    "stars": 3,
+    "reviewScore": 7.9,
+    "reviewCount": 2352,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 22296,
+    "name": "W New York - Times Square",
+    "latitude": 40.7593809890602,
+    "longitude": -73.985327258706,
+    "stars": 4,
+    "reviewScore": 7.9,
+    "reviewCount": 946,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 7704454,
+    "name": "Chelsea Rooms NYC",
+    "latitude": 40.748582,
+    "longitude": -73.995652,
+    "stars": 2,
+    "reviewScore": 7.9,
+    "reviewCount": 1772,
+    "district": "Chelsea"
+  },
+  {
+    "hotelId": 9057624,
+    "name": "Hilton New York Times Square",
+    "latitude": 40.75671594,
+    "longitude": -73.98891034,
+    "stars": 4,
+    "reviewScore": 7.9,
+    "reviewCount": 1374,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 617917,
+    "name": "Aloft by Marriott Manhattan Downtown - Financial District",
+    "latitude": 40.710294,
+    "longitude": -74.006735,
+    "stars": 4,
+    "reviewScore": 7.9,
+    "reviewCount": 1337,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 255384,
+    "name": "NoMo SoHo",
+    "latitude": 40.7198188804501,
+    "longitude": -74.0000193938614,
+    "stars": 4,
+    "reviewScore": 7.9,
+    "reviewCount": 1756,
+    "district": "SoHo"
+  },
+  {
+    "hotelId": 5218600,
+    "name": "Hyatt Place New York City - Times Square",
+    "latitude": 40.755967,
+    "longitude": -73.993703,
+    "stars": 4,
+    "reviewScore": 7.8,
+    "reviewCount": 16991,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 5759128,
+    "name": "Solita Soho Hotel",
+    "latitude": 40.719805,
+    "longitude": -73.998946,
+    "stars": 3,
+    "reviewScore": 7.8,
+    "reviewCount": 959,
+    "district": "Little Italy"
+  },
+  {
+    "hotelId": 484808,
+    "name": "Da Vinci Hotel",
+    "latitude": 40.7657814286814,
+    "longitude": -73.9829307049513,
+    "stars": 3,
+    "reviewScore": 7.8,
+    "reviewCount": 1336,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 187692,
+    "name": "Hampton Inn Manhattan - Times Square South",
+    "latitude": 40.7561800301835,
+    "longitude": -73.992964848876,
+    "stars": 3,
+    "reviewScore": 7.8,
+    "reviewCount": 1017,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 9722159,
+    "name": "Hampton Inn by Hilton New York Times Square",
+    "latitude": 40.759535,
+    "longitude": -73.98317,
+    "stars": 3,
+    "reviewScore": 7.8,
+    "reviewCount": 5152,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 14718497,
+    "name": "The George Manhattan, Tapestry Collection By Hilton",
+    "latitude": 40.812407,
+    "longitude": -73.954427,
+    "stars": 4,
+    "reviewScore": 7.8,
+    "reviewCount": 182,
+    "district": "Harlem"
+  },
+  {
+    "hotelId": 14142501,
+    "name": "voco Times Square - Broadway by IHG",
+    "latitude": 40.7595257,
+    "longitude": -73.9838434,
+    "stars": 3,
+    "reviewScore": 7.8,
+    "reviewCount": 708,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 55948,
+    "name": "Millennium Hotel Broadway Times Square",
+    "latitude": 40.7568962212921,
+    "longitude": -73.9848062396049,
+    "stars": 4,
+    "reviewScore": 7.7,
+    "reviewCount": 12435,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 57009,
+    "name": "Park Lane New York",
+    "latitude": 40.7650084516372,
+    "longitude": -73.9753836393356,
+    "stars": 5,
+    "reviewScore": 7.7,
+    "reviewCount": 5048,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 9747758,
+    "name": "Renaissance New York Harlem Hotel",
+    "latitude": 40.81020133,
+    "longitude": -73.9493456,
+    "stars": 4,
+    "reviewScore": 7.7,
+    "reviewCount": 1940,
+    "district": "Harlem"
+  },
+  {
+    "hotelId": 804817,
+    "name": "Dream Midtown, by Hyatt",
+    "latitude": 40.764364466525,
+    "longitude": -73.9818075299263,
+    "stars": 4,
+    "reviewScore": 7.7,
+    "reviewCount": 1381,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 181844,
+    "name": "Citadines Connect Fifth Avenue - Times Square New York",
+    "latitude": 40.7557513277007,
+    "longitude": -73.9801412075758,
+    "stars": 3,
+    "reviewScore": 7.7,
+    "reviewCount": 2460,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 56276,
+    "name": "New Yorker by Lotte Hotels",
+    "latitude": 40.7526284209899,
+    "longitude": -73.9933524280787,
+    "stars": 4,
+    "reviewScore": 7.7,
+    "reviewCount": 14949,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 57811,
+    "name": "Holiday Inn Manhattan 6th Ave - Chelsea by IHG",
+    "latitude": 40.7452848470416,
+    "longitude": -73.9923419058323,
+    "stars": 4,
+    "reviewScore": 7.7,
+    "reviewCount": 2106,
+    "district": "Chelsea"
+  },
+  {
+    "hotelId": 617923,
+    "name": "Hilton Garden Inn New York Central Park South-Midtown West",
+    "latitude": 40.764368,
+    "longitude": -73.98313,
+    "stars": 3,
+    "reviewScore": 7.7,
+    "reviewCount": 6611,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 8693977,
+    "name": "The Flat NYC",
+    "latitude": 40.743083,
+    "longitude": -73.990652,
+    "stars": 3,
+    "reviewScore": 7.7,
+    "reviewCount": 2469,
+    "district": "Flatiron District"
+  },
+  {
+    "hotelId": 180614,
+    "name": "AMTD Idea Tribeca Hotel",
+    "latitude": 40.7208881612818,
+    "longitude": -74.0054538846015,
+    "stars": 3,
+    "reviewScore": 7.6,
+    "reviewCount": 424,
+    "district": "Tribeca"
+  },
+  {
+    "hotelId": 14082271,
+    "name": "The Gray Loft Escape NYC Edition.",
+    "latitude": 40.76510265,
+    "longitude": -73.98791237,
+    "stars": 0,
+    "reviewScore": 7.6,
+    "reviewCount": 143,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 180769,
+    "name": "Hyatt Grand Central New York",
+    "latitude": 40.7518227807208,
+    "longitude": -73.9764592051507,
+    "stars": 4,
+    "reviewScore": 7.5,
+    "reviewCount": 2204,
+    "district": "Midtown East"
+  },
+  {
+    "hotelId": 2380425,
+    "name": "YOTEL New York Times Square",
+    "latitude": 40.7591568,
+    "longitude": -73.9954561,
+    "stars": 4,
+    "reviewScore": 7.5,
+    "reviewCount": 7576,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 1336211,
+    "name": "Orchard Street Hotel",
+    "latitude": 40.721144622138,
+    "longitude": -73.9887831140861,
+    "stars": 3,
+    "reviewScore": 7.5,
+    "reviewCount": 786,
+    "district": "Lower East Side"
+  },
+  {
+    "hotelId": 1732194,
+    "name": "Heritage Hotel New York City",
+    "latitude": 40.7433511574687,
+    "longitude": -73.9900456269837,
+    "stars": 3,
+    "reviewScore": 7.5,
+    "reviewCount": 3034,
+    "district": "Flatiron District"
+  },
+  {
+    "hotelId": 56800,
+    "name": "ROW NYC at Times Square",
+    "latitude": 40.7587618375053,
+    "longitude": -73.9884627610444,
+    "stars": 4,
+    "reviewScore": 7.4,
+    "reviewCount": 1122,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 11457350,
+    "name": "Days Inn by Wyndham New York Chinatown",
+    "latitude": 40.717103,
+    "longitude": -73.99279,
+    "stars": 3,
+    "reviewScore": 7.3,
+    "reviewCount": 441,
+    "district": "Lower East Side"
+  },
+  {
+    "hotelId": 4374958,
+    "name": "Cambria Hotel New York Times Square",
+    "latitude": 40.753283,
+    "longitude": -73.971055,
+    "stars": 3,
+    "reviewScore": 7.2,
+    "reviewCount": 76,
+    "district": "Midtown East"
+  },
+  {
+    "hotelId": 182326,
+    "name": "Holiday Inn Express - Times Square by IHG",
+    "latitude": 40.7562709513263,
+    "longitude": -73.9931857958437,
+    "stars": 3,
+    "reviewScore": 7.2,
+    "reviewCount": 2194,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 1466863,
+    "name": "U.S. Pacific Hotel",
+    "latitude": 40.7179514,
+    "longitude": -73.9953748,
+    "stars": 1,
+    "reviewScore": 7.2,
+    "reviewCount": 2358,
+    "district": "Chinatown"
+  },
+  {
+    "hotelId": 58194,
+    "name": "City Club Hotel",
+    "latitude": 40.7557878995844,
+    "longitude": -73.9822279661893,
+    "stars": 4,
+    "reviewScore": 7.2,
+    "reviewCount": 2452,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 491010,
+    "name": "Times Square West Hotel, BW Signature Collection",
+    "latitude": 40.764289,
+    "longitude": -73.99494,
+    "stars": 0,
+    "reviewScore": 7.2,
+    "reviewCount": 792,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 2012829,
+    "name": "Doubletree By Hilton New York Times Square West",
+    "latitude": 40.7568016379,
+    "longitude": -73.9930698658,
+    "stars": 4,
+    "reviewScore": 7.1,
+    "reviewCount": 9748,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 55956,
+    "name": "Night Hotel Broadway",
+    "latitude": 40.7932350720951,
+    "longitude": -73.9722434431314,
+    "stars": 3,
+    "reviewScore": 7.1,
+    "reviewCount": 3068,
+    "district": "Upper West Side"
+  },
+  {
+    "hotelId": 329667,
+    "name": "Hotel Alameda, Highline",
+    "latitude": 40.7506117621029,
+    "longitude": -74.0033684670925,
+    "stars": 4,
+    "reviewScore": 7,
+    "reviewCount": 199,
+    "district": "Chelsea"
+  },
+  {
+    "hotelId": 443305,
+    "name": "Holiday Inn Express Manhattan Midtown West by IHG",
+    "latitude": 40.7641089022431,
+    "longitude": -73.9945064485073,
+    "stars": 3,
+    "reviewScore": 7,
+    "reviewCount": 1937,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 4463237,
+    "name": "Hotel Henri NY",
+    "latitude": 40.743281,
+    "longitude": -73.991031,
+    "stars": 4,
+    "reviewScore": 7,
+    "reviewCount": 159,
+    "district": "Flatiron District"
+  },
+  {
+    "hotelId": 57397,
+    "name": "The Empire Hotel New York",
+    "latitude": 40.7714251075124,
+    "longitude": -73.9829682558775,
+    "stars": 4,
+    "reviewScore": 6.8,
+    "reviewCount": 3361,
+    "district": "Upper West Side"
+  },
+  {
+    "hotelId": 12587914,
+    "name": "Hudson Yards Hotel",
+    "latitude": 40.7597732,
+    "longitude": -73.9964611,
+    "stars": 3,
+    "reviewScore": 6.8,
+    "reviewCount": 1188,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 8222382,
+    "name": "Canal Loft Hotel",
+    "latitude": 40.71536,
+    "longitude": -73.993881,
+    "stars": 2,
+    "reviewScore": 6.6,
+    "reviewCount": 964,
+    "district": "Chinatown"
+  },
+  {
+    "hotelId": 55952,
+    "name": "The Gallivant Times Square",
+    "latitude": 40.7606192748693,
+    "longitude": -73.9862586557865,
+    "stars": 4,
+    "reviewScore": 6.5,
+    "reviewCount": 2595,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 56700,
+    "name": "Sheraton New York Times Square Hotel",
+    "latitude": 40.7626559458167,
+    "longitude": -73.9818906784058,
+    "stars": 4,
+    "reviewScore": 6.5,
+    "reviewCount": 2903,
+    "district": "Manhattan"
+  },
+  {
+    "hotelId": 56939,
+    "name": "Duane Street Hotel Tribeca, Belvilla District 6 Formerly Sonder",
+    "latitude": 40.715988843908,
+    "longitude": -74.0074313431978,
+    "stars": 4,
+    "reviewScore": 6.2,
+    "reviewCount": 292,
+    "district": "Tribeca"
+  },
+  {
+    "hotelId": 1064865,
+    "name": "Midtown West Hotel",
+    "latitude": 40.7497199,
+    "longitude": -73.9953685,
+    "stars": 3,
+    "reviewScore": 5.9,
+    "reviewCount": 1679,
+    "district": "Hell's Kitchen"
+  },
+  {
+    "hotelId": 182507,
+    "name": "La Quinta by Wyndham New York City Central Park",
+    "latitude": 40.7761451564527,
+    "longitude": -73.9776836335659,
+    "stars": 3,
+    "reviewScore": 5.8,
+    "reviewCount": 3500,
+    "district": "Upper West Side"
+  },
+  {
+    "hotelId": 11359622,
+    "name": "Hotel Moca NYC",
+    "latitude": 40.8485044,
+    "longitude": -73.9314247,
+    "stars": 3,
+    "reviewScore": 5.2,
+    "reviewCount": 835,
+    "district": "Washington Heights"
+  },
+  {
+    "hotelId": 16876694,
+    "name": "101 HOTEL MANHATTAN - Little Italy, SOHO, NOHO, LES, East Village, Chinatown - 1 GIG Internet, 12Inch Mattress, Hardsurface Floors",
+    "latitude": 40.7177450488192,
+    "longitude": -73.9951338606761,
+    "stars": 0,
+    "reviewScore": 4.8,
+    "reviewCount": 73,
+    "district": "Lower East Side"
+  }
+]
