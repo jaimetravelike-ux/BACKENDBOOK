@@ -15,6 +15,7 @@ import { logTurn, logResolved, listConversations, logLead, listLeads, logContact
 import { upsertProviderRate, listProviderRates } from './providerRates.js';
 import { sendContactNotification } from './mailer.js';
 import { lookupGeo, computeTrafficSource, parseUtmParams } from './geoip.js';
+import { currencyForCountryCode, getConverter, convertResultCurrency } from './currency.js';
 
 // Red de seguridad a nivel de proceso: con todas las rutas ya protegidas por
 // su propio try/catch (mas abajo) y con el listener de error del pool de
@@ -69,6 +70,7 @@ app.post('/api/chat', async (req, res) => {
       const { utmSource, utmMedium, utmCampaign } = parseUtmParams(landingUrl);
       session.visitorInfo = {
         country: geo.country,
+        countryCode: geo.countryCode,
         city: geo.city,
         referrer: referrer || null,
         utmSource,
@@ -150,11 +152,24 @@ app.post('/api/chat/resolve', async (req, res) => {
     }
     session.pendingSearch = false;
 
-    const reply = await phraseSearchResult(session, result);
+    // Precio mostrado en la moneda local del visitante (si se le pudo
+    // detectar pais por IP y hay tipo de cambio disponible) - si algo falla
+    // aqui, currency.js devuelve null y se sigue mostrando en USD tal cual,
+    // nunca rompe la respuesta.
+    let displayResult = result;
+    const targetCurrency = currencyForCountryCode(session.visitorInfo?.countryCode);
+    if (targetCurrency) {
+      const convert = await getConverter(targetCurrency);
+      if (convert) {
+        displayResult = convertResultCurrency(result, convert);
+      }
+    }
 
-    logResolved(sessionId, session, result);
+    const reply = await phraseSearchResult(session, displayResult);
 
-    res.json({ sessionId, reply, result });
+    logResolved(sessionId, session, displayResult);
+
+    res.json({ sessionId, reply, result: displayResult });
   } catch (err) {
     console.error(err);
     const { sessionId } = req.body ?? {};

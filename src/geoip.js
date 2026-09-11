@@ -16,7 +16,7 @@ function isPrivateOrLocalIp(ip) {
 
 export async function lookupGeo(ip) {
   if (isPrivateOrLocalIp(ip)) {
-    return { country: null, city: null };
+    return { country: null, countryCode: null, city: null };
   }
 
   const clean = ip.replace('::ffff:', '');
@@ -24,16 +24,19 @@ export async function lookupGeo(ip) {
   const timer = setTimeout(() => controller.abort(), GEO_TIMEOUT_MS);
   try {
     const res = await fetch(`https://ipwho.is/${encodeURIComponent(clean)}`, { signal: controller.signal });
-    if (!res.ok) return { country: null, city: null };
+    if (!res.ok) return { country: null, countryCode: null, city: null };
     const json = await res.json();
-    if (!json.success) return { country: null, city: null };
+    if (!json.success) return { country: null, countryCode: null, city: null };
     return {
       country: typeof json.country === 'string' ? json.country : null,
+      // ISO alpha-2 (ES, MX, CR...) - mas fiable que el nombre para mapear a
+      // moneda (currency.js), el nombre puede venir en ingles o con acentos.
+      countryCode: typeof json.country_code === 'string' ? json.country_code : null,
       city: typeof json.city === 'string' ? json.city : null,
     };
   } catch (err) {
     console.warn('[geoip] no se pudo geolocalizar la IP (se omite)', err?.name, err?.message);
-    return { country: null, city: null };
+    return { country: null, countryCode: null, city: null };
   } finally {
     clearTimeout(timer);
   }
